@@ -1,17 +1,7 @@
 import RPi.GPIO as GPIO
+import pigpio
 import time
 import logging
-
-# Define pin connections
-STEP_PIN = 18  # GPIO 18 is capable of hardware PWM
-DIR_PIN = 27
-ENA_PIN = 22
-
-# Set up GPIO pins
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(STEP_PIN, GPIO.OUT)
-GPIO.setup(DIR_PIN, GPIO.OUT)
-GPIO.setup(ENA_PIN, GPIO.OUT)
 
 
 def set_dir(
@@ -42,7 +32,7 @@ def disable_driver(
     pass
 
 
-def move_pwm(
+def move_pwm_rpigpio(
         pin: int,
         freq: int,
         run_time: int,
@@ -53,5 +43,40 @@ def move_pwm(
     time.sleep(run_time)
     pwm.stop()
 
-# Cleanup GPIO
-GPIO.cleanup()
+
+def move_pwm_pigpio(
+        pin,
+        pulse_timings,
+):
+    # Initialize pigpio
+    pi = pigpio.pi()
+
+    # Set the mode of the pin
+    pi.set_mode(pin, pigpio.OUTPUT)
+
+    # Create a waveform using the specified timings
+    waves = []
+    for high, low in pulse_timings:
+        waves.append(pigpio.pulse(1 << pin, 0, int(high * 1000)))
+        waves.append(pigpio.pulse(0, 1 << pin, int(low * 1000)))
+
+    # Create a wave from the pulses
+    pi.wave_add_generic(waves)
+
+    # Create a wave ID for the waveform
+    wave_id = pi.wave_create()
+
+    # Send the waveform (this will repeat the waveform indefinitely)
+    pi.wave_send_repeat(wave_id)
+
+    try:
+        # Keep the script running to allow the PWM signal to be generated
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        # Stop the waveform and clean up on Ctrl+C
+        pi.wave_tx_stop()
+        pi.wave_delete(wave_id)
+        pi.stop()
+
+    pass
