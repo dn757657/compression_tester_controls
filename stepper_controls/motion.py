@@ -50,6 +50,10 @@ def move_pwm_rpigpio(
     time.sleep(run_time)
     pwm.stop()
 
+# TODO new motion func
+# set duty cycle
+# set frequency
+# might instead need to make composite funcs for moving while checking something
 
 def move_pwm_pigpio(
         pin,
