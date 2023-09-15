@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 from stepper_controls.motion import move_pwm_pigpio, enable_driver, set_dir
 
 # Define pin connections
-STEP_PIN = 18  # GPIO 18 is capable of hardware PWM
+STEP_PIN = 13  # GPIO 18 is capable of hardware PWM
 DIR_PIN = 27
 ENA_PIN = 22
 

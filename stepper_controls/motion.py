@@ -6,14 +6,21 @@ import logging
 
 def set_dir(
         pin: int,
-        dir: str='cww'
+        dir: str='ccw'
 ):
+    """
+    maybe alter such that ccw and cs being high or low can be set in the args for
+    different motors
+    :param pin:
+    :param dir:
+    :return:
+    """
     if dir not in ['cw', 'ccw']:
         logging.info(f'{dir}: not in possible directions')
 
-    if dir == 'cw':
+    if dir == 'ccw':
         GPIO.output(pin, GPIO.HIGH)
-    elif dir == 'ccw':
+    elif dir == 'cw':
         GPIO.output(pin, GPIO.LOW)
     pass
 
