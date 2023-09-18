@@ -9,8 +9,8 @@ CRUSHING_ENA_PIN = 22
 
 # Define pin connections
 CAMERA_STEP_PIN = 19
-CAMERA_DIR_PIN = 4
-CAMERA_ENA_PIN = 17
+CAMERA_DIR_PIN = 17
+CAMERA_ENA_PIN = 26
 
 chan_list = [
     CRUSHING_STEP_PIN,
