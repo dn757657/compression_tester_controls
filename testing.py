@@ -35,11 +35,23 @@ CRUSHING_STEPPER_PROPERTIES = {
     'step_on_rising_edge': False
 }
 
+CAMERA_STEPPER_PROPERTIES = {
+    'dir_pin': CAMERA_DIR_PIN,
+    'dsbl_pin': CAMERA_ENA_PIN,
+    'step_pin': CAMERA_STEP_PIN,
+    'cw_pin_high': False,
+    'disable_high': False,  # subject to change with new relay setup?
+    'step_on_rising_edge': True
+}
+
 
 def main():
     crushing_stepper = StepperMotorDriver(**CRUSHING_STEPPER_PROPERTIES)
+    crushing_stepper.move_steps(steps=100, duty_cyle=(3/3.5)*100, direction='cw', freq=100)
 
-    crushing_stepper.move_steps(steps=10, duty_cyle=(3/3.5), direction='cw', freq=100)
+    camera_stepper = StepperMotorDriver(**CAMERA_STEPPER_PROPERTIES)
+    camera_stepper.move_steps(steps=100, duty_cyle=50, direction='cw', freq=5000)
+    camera_stepper.move_steps(steps=100, duty_cyle=50, direction='ccw', freq=5000)
 
     GPIO.cleanup()
 
