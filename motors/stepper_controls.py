@@ -64,7 +64,7 @@ class StepperMotorDriver:
             if self.cw_pin_high:
                 GPIO.output(self.dir_pin, GPIO.LOW)
             elif not self.cw_pin_high:
-                GPIO.output(self.dir_pin, GPIO.LOW)
+                GPIO.output(self.dir_pin, GPIO.HIGH)
         elif dir == 'cw':
             if self.cw_pin_high:
                 GPIO.output(self.dir_pin, GPIO.HIGH)
