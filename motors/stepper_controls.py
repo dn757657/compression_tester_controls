@@ -71,6 +71,7 @@ class StepperMotorDriver:
             elif not self.cw_pin_high:
                 GPIO.output(self.dir_pin, GPIO.LOW)
 
+        print(f'{self.cw_pin_high}')
         print(f'direction is {direction}: pin set to {GPIO.input(self.dir_pin)}')
         pass
 
