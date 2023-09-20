@@ -61,15 +61,15 @@ class StepperMotorDriver:
             logging.info(f'{dir}: not in possible directions')
 
         if dir == 'ccw':
-            if self.cw_pin_high:
+            if self.cw_pin_high is True:
                 GPIO.output(self.dir_pin, GPIO.LOW)
-            elif not self.cw_pin_high:
+            elif not self.cw_pin_high is False:
                 GPIO.output(self.dir_pin, GPIO.HIGH)
                 print(f'direction is {direction}: pin set to {GPIO.input(self.dir_pin)}')
         elif dir == 'cw':
-            if self.cw_pin_high:
+            if self.cw_pin_high is True:
                 GPIO.output(self.dir_pin, GPIO.HIGH)
-            elif not self.cw_pin_high:
+            elif self.cw_pin_high is False:
                 GPIO.output(self.dir_pin, GPIO.LOW)
                 print(f'direction is {direction}: pin set to {GPIO.input(self.dir_pin)}')
 
