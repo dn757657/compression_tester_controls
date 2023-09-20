@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import time
 
 from motors.stepper_controls import StepperMotorDriver
 
@@ -48,10 +49,13 @@ CAMERA_STEPPER_PROPERTIES = {
 def main():
     crushing_stepper = StepperMotorDriver(**CRUSHING_STEPPER_PROPERTIES)
     crushing_stepper.move_steps(steps=100, duty_cyle=(3/3.5)*100, direction='cw', freq=100)
+    time.sleep(0.5)
+    crushing_stepper.move_steps(steps=100, duty_cyle=(3/3.5)*100, direction='ccw', freq=100)
+    time.sleep(0.5)
 
-    camera_stepper = StepperMotorDriver(**CAMERA_STEPPER_PROPERTIES)
-    camera_stepper.move_steps(steps=100, duty_cyle=50, direction='cw', freq=5000)
-    camera_stepper.move_steps(steps=100, duty_cyle=50, direction='ccw', freq=5000)
+    # camera_stepper = StepperMotorDriver(**CAMERA_STEPPER_PROPERTIES)
+    # camera_stepper.move_steps(steps=100, duty_cyle=50, direction='cw', freq=5000)
+    # camera_stepper.move_steps(steps=100, duty_cyle=50, direction='ccw', freq=5000)
 
     GPIO.cleanup()
 
