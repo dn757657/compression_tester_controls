@@ -48,6 +48,7 @@ CAMERA_STEPPER_PROPERTIES = {
 
 def main():
     crushing_stepper = StepperMotorDriver(**CRUSHING_STEPPER_PROPERTIES)
+    GPIO.output(CRUSHING_DIR_PIN, GPIO.HIGH)
     crushing_stepper.move_steps(steps=1000, duty_cyle=(3/3.5)*100, direction='cw', freq=1000)
     time.sleep(0.5)
     crushing_stepper.move_steps(steps=1000, duty_cyle=(3/3.5)*100, direction='ccw', freq=1000)
