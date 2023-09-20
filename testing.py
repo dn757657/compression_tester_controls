@@ -52,8 +52,8 @@ def main():
     crushing_stepper.move_steps(steps=1000, duty_cyle=(3/3.5)*100, direction='ccw', freq=1000)
 
     camera_stepper = StepperMotorDriver(**CAMERA_STEPPER_PROPERTIES)
-    camera_stepper.move_steps(steps=100, duty_cyle=50, direction='cw', freq=5000)
-    camera_stepper.move_steps(steps=100, duty_cyle=50, direction='ccw', freq=5000)
+    camera_stepper.move_steps(steps=1000, duty_cyle=50, direction='cw', freq=5000)
+    camera_stepper.move_steps(steps=1000, duty_cyle=50, direction='ccw', freq=5000)
 
     GPIO.cleanup()
 
