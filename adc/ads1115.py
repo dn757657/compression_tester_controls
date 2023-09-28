@@ -64,6 +64,6 @@ def ads1115_read_channels(
         if channel not in channels:
             logging.info(f'Channel {channel} not in available channels: {channels}, Skipping')
         else:
-            samples[channel] = AnalogIn(adc, channel_mappings.get(channel))
+            samples[channel] = AnalogIn(adc, channel_mappings.get(channel)).value
 
     return samples

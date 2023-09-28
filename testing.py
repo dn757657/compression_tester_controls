@@ -64,7 +64,7 @@ def check_small_stepper():
 
 def main():
     while True:
-        adc = init_ads1115(gain='4', address=0x49)
+        adc = init_ads1115(gain=4, address=0x48)
         samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'], adc=adc)
         for k, v in samples.items():
             print(f'{k}: {v}')
