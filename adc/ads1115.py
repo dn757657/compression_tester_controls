@@ -6,7 +6,7 @@ from adafruit_ads1x15.analog_in import AnalogIn
 
 
 def init_ads1115(
-        gain: int,
+        gain: float,
         address: hex,
 ):
     gains = [

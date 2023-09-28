@@ -64,7 +64,7 @@ def check_small_stepper():
 
 def main():
     while True:
-        adc = init_ads1115(gain=4, address=0x48)
+        adc = init_ads1115(gain=2/3, address=0x48)
 
         print(f'adc gain is {adc.gain}')
 
