@@ -62,20 +62,43 @@ def check_small_stepper():
     pass
 
 
+def A201_resistance(
+        vin: float,
+        vout: float,
+        rf: float,
+):
+    """
+    convert from voltages and sensitivity resistance to A201 sensor resistance
+    :param vin:
+    :param vout:
+    :param rf:
+    :return: resistance of sensor in units of rf
+    """
+
+    rs = -rf/((vout/vin) - 1)
+
+    return rs
+
+
 def main():
     while True:
         adc = init_ads1115(gain=2/3, address=0x48)
-
-        print(f'adc gain is {adc.gain}')
 
         bits_samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'], adc=adc)
 
         volts_samples = {}
         for k, v in bits_samples.items():
             volts_samples[k] = ads1115_bits_to_volts(adc=adc, bits_val=v)
-        
+
         for k, v in volts_samples.items():
-            print(f'{k}: {v}')
+
+            rs = A201_resistance(
+                vin=volts_samples['A3'] - volts_samples['A2'],
+                vout=volts_samples['A1'] - volts_samples['A0'],
+                rf=13430
+            )
+            print(f'{rs}')
+
         time.sleep(0.5)
 
 
