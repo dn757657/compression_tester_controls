@@ -91,13 +91,16 @@ def main():
             volts_samples[k] = ads1115_bits_to_volts(adc=adc, bits_val=v)
 
         for k, v in volts_samples.items():
+            vin = volts_samples['A3'] - volts_samples['A2']
+            vout = volts_samples['A1'] - volts_samples['A0']
 
-            rs = A201_resistance(
-                vin=volts_samples['A3'] - volts_samples['A2'],
-                vout=volts_samples['A1'] - volts_samples['A0'],
-                rf=13430
-            )
-            print(f'{rs}')
+            # rs = A201_resistance(
+            #     vin=volts_samples['A3'] - volts_samples['A2'],
+            #     vout=volts_samples['A1'] - volts_samples['A0'],
+            #     rf=13430
+            # )
+            # print(f'{rs}')
+            print(f'{vin}, {vout}')
 
         time.sleep(0.5)
 
