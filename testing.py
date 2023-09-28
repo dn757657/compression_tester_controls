@@ -94,14 +94,14 @@ def main():
             vin = volts_samples['A3'] - volts_samples['A2']
             vout = volts_samples['A1'] - volts_samples['A0']
 
-            # rs = A201_resistance(
-            #     vin=volts_samples['A3'] - volts_samples['A2'],
-            #     vout=volts_samples['A1'] - volts_samples['A0'],
-            #     rf=13430
-            # )
-            # print(f'{rs}')
-            # print(f'{vin}, {vout}')
-            print(f'{k}: {v}')
+            rs = A201_resistance(
+                vin=vin,
+                vout=vout,
+                rf=13430
+            )
+            print(f'{vin}, {vout}')
+            print(f'{rs}')
+            # print(f'{k}: {v}')
 
         time.sleep(0.5)
 
