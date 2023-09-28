@@ -12,6 +12,8 @@ def gphoto2_get_active_ports():
     active_ports = active_ports.stdout
     print(f"{active_ports}")
 
+    print(f'{type(active_ports)}')
+
     return active_ports
 
 
