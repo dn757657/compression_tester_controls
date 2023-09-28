@@ -4,11 +4,12 @@ import os
 
 def gphoto2_get_active_ports():
     try:
-        active_ports = subprocess.run(['sudo', 'gphoto2', '--auto-detect'])
+        active_ports = subprocess.run(['sudo', 'gphoto2', '--auto-detect'], capture_output=True, text=True, check=True)
 
     except subprocess.CalledProcessError:
         active_ports = []
 
+    active_ports = active_ports.stdout
     print(f"{active_ports}")
 
     return active_ports
