@@ -46,8 +46,8 @@ def eosr50_capture_and_save(
 
     # sudo gphoto2 --capture-image-and-download -filename "%Y%m%d%H%M%S.jpg"
     try:
-        subprocess.run(['sudo', 'gphoto2', f'--port {port}', '--capture-image-and-download', f'-filename {filename}'])
-        print("Image Captured")
+        subprocess.run(['sudo', 'gphoto2', f'--port {port}', '--capture-image-and-download', f'-filename "{filename}"'])
+        print(f"Image {filename} Captured")
 
     except subprocess.CalledProcessError:
         print("Failed to configure EOS R50.")
