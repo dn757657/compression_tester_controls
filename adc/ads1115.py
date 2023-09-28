@@ -41,8 +41,8 @@ def ads1115_read_channels(
     :return: dict indexed by channel name
     """
 
-    i2c = busio.I2C(board.SCL, board.SDA)
-    adc = ADS.ADS1115(i2c)
+    # i2c = busio.I2C(board.SCL, board.SDA)
+    # adc = ADS.ADS1115(i2c)
 
     channels = [
         'A0',
