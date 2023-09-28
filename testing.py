@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 
 from motors.stepper_controls import StepperMotorDriver
-from adc.ads1115 import ads1115_read_channels, init_ads1115
+from adc.ads1115 import ads1115_read_channels, init_ads1115, ads1115_bits_to_volts
 
 # Define pin connections
 CRUSHING_STEP_PIN = 13
@@ -68,8 +68,13 @@ def main():
 
         print(f'adc gain is {adc.gain}')
 
-        samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'], adc=adc)
-        for k, v in samples.items():
+        bits_samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'], adc=adc)
+
+        volts_samples = {}
+        for k, v in bits_samples.items():
+            volts_samples[k] = ads1115_bits_to_volts(adc=adc, bits_val=v)
+        
+        for k, v in volts_samples.items():
             print(f'{k}: {v}')
         time.sleep(0.5)
 

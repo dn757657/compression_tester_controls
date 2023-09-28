@@ -67,3 +67,24 @@ def ads1115_read_channels(
             samples[channel] = AnalogIn(adc, channel_mappings.get(channel)).value
 
     return samples
+
+
+def ads1115_bits_to_volts(
+        adc,
+        bits_val
+):
+    gains_ranges_mappings = {
+        2/3: 6.144,
+        1: 4.096,
+        2: 2.048,
+        4: 1.024,
+        8: 0.512,
+        16: 0.256,
+    }
+
+    max_ads1115_bits_value = 32767
+    full_scale_voltage = gains_ranges_mappings.get(adc.gain)
+
+    volts_val = (bits_val / max_ads1115_bits_value) * full_scale_voltage
+
+    return volts_val
