@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 
 from motors.stepper_controls import StepperMotorDriver
-from adc.ads1115 import ads1115_read_channels
+from adc.ads1115 import ads1115_read_channels, init_ads1115
 
 # Define pin connections
 CRUSHING_STEP_PIN = 13
@@ -64,7 +64,8 @@ def check_small_stepper():
 
 def main():
     while True:
-        samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'])
+        adc = init_ads1115(gain='4', address=0x49)
+        samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'], adc=adc)
         for k, v in samples.items():
             print(f'{k}: {v}')
         time.sleep(0.5)
