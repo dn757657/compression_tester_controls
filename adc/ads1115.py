@@ -6,23 +6,26 @@ from adafruit_ads1x15.analog_in import AnalogIn
 
 
 def init_ads1115(
-        gain: str,
+        gain: int,
         address: hex,
 ):
-    gain_mappings = {
-        '2/3': ADS.GAIN.TWO_THIRDS,
-        '1': ADS.GAIN.ONE,
-        '2': ADS.GAIN.TWO,
-        '4': ADS.GAIN.FOUR,
-        '8': ADS.GAIN.EIGHT,
-        '16': ADS.GAIN.SIXTEEN
-    }
+    gains = [
+        2/3,
+        1,
+        2,
+        4,
+        8,
+        16
+    ]
+
+    if gain in gains:
+        logging.info(f'Gain {gain} not in available gains {gains}')
 
     i2c = busio.I2C(board.SCL, board.SDA)
     adc = ADS.ADS1115(
         i2c,
         address=address,
-        gain=gain_mappings.get(gain)
+        gain=gain
     )
 
     return adc
