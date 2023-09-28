@@ -111,7 +111,7 @@ def main():
 
     # camera testign
     active_ports = gphoto2_get_active_ports()
-    print(f'{active_ports}\n')
+    print(f'{type(active_ports)}\n')
 
 
 if __name__ == '__main__':
