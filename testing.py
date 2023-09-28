@@ -100,7 +100,8 @@ def main():
             #     rf=13430
             # )
             # print(f'{rs}')
-            print(f'{vin}, {vout}')
+            # print(f'{vin}, {vout}')
+            print(f'{k}: {v}')
 
         time.sleep(0.5)
 
