@@ -74,8 +74,10 @@ def A201_resistance(
     :param rf:
     :return: resistance of sensor in units of rf
     """
-
-    rs = -rf/((vout/vin) - 1)
+    try:
+        rs = -rf/((vout/vin) - 1)
+    except ZeroDivisionError:
+        rs = 0
 
     return rs
 
