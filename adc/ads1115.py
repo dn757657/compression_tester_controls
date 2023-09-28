@@ -21,7 +21,7 @@ def init_ads1115(
     if gain in gains:
         logging.info(f'Gain {gain} not in available gains {gains}')
 
-    i2c = busio.I2C(board.SCL_1, board.SDA_2)
+    i2c = busio.I2C(board.SCL, board.SDA)
     adc = ADS.ADS1115(
         i2c,
         address=address,
