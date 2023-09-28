@@ -1,2 +1,4 @@
 RPi.GPIO~=0.7.0
-pigpio
+board
+busio
+adafruit-circuitpython-ads1x15

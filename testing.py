@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import time
 
 from motors.stepper_controls import StepperMotorDriver
+from adc.ads1115 import ads1115_read_channels
 
 # Define pin connections
 CRUSHING_STEP_PIN = 13
@@ -46,16 +47,27 @@ CAMERA_STEPPER_PROPERTIES = {
 }
 
 
-def main():
-    # crushing_stepper = StepperMotorDriver(**CRUSHING_STEPPER_PROPERTIES)
-    # crushing_stepper.move_steps(steps=1000, duty_cyle=(3/3.5)*100, direction='cw', freq=1000)
-    # crushing_stepper.move_steps(steps=1000, duty_cyle=(3/3.5)*100, direction='ccw', freq=1000)
+# setup funcs
+def check_big_stepper():
+    crushing_stepper = StepperMotorDriver(**CRUSHING_STEPPER_PROPERTIES)
+    crushing_stepper.move_steps(steps=1000, duty_cyle=(3/3.5)*100, direction='cw', freq=1000)
+    crushing_stepper.move_steps(steps=1000, duty_cyle=(3/3.5)*100, direction='ccw', freq=1000)
+    pass
 
+
+def check_small_stepper():
     camera_stepper = StepperMotorDriver(**CAMERA_STEPPER_PROPERTIES)
     camera_stepper.move_steps(steps=1000, duty_cyle=50, direction='cw', freq=5000)
     camera_stepper.move_steps(steps=1000, duty_cyle=50, direction='ccw', freq=5000)
+    pass
 
-    GPIO.cleanup()
+
+def main():
+    while True:
+        samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'])
+        for k, v in samples.items():
+            print(f'{k}: {v}')
+        time.sleep(0.5)
 
 
 if __name__ == '__main__':
