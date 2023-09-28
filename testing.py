@@ -3,6 +3,7 @@ import time
 
 from motors.stepper_controls import StepperMotorDriver
 from adc.ads1115 import ads1115_read_channels, init_ads1115, ads1115_bits_to_volts
+from camera.canon_eosr50 import eosr50_init, eosr50_capture_and_save, gphoto2_get_active_ports
 
 # Define pin connections
 CRUSHING_STEP_PIN = 13
@@ -75,7 +76,7 @@ def A201_resistance(
     :return: resistance of sensor in units of rf
     """
     try:
-        rs = -rf/((vout/vin) - 1)
+        rs = rf/((vout/vin) - 1)
     except ZeroDivisionError:
         rs = 0
 
@@ -83,29 +84,34 @@ def A201_resistance(
 
 
 def main():
-    while True:
-        adc = init_ads1115(gain=2/3, address=0x48)
+    # # ADC testing
+    # while True:
+    #     adc = init_ads1115(gain=2/3, address=0x48)
+    #
+    #     bits_samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'], adc=adc)
+    #
+    #     volts_samples = {}
+    #     for k, v in bits_samples.items():
+    #         volts_samples[k] = ads1115_bits_to_volts(adc=adc, bits_val=v)
+    #
+    #     for k, v in volts_samples.items():
+    #         vin = volts_samples['A3'] - volts_samples['A2']
+    #         vout = volts_samples['A1'] - volts_samples['A0']
+    #
+    #         rs = A201_resistance(
+    #             vin=vin,
+    #             vout=vout,
+    #             rf=13430
+    #         )
+    #         print(f'{vin}, {vout}')
+    #         print(f'{rs}')
+    #         # print(f'{k}: {v}')
+    #
+    #     time.sleep(0.5)
 
-        bits_samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'], adc=adc)
-
-        volts_samples = {}
-        for k, v in bits_samples.items():
-            volts_samples[k] = ads1115_bits_to_volts(adc=adc, bits_val=v)
-
-        for k, v in volts_samples.items():
-            vin = volts_samples['A3'] - volts_samples['A2']
-            vout = volts_samples['A1'] - volts_samples['A0']
-
-            rs = A201_resistance(
-                vin=vin,
-                vout=vout,
-                rf=13430
-            )
-            print(f'{vin}, {vout}')
-            print(f'{rs}')
-            # print(f'{k}: {v}')
-
-        time.sleep(0.5)
+    # camera testign
+    active_ports = gphoto2_get_active_ports()
+    print(f'{active_ports}')
 
 
 if __name__ == '__main__':
