@@ -111,8 +111,8 @@ def main():
 
     # camera testign
     active_ports = gphoto2_get_active_ports()
-    # print(f'{type(active_ports)}\n')
-
+    eosr50_init(port=active_ports[0])
+    eosr50_capture_and_save(port=active_ports[0], filename='testing.jpg')
 
 if __name__ == '__main__':
     main()

@@ -14,9 +14,6 @@ def gphoto2_get_active_ports():
     # detect command returns a table in string format, find the ports in this table-string
     active_ports = re.findall(r"usb:\d+,\d+", active_ports)
 
-    print(f"{active_ports}")
-    print(f'{type(active_ports)}')
-
     return active_ports
 
 
