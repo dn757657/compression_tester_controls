@@ -113,7 +113,7 @@ def main():
     # active_ports = gphoto2_get_active_ports()
     # eosr50_init(port=active_ports[0])
 
-    freq = 10
+    freq = 100
     for i in range(0, 10):
         eosr50_capture_and_save(port='usb:001,012', filename=f'test{i}.jpg')
         time.sleep(1/freq)
