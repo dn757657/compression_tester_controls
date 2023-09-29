@@ -112,7 +112,11 @@ def main():
     # camera testign
     # active_ports = gphoto2_get_active_ports()
     # eosr50_init(port=active_ports[0])
-    eosr50_capture_and_save(port='usb:001,012', filename='testing11.jpg')
+
+    freq = 10
+    for i in range(0, 10):
+        eosr50_capture_and_save(port='usb:001,012', filename=f'test{i}.jpg')
+        time.sleep(1/freq)
 
 
 if __name__ == '__main__':
