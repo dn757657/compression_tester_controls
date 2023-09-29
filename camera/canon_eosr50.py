@@ -49,11 +49,13 @@ def eosr50_capture_and_save(
         subprocess.run([
             'sudo',
             'gphoto2',
-            f'--port {port}',
+            '--port', port,
             '--capture-image-and-download',
-            f'--filename "{filename}"',
+            '--filename', filename,
             '--keep'
-        ])
+        ],
+            check=True
+        )
         print(f"Image {filename} Captured")
 
     except subprocess.CalledProcessError:

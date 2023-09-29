@@ -114,5 +114,6 @@ def main():
     # eosr50_init(port=active_ports[0])
     eosr50_capture_and_save(port='usb:001,012', filename='testing11.jpg')
 
+
 if __name__ == '__main__':
     main()
