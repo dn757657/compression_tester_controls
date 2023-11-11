@@ -8,12 +8,12 @@ from camera.canon_eosr50 import eosr50_init, eosr50_capture_and_save, gphoto2_ge
 # Define pin connections
 CRUSHING_STEP_PIN = 13
 CRUSHING_DIR_PIN = 27
-CRUSHING_ENA_PIN = 22
+CRUSHING_ENA_PIN = 22  # not currently implemented since using estop instead
 
 # Define pin connections
-CAMERA_STEP_PIN = 19
-CAMERA_DIR_PIN = 17
-CAMERA_ENA_PIN = 26
+CAMERA_STEP_PIN = 32
+CAMERA_DIR_PIN = 11
+CAMERA_ENA_PIN = 26  # not currently implemented since using estop instead
 
 chan_list = [
     CRUSHING_STEP_PIN,
@@ -25,7 +25,7 @@ chan_list = [
 ]
 
 # Set up GPIO pins - all gpio config is done here, easier to cleanup (less fancy)
-GPIO.setmode(GPIO.BCM)
+GPIO.setmode(GPIO.BOARD)
 GPIO.setup(chan_list, GPIO.OUT)
 
 # crushing stepper motor configuration
@@ -113,10 +113,12 @@ def main():
     # active_ports = gphoto2_get_active_ports()
     # eosr50_init(port=active_ports[0])
 
-    freq = 100
-    for i in range(0, 10):
-        eosr50_capture_and_save(port='usb:001,012', filename=f'test{i}.jpg')
-        time.sleep(1/freq)
+    # freq = 10  # max freq seems to be about 10Hz
+    # for i in range(0, 10):
+    #     eosr50_capture_and_save(port='usb:001,012', filename=f'test{i}.jpg')
+    #     time.sleep(1/freq)
+
+    check_small_stepper()
 
 
 if __name__ == '__main__':
