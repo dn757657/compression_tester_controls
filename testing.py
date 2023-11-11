@@ -11,8 +11,8 @@ CRUSHING_DIR_PIN = 27
 CRUSHING_ENA_PIN = 22  # not currently implemented since using estop instead
 
 # Define pin connections
-CAMERA_STEP_PIN = 32
-CAMERA_DIR_PIN = 11
+CAMERA_STEP_PIN = 12
+CAMERA_DIR_PIN = 17
 CAMERA_ENA_PIN = 26  # not currently implemented since using estop instead
 
 chan_list = [
@@ -25,7 +25,7 @@ chan_list = [
 ]
 
 # Set up GPIO pins - all gpio config is done here, easier to cleanup (less fancy)
-GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BCM)
 GPIO.setup(chan_list, GPIO.OUT)
 
 # crushing stepper motor configuration
