@@ -58,8 +58,8 @@ def check_big_stepper():
 
 def check_small_stepper():
     camera_stepper = StepperMotorDriver(**CAMERA_STEPPER_PROPERTIES)
-    camera_stepper.move_steps(steps=1000, duty_cyle=50, direction='cw', freq=5000)
-    camera_stepper.move_steps(steps=1000, duty_cyle=50, direction='ccw', freq=5000)
+    camera_stepper.move_steps(steps=10000, duty_cyle=50, direction='cw', freq=500)
+    camera_stepper.move_steps(steps=10000, duty_cyle=50, direction='ccw', freq=500)
     pass
 
 
