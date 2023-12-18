@@ -113,23 +113,23 @@ def main():
               )
     )
 
-    endstop_2_thread = threading.Thread(
-        target=read_endstop_state,
-        args=(adc,
-              "A1",
-              "A2",
-              3,
-              False,
-              trigger_event1
-              )
-    )
+    # endstop_2_thread = threading.Thread(
+    #     target=read_endstop_state,
+    #     args=(adc,
+    #           "A1",
+    #           "A2",
+    #           3,
+    #           False,
+    #           trigger_event1
+    #           )
+    # )
 
     endstop_1_thread.start()
-    endstop_2_thread.start()
+    # endstop_2_thread.start()
 
     # Wait for either endstop to be triggered
     endstop_1_thread.join()
-    endstop_2_thread.join()
+    # endstop_2_thread.join()
 
 
 if __name__ == '__main__':
