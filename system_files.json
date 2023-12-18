@@ -1,0 +1,4 @@
+{
+    "state_json_fp": ".\\system_state_variables.json",
+    "init_json_fp": ".\\system_initialization_variables.json"
+}

@@ -4,6 +4,8 @@ import logging
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
+from typing import List
+
 
 def init_ads1115(
         gain: float,
@@ -88,3 +90,23 @@ def ads1115_bits_to_volts(
     volts_val = (bits_val / max_ads1115_bits_value) * full_scale_voltage
 
     return volts_val
+
+
+def read_ads1115(
+        adc,
+        channels: List[str],
+):
+    """
+    :param adc: adc object
+    :param channels:
+    :return:
+    """
+
+    bits_samples = ads1115_read_channels(req_channels=channels, adc=adc)
+
+    volts_samples = {}
+    for k, v in bits_samples.items():
+        volts_samples[k] = ads1115_bits_to_volts(adc=adc, bits_val=v)
+
+    return volts_samples
+

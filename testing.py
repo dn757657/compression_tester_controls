@@ -1,9 +1,12 @@
 import RPi.GPIO as GPIO
 import time
+import threading
 
 from motors.stepper_controls import StepperMotorDriver
-from adc.ads1115 import ads1115_read_channels, init_ads1115, ads1115_bits_to_volts
+from adc.ads1115 import ads1115_read_channels, init_ads1115, ads1115_bits_to_volts, read_ads1115
 from camera.canon_eosr50 import eosr50_init, eosr50_capture_and_save, gphoto2_get_active_ports
+from protocols import read_endstop_state
+
 
 # Define pin connections
 CRUSHING_STEP_PIN = 13
@@ -73,7 +76,7 @@ def A201_resistance(
     convert from voltages and sensitivity resistance to A201 sensor resistance
     :param vin:
     :param vout:
-    :param rf:
+    :param rf: calibration resistor resistance
     :return: resistance of sensor in units of rf
     """
     try:
@@ -85,30 +88,6 @@ def A201_resistance(
 
 
 def main():
-    # # ADC testing
-    # while True:
-    #     adc = init_ads1115(gain=2/3, address=0x48)
-    #
-    #     bits_samples = ads1115_read_channels(req_channels=['A0', 'A1', 'A2', 'A3'], adc=adc)
-    #
-    #     volts_samples = {}
-    #     for k, v in bits_samples.items():
-    #         volts_samples[k] = ads1115_bits_to_volts(adc=adc, bits_val=v)
-    #
-    #     for k, v in volts_samples.items():
-    #         vin = volts_samples['A3'] - volts_samples['A2']
-    #         vout = volts_samples['A1'] - volts_samples['A0']
-    #
-    #         rs = A201_resistance(
-    #             vin=vin,
-    #             vout=vout,
-    #             rf=13430
-    #         )
-    #         print(f'{vin}, {vout}')
-    #         print(f'{rs}')
-    #         # print(f'{k}: {v}')
-    #
-    #     time.sleep(0.5)
 
     # camera testign
     # active_ports = gphoto2_get_active_ports()
@@ -119,7 +98,38 @@ def main():
     #     eosr50_capture_and_save(port='usb:001,012', filename=f'test{i}.jpg')
     #     time.sleep(1/freq)
 
-    check_small_stepper()
+    # Create and start threads for checking endstops
+    trigger_event1 = False
+    adc = init_ads1115(gain=2/3, address=0x49)
+
+    endstop_1_thread = threading.Thread(
+        target=read_endstop_state,
+        args=(adc,
+              "A0",
+              "A2",
+              3,
+              False,
+              trigger_event1
+              )
+    )
+
+    endstop_2_thread = threading.Thread(
+        target=read_endstop_state,
+        args=(adc,
+              "A1",
+              "A2",
+              3,
+              False,
+              trigger_event1
+              )
+    )
+
+    endstop_1_thread.start()
+    endstop_2_thread.start()
+
+    # Wait for either endstop to be triggered
+    endstop_1_thread.join()
+    endstop_2_thread.join()
 
 
 if __name__ == '__main__':
