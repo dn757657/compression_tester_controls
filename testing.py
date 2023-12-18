@@ -5,7 +5,7 @@ import threading
 from motors.stepper_controls import StepperMotorDriver
 from adc.ads1115 import ads1115_read_channels, init_ads1115, ads1115_bits_to_volts, read_ads1115
 from camera.canon_eosr50 import eosr50_init, eosr50_capture_and_save, gphoto2_get_active_ports
-from protocols import read_endstop_state
+from protocols import read_endstop_state, read_endstops_states
 
 
 # Define pin connections
@@ -99,23 +99,22 @@ def main():
     #     time.sleep(1/freq)
 
     # Create and start threads for checking endstops
-    trigger_event1 = False
+    trigger_event = False
     adc = init_ads1115(gain=2/3, address=0x49)
-    channels = ["A0", "A1", "A2"]
-    initial_samples = read_ads1115(adc, channels)
-    print(f'{initial_samples.items}')
 
-    while trigger_event1 is False:
-        adc_samples = dict()
+    while trigger_event is False:
 
-        endstop_1_thread = threading.Thread(
-            target=read_ads1115,
+        endstops_thread = threading.Thread(
+            target=read_endstops_states,
             args=(adc,
-                  channels,
-                  adc_samples
+                  ["A0", "A1", "A2"],
+                  ["A0", "A1"],
+                  ["A2", "A2"],
+                  [3, 3],
+                  [False, False],
+                  trigger_event
                   )
         )
-        print(f"{adc_samples}")
 
         # endstop_2_thread = threading.Thread(
         #     target=read_endstop_state,

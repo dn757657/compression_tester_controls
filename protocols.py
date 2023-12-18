@@ -27,7 +27,6 @@ def read_endstop_state(
         sample2: float,
         trigger_threshold: float,
         trigger_above_threshold: bool,
-        trigger_event: bool=False,
 ):
     """
     sample an end stop to determine if triggered
@@ -41,14 +40,14 @@ def read_endstop_state(
 
     # TODO need to set state in here? - no outside since we need to know the direction
     # the motor is going to know which endstop state to set
-    trigger_event = endstop_is_triggered(
+    triggered = endstop_is_triggered(
         sample1=sample1,
         sample2=sample2,
         trigger_threshold=trigger_threshold,
         trigger_above_threshold=trigger_above_threshold
     )
 
-    pass
+    return triggered
 
 
 def endstop_is_triggered(
@@ -70,7 +69,15 @@ def endstop_is_triggered(
             return True
 
 
-def read_endstops_states_continuous():
+def read_endstops_states(
+        adc,
+        adc_channels: list,
+        channel1: list,
+        channel2: list,
+        trigger_thresholds: list,
+        trigger_above_thresholds: list,
+        trigger_event=False
+):
     """
     sample both camera ring endstops until one is triggered
     return the one that was triggered
@@ -78,7 +85,19 @@ def read_endstops_states_continuous():
     :return:
     """
 
-    return
+    adc_samples = read_ads1115(adc, adc_channels)
+
+    for i in range(0, len(channel1)):
+        endstop_state = read_endstop_state(
+            sample1=adc_samples[channel1[i]],
+            sample2=adc_samples[channel2[i]],
+            trigger_threshold=trigger_thresholds[i],
+            trigger_above_threshold=trigger_above_thresholds[i],
+        )
+        if endstop_state == True:
+            trigger_event = True
+
+    pass
 
 
 def full_ring_rotation():
