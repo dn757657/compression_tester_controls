@@ -102,6 +102,8 @@ def main():
     trigger_event1 = False
     adc = init_ads1115(gain=2/3, address=0x49)
     channels = ["A0", "A1", "A2"]
+    initial_samples = read_ads1115(adc, channels)
+    print(f'{initial_samples.items}')
 
     while trigger_event1 is False:
         adc_samples = dict()
