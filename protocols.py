@@ -23,9 +23,8 @@ def find_full_ring_rotation_steps():
 
 
 def read_endstop_state(
-        adc,
-        channel1: str,
-        channel2: str,
+        sample1: float,
+        sample2: float,
         trigger_threshold: float,
         trigger_above_threshold: bool,
         trigger_event: bool=False,
@@ -37,29 +36,38 @@ def read_endstop_state(
     :param channels: must be of length 2? list of strings
     :return:
     """
-    channels = [channel1, channel2]
-    channel_samples = read_ads1115(adc=adc, channels=channels)
-
-    sample1 = channel_samples[channel1]
-    sample2 = channel_samples[channel2]
 
     print(f'{abs(sample1 - sample2)}')
 
     # TODO need to set state in here? - no outside since we need to know the direction
     # the motor is going to know which endstop state to set
+    trigger_event = endstop_is_triggered(
+        sample1=sample1,
+        sample2=sample2,
+        trigger_threshold=trigger_threshold,
+        trigger_above_threshold=trigger_above_threshold
+    )
+
+    pass
+
+
+def endstop_is_triggered(
+        sample1: float,
+        sample2: float,
+        trigger_threshold: float,
+        trigger_above_threshold: bool
+):
     if abs(sample1 - sample2) > trigger_threshold:
         if trigger_above_threshold == True:
-            trigger_event = True
+            return True
         else:
-            trigger_event = False
+            return False
 
     if abs(sample1 - sample2) <= trigger_threshold:
         if trigger_above_threshold == True:
-            trigger_event = False
+            return False
         else:
-            trigger_event = True
-
-    pass
+            return True
 
 
 def read_endstops_states_continuous():

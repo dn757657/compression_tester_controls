@@ -101,18 +101,19 @@ def main():
     # Create and start threads for checking endstops
     trigger_event1 = False
     adc = init_ads1115(gain=2/3, address=0x49)
+    channels = ["A0", "A1", "A2"]
 
     while trigger_event1 is False:
+        adc_samples = dict()
+
         endstop_1_thread = threading.Thread(
-            target=read_endstop_state,
+            target=read_ads1115,
             args=(adc,
-                  "A0",
-                  "A2",
-                  3,
-                  False,
-                  trigger_event1
+                  channels,
+                  adc_samples
                   )
         )
+        print(f"{adc_samples}")
 
         # endstop_2_thread = threading.Thread(
         #     target=read_endstop_state,

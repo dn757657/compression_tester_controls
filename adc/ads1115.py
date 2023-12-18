@@ -95,6 +95,7 @@ def ads1115_bits_to_volts(
 def read_ads1115(
         adc,
         channels: List[str],
+        volts_samples: {} = None
 ):
     """
     :param adc: adc object
