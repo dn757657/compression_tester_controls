@@ -37,7 +37,7 @@ def read_endstop_state(
     :param channels: must be of length 2? list of strings
     :return:
     """
-    channels = [channel1, channel1]
+    channels = [channel1, channel2]
     channel_samples = read_ads1115(adc=adc, channels=channels)
 
     sample1 = channel_samples[channel1]
