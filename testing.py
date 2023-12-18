@@ -102,37 +102,37 @@ def main():
     trigger_event = threading.Event()
     adc = init_ads1115(gain=2/3, address=0x49)
 
-    while not trigger_event.is_set():
+    # while not trigger_event.is_set():
 
-        endstops_thread = threading.Thread(
-            target=read_endstops_states,
-            args=(adc,
-                  ["A0", "A1", "A2"],
-                  ["A0", "A1"],
-                  ["A2", "A2"],
-                  [3, 3],
-                  [False, False],
-                  trigger_event
-                  )
-        )
+    endstops_thread = threading.Thread(
+        target=read_endstops_states,
+        args=(adc,
+              ["A0", "A1", "A2"],
+              ["A0", "A1"],
+              ["A2", "A2"],
+              [2, 2],
+              [False, False],
+              trigger_event
+              )
+    )
 
-        # endstop_2_thread = threading.Thread(
-        #     target=read_endstop_state,
-        #     args=(adc,
-        #           "A1",
-        #           "A2",
-        #           3,
-        #           False,
-        #           trigger_event1
-        #           )
-        # )
+    # endstop_2_thread = threading.Thread(
+    #     target=read_endstop_state,
+    #     args=(adc,
+    #           "A1",
+    #           "A2",
+    #           3,
+    #           False,
+    #           trigger_event1
+    #           )
+    # )
 
-        endstops_thread.start()
-        # endstop_2_thread.start()
+    endstops_thread.start()
+    # endstop_2_thread.start()
 
-        # Wait for either endstop to be triggered
-        # endstops_thread.join()
-        # endstop_2_thread.join()
+    # Wait for either endstop to be triggered
+    endstops_thread.join()
+    # endstop_2_thread.join()
 
 
 if __name__ == '__main__':

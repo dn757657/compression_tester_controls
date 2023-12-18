@@ -84,18 +84,18 @@ def read_endstops_states(
     break function when end stop triggered?
     :return:
     """
+    while not trigger_event.is_set():
+        adc_samples = read_ads1115(adc, adc_channels)
 
-    adc_samples = read_ads1115(adc, adc_channels)
-
-    for i in range(0, len(channel1)):
-        endstop_state = read_endstop_state(
-            sample1=adc_samples[channel1[i]],
-            sample2=adc_samples[channel2[i]],
-            trigger_threshold=trigger_thresholds[i],
-            trigger_above_threshold=trigger_above_thresholds[i],
-        )
-        if endstop_state == True:
-            trigger_event.set()
+        for i in range(0, len(channel1)):
+            endstop_state = read_endstop_state(
+                sample1=adc_samples[channel1[i]],
+                sample2=adc_samples[channel2[i]],
+                trigger_threshold=trigger_thresholds[i],
+                trigger_above_threshold=trigger_above_thresholds[i],
+            )
+            if endstop_state == True:
+                trigger_event.set()
 
     pass
 
