@@ -42,12 +42,12 @@ STATE_DEFAULTS = {
     'camera_stepper_end_stop_last_triggered': "cw"
 }
 
-SYSTEM_JSON_FILEPATH = Path(".\\").joinpath("system_files.json")
+SYSTEM_JSON_FILEPATH = os.path.join(".", "system_files.json")
 STATE_JSON_KEY = 'state_json_fp'
 INIT_JSON_KEY = 'init_json_fp'
 SYSTEM_FILES_DEFAULTS = {
-    STATE_JSON_KEY: os.path.join(".\\", "system_state_variables.json"),
-    INIT_JSON_KEY: os.path.join(".\\", "system_initialization_variables.json")
+    STATE_JSON_KEY: os.path.join(".", "system_state_variables.json"),
+    INIT_JSON_KEY: os.path.join(".", "system_initialization_variables.json")
 }
 
 SYSTEM_FILES = load_sys_json(SYSTEM_JSON_FILEPATH, SYSTEM_FILES_DEFAULTS)
