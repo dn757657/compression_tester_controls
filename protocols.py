@@ -76,7 +76,7 @@ def read_endstops_states(
         channel2: list,
         trigger_thresholds: list,
         trigger_above_thresholds: list,
-        trigger_event=False
+        trigger_event
 ):
     """
     sample both camera ring endstops until one is triggered
@@ -95,7 +95,7 @@ def read_endstops_states(
             trigger_above_threshold=trigger_above_thresholds[i],
         )
         if endstop_state == True:
-            trigger_event = True
+            trigger_event.set()
 
     pass
 

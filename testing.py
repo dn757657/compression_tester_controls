@@ -99,10 +99,10 @@ def main():
     #     time.sleep(1/freq)
 
     # Create and start threads for checking endstops
-    trigger_event = False
+    trigger_event = threading.Event()
     adc = init_ads1115(gain=2/3, address=0x49)
 
-    while trigger_event is False:
+    while not trigger_event.is_set():
 
         endstops_thread = threading.Thread(
             target=read_endstops_states,
@@ -127,11 +127,11 @@ def main():
         #           )
         # )
 
-        endstop_1_thread.start()
+        endstops_thread.start()
         # endstop_2_thread.start()
 
         # Wait for either endstop to be triggered
-        endstop_1_thread.join()
+        # endstops_thread.join()
         # endstop_2_thread.join()
 
 
