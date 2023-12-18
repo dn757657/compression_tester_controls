@@ -98,12 +98,3 @@ def read_endstops_states(
                 trigger_event.set()
 
     pass
-
-
-def full_ring_rotation():
-    """
-    trigger end stop if not triggered
-    multiprocess stepper move and endstop samples
-    :return:
-    """
-    return

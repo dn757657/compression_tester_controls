@@ -89,12 +89,12 @@ class StepperMotorDriver:
 
     # TODO test limits of both motors frequency?
     # TODO the limits of duty cycle are implied
-    def move_steps(
+    def rotate_steps(
             self,
             direction: str,
-            steps: int,
             duty_cyle: float,
-            freq: float
+            freq: float,
+            steps: int,
     ):
         """
 
@@ -111,6 +111,29 @@ class StepperMotorDriver:
             self.step(duty_cycle=duty_cyle, freq=freq)
 
         return
+
+    def rotate(
+            self,
+            direction: str,
+            duty_cyle: float,
+            freq: float,
+            stop_event,
+    ):
+        """
+
+        :param direction:
+        :param steps:
+        :param duty_cyle: percentage of time signal is high/ON
+        :param freq:
+        :return:
+        """
+        self.enable_driver()
+        self.set_dir(direction=direction)
+
+        while not stop_event.is_set():
+            self.step(duty_cycle=duty_cyle, freq=freq)
+
+        pass
 
     def step(
             self,
