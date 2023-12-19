@@ -44,7 +44,7 @@ class ADS1115:
         ]
         self.channel_map = dict(zip(self.channel_labels, self.channels))
 
-        self.channel_states = dict()  # last known channel states
+        self.channel_states = self.read()
 
         pass
 

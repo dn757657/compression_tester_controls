@@ -11,6 +11,7 @@ from typing import Union
 from utils import load_sys_json, write_sys_json
 from motors.stepper_controls import StepperMotorDriver
 from adc.ads1115 import ADS1115
+from misc_components.switch import DiPoleSwitch
 
 INIT_VARS = {
     'end_stop1': {
@@ -112,11 +113,29 @@ def init_components(
     force_sensor_adc = ADS1115(**init_vars.get('force_sensor_adc'))
     camera_endstops_adc = ADS1115(**init_vars.get('camera_endstops_adc'))
 
+    endstop_params = init_vars.get('endstop1')
+    endstop1 = DiPoleSwitch(
+        channel1=force_sensor_adc.channel_states[endstop_params.get('channel1')],
+        channel2=force_sensor_adc.channel_states[endstop_params.get('channel2')],
+        trigger_threshold=force_sensor_adc.channel_states[endstop_params.get('trigger_threshold')],
+        trigger_above_threshold=force_sensor_adc.channel_states[endstop_params.get('trigger_above_threshold')]
+    )
+
+    endstop_params = init_vars.get('endstop2')
+    endstop2 = DiPoleSwitch(
+        channel1=force_sensor_adc.channel_states[endstop_params.get('channel1')],
+        channel2=force_sensor_adc.channel_states[endstop_params.get('channel2')],
+        trigger_threshold=force_sensor_adc.channel_states[endstop_params.get('trigger_threshold')],
+        trigger_above_threshold=force_sensor_adc.channel_states[endstop_params.get('trigger_above_threshold')]
+    )
+
     comps = {
         'camera_stepper': camera_stepper,
         'crushing_stepper': crushing_stepper,
         'force_sensor_adc': force_sensor_adc,
-        'camera_endstops_adc': camera_endstops_adc
+        'camera_endstops_adc': camera_endstops_adc,
+        'endstop1': endstop1,
+        'endstop2': endstop2
     }
 
     return comps
@@ -129,9 +148,15 @@ def main():
 
     comps = init_components(init_vars=init_vars)
 
+    # test adc init - maybe move to adc file
     adc1 = comps.get('force_sensor_adc')
-    print(f'{adc1.read().__str__}')
+    print(f'{adc1.state.__str__()}')
 
+    endstop1 = comps.get('endstop1')
+    print(f'{endstop1.state.__str__()}')
+
+    endstop2 = comps.get('endstop2')
+    print(f'{endstop2.state.__str__()}')
     pass
 
 

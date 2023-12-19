@@ -21,6 +21,14 @@ def rotate_camera_position_onto_endstop():
     adc = COMPS.get('camera_endstops_adc')
     camera_stepper = COMPS.get('camera_stepper')
 
+    adc.read()  # update adc
+    endstop_params = COMPS.get('end_stop1')
+    end1_state = read_endstop_state(
+        sample1=adc.channel_states[endstop_params.get('channel1')],
+        sample2=adc.channel_states[endstop_params.get('channel2')],
+        trigger_threshold=adc.channel_states[endstop_params.get('trigger_threshold')],
+        trigger_above_threshold=adc.channel_states[endstop_params.get('trigger_above_threshold')]
+    )
 
 
     trigger_event = threading.Event()  # create event for triggering
