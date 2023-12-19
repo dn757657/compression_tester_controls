@@ -150,7 +150,7 @@ def main():
 
     # test adc init - maybe move to adc file
     adc1 = comps.get('force_sensor_adc')
-    print(f'{adc1.state.__str__()}')
+    print(f'{adc1.channel_states.__str__()}')
 
     endstop1 = comps.get('endstop1')
     print(f'{endstop1.state.__str__()}')

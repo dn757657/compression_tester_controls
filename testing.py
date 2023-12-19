@@ -98,38 +98,8 @@ def main():
     #     eosr50_capture_and_save(port='usb:001,012', filename=f'test{i}.jpg')
     #     time.sleep(1/freq)
 
-    # intiialize
-    trigger_event = threading.Event()
-    adc = init_ads1115(gain=2/3, address=0x49)
     camera_stepper = StepperMotorDriver(**CAMERA_STEPPER_PROPERTIES)
-
-    camera_stepper_thread = threading.Thread(
-        target=camera_stepper.rotate,
-        args=(
-            'cw',
-            50,
-            500,
-            trigger_event
-        )
-    )
-
-    # camera_stepper_thread.start()
-
-    endstops_thread = threading.Thread(
-        target=read_endstops_states,
-        args=(adc,
-              ["A0", "A1", "A2"],
-              ["A0", "A1"],
-              ["A2", "A2"],
-              [2, 2],
-              [False, False],
-              trigger_event
-              )
-    )
-
-    endstops_thread.start()
-    camera_stepper_thread.start()
-    endstops_thread.join()  # wait for endstop thread
+    camera_stepper.rotate_steps(steps=1, duty_cyle=50, direction='cw', freq=500)
 
 
 if __name__ == '__main__':
