@@ -1,5 +1,9 @@
 import json
 import os
+import sys
+
+# so we can find other same level packages
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from pathlib import Path
 from typing import Union
@@ -42,13 +46,13 @@ INIT_VARS = {
     },
 
     'force_sensor_adc': {
-        'addr': 0x48,
+        'address': 0x48,
         'gain': 2/3,
         'channel_labels': ["A0", "A1", "A2", "A3"],
     },
 
     'camera_endstops_adc': {
-        'addr': 0x49,
+        'address': 0x49,
         'gain': 2/3,
         'channel_labels': ["A0", "A1", "A2"]
     }
@@ -105,19 +109,8 @@ def init_components(
     camera_stepper = StepperMotorDriver(**init_vars.get('camera_stepper'))
     crushing_stepper = StepperMotorDriver(**init_vars.get('crushing_stepper'))
 
-    force_sensor_adc_params = init_vars.get('force_sensor_adc')
-    force_sensor_adc = ADS1115(
-        gain=force_sensor_adc_params.get('gain'),
-        address=force_sensor_adc_params.get('addr'),
-        channel_labels=force_sensor_adc_params.get('channel_labels')
-    )
-
-    camera_endstops_adc_params = init_vars.get('camera_endstops_adc')
-    camera_endstops_adc = ADS1115(
-        gain=camera_endstops_adc_params.get('gain'),
-        address=camera_endstops_adc_params.get('addr'),
-        channel_labels=camera_endstops_adc_params.get('channel_labels')
-    )
+    force_sensor_adc = ADS1115(**init_vars.get('force_sensor_adc'))
+    camera_endstops_adc = ADS1115(**init_vars.get('camera_endstops_adc'))
 
     comps = {
         'camera_stepper': camera_stepper,
