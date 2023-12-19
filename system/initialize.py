@@ -113,20 +113,20 @@ def init_components(
     force_sensor_adc = ADS1115(**init_vars.get('force_sensor_adc'))
     camera_endstops_adc = ADS1115(**init_vars.get('camera_endstops_adc'))
 
-    endstop_params = init_vars.get('endstop1')
+    endstop_params = init_vars.get('end_stop1')
     endstop1 = DiPoleSwitch(
         channel1=force_sensor_adc.channel_states[endstop_params.get('channel1')],
         channel2=force_sensor_adc.channel_states[endstop_params.get('channel2')],
-        trigger_threshold=force_sensor_adc.channel_states[endstop_params.get('trigger_threshold')],
-        trigger_above_threshold=force_sensor_adc.channel_states[endstop_params.get('trigger_above_threshold')]
+        trigger_threshold=endstop_params.get('trigger_threshold'),
+        trigger_above_threshold=endstop_params.get('trigger_above_threshold')
     )
 
-    endstop_params = init_vars.get('endstop2')
+    endstop_params = init_vars.get('end_stop2')
     endstop2 = DiPoleSwitch(
         channel1=force_sensor_adc.channel_states[endstop_params.get('channel1')],
         channel2=force_sensor_adc.channel_states[endstop_params.get('channel2')],
-        trigger_threshold=force_sensor_adc.channel_states[endstop_params.get('trigger_threshold')],
-        trigger_above_threshold=force_sensor_adc.channel_states[endstop_params.get('trigger_above_threshold')]
+        trigger_threshold=endstop_params.get('trigger_threshold'),
+        trigger_above_threshold=endstop_params.get('trigger_above_threshold')
     )
 
     comps = {
