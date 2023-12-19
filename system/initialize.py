@@ -4,42 +4,58 @@ import os
 from pathlib import Path
 from typing import Union
 
-from .utils import load_sys_json, write_sys_json
+from utils import load_sys_json, write_sys_json
+from motors.stepper_controls import StepperMotorDriver
+from adc.ads1115 import ADS1115
 
 INIT_VARS = {
-    # end stop switch thresholds - what voltage is considered on/off?
-    # endstop input voltage
-    # endstop trigger threshhold
-    # endstop trigger_above_treshold: False  # triggered state is above or below threshold
+    'end_stop1': {
+        'channel1': "A0",
+        'channel2': "A2",
+        'trigger_threshold': 2,
+        'trigger_above_threshold': False,
+    },
 
-    # motor params
-    'crushing_stepper_step_pin': 13,
-    'crushing_stepper_dir_pin': 27,
-    'crushing_stepper_dsbl_pin': 22,
-    'crushing_stepper_cw_pin_high': False,
-    'crushing_stepper_disable_high': False,
-    'crushing_stepper_step_on_rising_edge': False,
+    'end_stop2': {
+        'channel1': "A1",
+        'channel2': "A2",
+        'trigger_threshold': 2,
+        'trigger_above_threshold': False,
+    },
 
-    'camera_stepper_step_pin': 12,
-    'camera_stepper_dir_pin': 17,
-    'camera_stepper_dsbl_pin': 26,
-    'camera_stepper_cw_pin_high': False,
-    'camera_stepper_disable_high': False,
-    'camera_stepper_step_on_rising_edge': True,
+    'crushing_stepper': {
+        'step_pin': 13,
+        'dir_pin': 27,
+        'dsbl_pin': 22,
+        'cw_pin_high': False,
+        'disable_high': False,
+        'step_on_rising_edge': False,
+    },
 
-    # adc params
-    'force_adc_addr': 0x48,
-    'force_adc_gain': 2/3,
-    'force_adc_channels': ["A0", "A1", "A2", "A3"],
+    'camera_stepper': {
+        'step_pin': 12,
+        'dir_pin': 17,
+        'dsbl_pin': 26,
+        'cw_pin_high': False,
+        'disable_high': False,
+        'step_on_rising_edge': True,
+    },
 
-    'camera_position_adc_addr': 0x49,
-    'camera_position_adc_gain': 2/3,
-    'camera_position_adc_channels': ["A0", "A1", "A2"]
+    'force_sensor_adc': {
+        'addr': 0x48,
+        'gain': 2/3,
+        'channel_labels': ["A0", "A1", "A2", "A3"],
+    },
+
+    'camera_endstops_adc': {
+        'addr': 0x49,
+        'gain': 2/3,
+        'channel_labels': ["A0", "A1", "A2"]
+    }
 }
 
 STATE_DEFAULTS = {
     'camera_stepper_last_dir': "cw",
-    'camera_stepper_end_stop_last_triggered': "cw"
 }
 
 SYSTEM_JSON_FILEPATH = os.path.join(".", "system_files.json")
@@ -76,10 +92,52 @@ def init_system(
     return init_vars
 
 
+def init_components(
+        init_vars: dict
+):
+    """
+    initialize any components as defined by init vars
+    :param init_vars:
+    :return:
+    """
+    # TODO add some error handling here if components cant be intiialized
+
+    camera_stepper = StepperMotorDriver(**init_vars.get('camera_stepper'))
+    crushing_stepper = StepperMotorDriver(**init_vars.get('crushing_stepper'))
+
+    force_sensor_adc_params = init_vars.get('force_sensor_adc')
+    force_sensor_adc = ADS1115(
+        gain=force_sensor_adc_params.get('gain'),
+        address=force_sensor_adc_params.get('addr'),
+        channel_labels=force_sensor_adc_params.get('channel_labels')
+    )
+
+    camera_endstops_adc_params = init_vars.get('camera_endstops_adc')
+    camera_endstops_adc = ADS1115(
+        gain=camera_endstops_adc_params.get('gain'),
+        address=camera_endstops_adc_params.get('addr'),
+        channel_labels=camera_endstops_adc_params.get('channel_labels')
+    )
+
+    comps = {
+        'camera_stepper': camera_stepper,
+        'crushing_stepper': crushing_stepper,
+        'force_sensor_adc': force_sensor_adc,
+        'camera_endstops_adc': camera_endstops_adc
+    }
+
+    return comps
+
+
 def main():
     system_files = load_sys_json(SYSTEM_JSON_FILEPATH, SYSTEM_FILES_DEFAULTS)
     state = load_sys_json(fp=system_files['state_json_fp'], defaults=STATE_DEFAULTS)
     init_vars = load_sys_json(fp=system_files['init_json_fp'], defaults=INIT_VARS)
+
+    comps = init_components(init_vars=init_vars)
+
+    adc1 = comps.get('force_sensor_adc')
+    print(f'{adc1.read().__str__}')
 
     pass
 

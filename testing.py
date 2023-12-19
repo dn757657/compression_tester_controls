@@ -113,7 +113,7 @@ def main():
         )
     )
 
-    camera_stepper_thread.start()
+    # camera_stepper_thread.start()
 
     endstops_thread = threading.Thread(
         target=read_endstops_states,
@@ -128,6 +128,7 @@ def main():
     )
 
     endstops_thread.start()
+    camera_stepper_thread.start()
     endstops_thread.join()  # wait for endstop thread
 
 

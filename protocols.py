@@ -1,10 +1,70 @@
-from system.initialize import load_state, init_system, save_state
+# anything in this file should be able to run in a thread
+import threading
+
+from system.initialize import load_state, init_system, save_state, init_components
 from adc.ads1115 import read_ads1115
 
 
 # might need to be careful with states of state and init params
 STATE = load_state()
-INIT_PARAMS = init_system()  # TODO this should be components?
+INIT_PARAMS = init_system()
+COMPS = init_components(INIT_PARAMS)
+
+
+def rotate_camera_position_onto_endstop():
+    """
+    check if endstop already triggered if so just go otherway?
+    :return:
+    """
+
+    # check if endstops triggered
+    adc = COMPS.get('camera_endstops_adc')
+    camera_stepper = COMPS.get('camera_stepper')
+
+
+
+    trigger_event = threading.Event()  # create event for triggering
+
+    camera_stepper_thread = threading.Thread(
+        target=camera_stepper.rotate,
+        args=(
+            'cw',  # direction
+            50,  # duty cycle
+            500,  # frequency
+            trigger_event
+        )
+    )
+
+    # camera_stepper_thread.start()
+
+    endstops_thread = threading.Thread(
+        target=read_endstops_states,
+        args=(adc,
+              ["A0", "A1", "A2"],
+              ["A0", "A1"],
+              ["A2", "A2"],
+              [2, 2],
+              [False, False],
+              trigger_event
+              )
+    )
+
+    endstops_thread.start()
+    camera_stepper_thread.start()
+    endstops_thread.join()  # wait for endstop thread
+
+    # set state of last camera stepper direction
+
+    pass
+
+
+def rotate_camera_position_off_endstop():
+    """
+    move camera until off of endstop, or endstop is un-triggered
+    :return:
+    """
+
+    return
 
 
 def find_full_ring_rotation_steps():

@@ -1,0 +1,49 @@
+{
+    "end_stop1": {
+        "channel1": "A0",
+        "channel2": "A2",
+        "trigger_threshold": 2,
+        "trigger_above_threshold": false
+    },
+    "end_stop2": {
+        "channel1": "A1",
+        "channel2": "A2",
+        "trigger_threshold": 2,
+        "trigger_above_threshold": false
+    },
+    "crushing_stepper": {
+        "step_pin": 13,
+        "dir_pin": 27,
+        "dsbl_pin": 22,
+        "cw_pin_high": false,
+        "disable_high": false,
+        "step_on_rising_edge": false
+    },
+    "camera_stepper": {
+        "step_pin": 12,
+        "dir_pin": 17,
+        "dsbl_pin": 26,
+        "cw_pin_high": false,
+        "disable_high": false,
+        "step_on_rising_edge": true
+    },
+    "force_sensor_adc": {
+        "addr": 72,
+        "gain": 0.6666666666666666,
+        "channels": [
+            "A0",
+            "A1",
+            "A2",
+            "A3"
+        ]
+    },
+    "camera_endstops_adc": {
+        "adc_addr": 73,
+        "adc_gain": 0.6666666666666666,
+        "adc_channels": [
+            "A0",
+            "A1",
+            "A2"
+        ]
+    }
+}
