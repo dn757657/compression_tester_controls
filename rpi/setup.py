@@ -17,7 +17,7 @@ def init_pi_pins(
     else:
         print(f"{pin_mode} must be one of {pin_modes}")
         return
-
+    print(f'{channel_list}')
     # Set up GPIO pins - all gpio config is done here, easier to cleanup (less fancy)
     GPIO.setmode(pin_mode)
     GPIO.setup(channel_list, GPIO.OUT)  # may need to accomodate IN pins also?

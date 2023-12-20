@@ -4,6 +4,8 @@ import logging
 
 from motors.stepper_controls import StepperMotorDriver
 
+logging.getLogger().setLevel(logging.INFO)
+
 
 def rotate_camera_position_onto_endstop(
         stepper_motor: StepperMotorDriver,
@@ -36,13 +38,13 @@ def rotate_camera_position_onto_endstop(
         target=stepper_motor.rotate,
         args=(
             stepper_dir,  # direction
-            stepper_frequency,  # duty cycle
-            stepper_duty_cycle,  # frequency
+            stepper_duty_cycle,  # duty cycle
+            stepper_frequency,  # frequency
             trigger_event
         )
     )
 
-    # camera_stepper_thread.start()
+    #camera_stepper_thread.start()
 
     endstops_thread = threading.Thread(
         target=detect_switches_triggers,
@@ -231,11 +233,12 @@ def detect_switches_triggers(
     :return:
     """
 
-    for adc in switch_adcs:
-        adc.read()
+    #for adc in switch_adcs:
+    #    adc.read()
 
     while not trigger_event.is_set():
-
+        for adc in switch_adcs:
+            adc.read()
         for switch in switches:
             switch.read()
             if switch.state == True:

@@ -34,7 +34,15 @@ def main():
 
     stepper_dir = STATE.get('camera_stepper_last_dir')
     camera_stepper_steps_to_untrigger_endstop = STATE.get('camera_stepper_steps_to_untrigger_endstop')
+    
+    es1 = COMPS.get('endstop1')
+    es2 = COMPS.get('endstop2')
+    print(f'es1: {es1.state}\nes2: {es2.state}')
 
+    adc = COMPS.get('camera_endstops_adc')
+    print(f'{adc.channel_states}')
+
+    print(f'{stepper_dir}')
     camera_stepper = COMPS.get('camera_stepper')
     rotate_camera_position_onto_endstop(
         stepper_motor=camera_stepper,
