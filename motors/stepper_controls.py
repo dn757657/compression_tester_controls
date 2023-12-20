@@ -26,7 +26,12 @@ class StepperMotorDriver:
             cw_pin_high: bool,
             disable_high: bool,
             step_on_rising_edge: bool,
+            default_duty_cycle: float,
+            default_frequency: float,
     ):
+        # TODO implement min max frequency and other param limits
+        # TODO test at min and max frequency in test method?
+
         # define pins
         self.dir_pin = dir_pin
         self.dsbl_pin = dsbl_pin
@@ -44,6 +49,12 @@ class StepperMotorDriver:
         else:
             self.step_edge = 'falling'
 
+        self.default_duty_cycle = default_duty_cycle
+        self.default_frequency = default_frequency
+
+        # component limits
+        self.motor_directions = ['cw', 'ccw']
+
         return
 
     def set_dir(
@@ -57,8 +68,8 @@ class StepperMotorDriver:
         :param dir:
         :return:
         """
-        if direction not in ['cw', 'ccw']:
-            logging.info(f'{dir}: not in possible directions')
+        if direction not in self.motor_directions:
+            logging.info(f'{direction}: not in possible directions')
 
         if direction == 'ccw':
             if self.cw_pin_high is True:
@@ -169,6 +180,15 @@ class StepperMotorDriver:
             time.sleep(off_time)
 
         return
+
+    def test(self):
+        for direction in self.motor_directions:
+            self.rotate_steps(
+                steps=1000,
+                duty_cyle=self.default_duty_cycle,
+                direction=direction,
+                freq=self.default_frequency
+            )
 
 
 # def move_pwm_rpigpio(

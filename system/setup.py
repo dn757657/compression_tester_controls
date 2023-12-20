@@ -12,16 +12,17 @@ from utils import load_sys_json, write_sys_json
 from motors.stepper_controls import StepperMotorDriver
 from adc.ads1115 import ADS1115
 from misc_components.switch import DiPoleSwitch
+from rpi.setup import init_pi_pins
 
-INIT_VARS = {
-    'end_stop1': {
+DEFAULT_INIT_PARAMS = {
+    'endstop1': {
         'channel1': "A0",
         'channel2': "A2",
         'trigger_threshold': 2,
         'trigger_above_threshold': False,
     },
 
-    'end_stop2': {
+    'endstop2': {
         'channel1': "A1",
         'channel2': "A2",
         'trigger_threshold': 2,
@@ -35,6 +36,8 @@ INIT_VARS = {
         'cw_pin_high': False,
         'disable_high': False,
         'step_on_rising_edge': False,
+        'default_duty_cyle': (3/3.5)*100,
+        'default_frequency': 1000
     },
 
     'camera_stepper': {
@@ -44,6 +47,8 @@ INIT_VARS = {
         'cw_pin_high': False,
         'disable_high': False,
         'step_on_rising_edge': True,
+        'default_duty_cyle': 50,
+        'default_frequency': 500
     },
 
     'force_sensor_adc': {
@@ -56,11 +61,16 @@ INIT_VARS = {
         'address': 0x49,
         'gain': 2/3,
         'channel_labels': ["A0", "A1", "A2"]
-    }
+    },
+
+    'rpi4': {
+        'pin_mode': 'BCM'
+    },
 }
 
 STATE_DEFAULTS = {
     'camera_stepper_last_dir': "cw",
+    'camera_stepper_steps_to_untrigger_endstop': 112  # determined manually for now - set auto later
 }
 
 SYSTEM_JSON_FILEPATH = os.path.join(".", "system_files.json")
@@ -68,7 +78,7 @@ STATE_JSON_KEY = 'state_json_fp'
 INIT_JSON_KEY = 'init_json_fp'
 SYSTEM_FILES_DEFAULTS = {
     STATE_JSON_KEY: os.path.join(".", "system_state_variables.json"),
-    INIT_JSON_KEY: os.path.join(".", "system_initialization_variables.json")
+    INIT_JSON_KEY: os.path.join(".", "system_initialization_parameters.json")
 }
 
 SYSTEM_FILES = load_sys_json(SYSTEM_JSON_FILEPATH, SYSTEM_FILES_DEFAULTS)
@@ -90,10 +100,10 @@ def save_state(
     pass
 
 
-def init_system(
+def load_init_vars(
         system_file=SYSTEM_FILES[INIT_JSON_KEY]
 ):
-    init_vars = load_sys_json(fp=system_file, defaults=INIT_VARS)
+    init_vars = load_sys_json(fp=system_file, defaults=DEFAULT_INIT_PARAMS)
     return init_vars
 
 
@@ -129,6 +139,10 @@ def init_components(
         trigger_above_threshold=endstop_params.get('trigger_above_threshold')
     )
 
+    # this sucks but it works for now
+    pi_channels = [v for k, v in init_vars.items() if 'pin' in k]
+    init_pi_pins(channel_list=pi_channels, pin_mode=init_vars.get('rpi4').get('pin_mode'))
+
     comps = {
         'camera_stepper': camera_stepper,
         'crushing_stepper': crushing_stepper,
@@ -144,7 +158,7 @@ def init_components(
 def main():
     system_files = load_sys_json(SYSTEM_JSON_FILEPATH, SYSTEM_FILES_DEFAULTS)
     state = load_sys_json(fp=system_files['state_json_fp'], defaults=STATE_DEFAULTS)
-    init_vars = load_sys_json(fp=system_files['init_json_fp'], defaults=INIT_VARS)
+    init_vars = load_sys_json(fp=system_files['init_json_fp'], defaults=DEFAULT_INIT_PARAMS)
 
     comps = init_components(init_vars=init_vars)
 

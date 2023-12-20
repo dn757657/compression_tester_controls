@@ -1,17 +1,19 @@
 # anything in this file should be able to run in a thread
 import threading
+import logging
 
-from system.initialize import load_state, init_system, save_state, init_components
-from adc.ads1115 import read_ads1115
-
-
-# might need to be careful with states of state and init params
-STATE = load_state()
-INIT_PARAMS = init_system()
-COMPS = init_components(INIT_PARAMS)
+from motors.stepper_controls import StepperMotorDriver
 
 
-def rotate_camera_position_onto_endstop():
+def rotate_camera_position_onto_endstop(
+        stepper_motor: StepperMotorDriver,
+        switch_adcs: list,
+        endstops: list,  # should only ever be two tbh
+        stepper_duty_cycle: float,
+        stepper_frequency: float,
+        stepper_dir: str,
+        trigger_event: threading.Event = threading.Event()
+):
     """
     check if endstop is triggered
     if not move in last known direction
@@ -20,28 +22,22 @@ def rotate_camera_position_onto_endstop():
     :return:
     """
 
-    # check if endstops triggered
-    adc = COMPS.get('camera_endstops_adc')
-    camera_stepper = COMPS.get('camera_stepper')
+    # update adcs for switches
+    for adc in switch_adcs:
+        adc.read()
 
-    adc.read()  # update adc
-    endstop_params = COMPS.get('end_stop1')
-    end1_state = read_endstop_state(
-        sample1=adc.channel_states[endstop_params.get('channel1')],
-        sample2=adc.channel_states[endstop_params.get('channel2')],
-        trigger_threshold=adc.channel_states[endstop_params.get('trigger_threshold')],
-        trigger_above_threshold=adc.channel_states[endstop_params.get('trigger_above_threshold')]
-    )
-
-
-    trigger_event = threading.Event()  # create event for triggering
+    # if any endstop is triggered than do nothing
+    for endstop in endstops:
+        if endstop.state:
+            logging.info("An endstop switch is triggered, must reset position!")
+            return
 
     camera_stepper_thread = threading.Thread(
-        target=camera_stepper.rotate,
+        target=stepper_motor.rotate,
         args=(
-            'cw',  # direction
-            50,  # duty cycle
-            500,  # frequency
+            stepper_dir,  # direction
+            stepper_frequency,  # duty cycle
+            stepper_duty_cycle,  # frequency
             trigger_event
         )
     )
@@ -49,33 +45,116 @@ def rotate_camera_position_onto_endstop():
     # camera_stepper_thread.start()
 
     endstops_thread = threading.Thread(
-        target=read_endstops_states,
-        args=(adc,
-              ["A0", "A1", "A2"],
-              ["A0", "A1"],
-              ["A2", "A2"],
-              [2, 2],
-              [False, False],
+        target=detect_switches_triggers,
+        args=(switch_adcs,
+              endstops,
               trigger_event
               )
     )
 
     endstops_thread.start()
     camera_stepper_thread.start()
-    endstops_thread.join()  # wait for endstop thread
-
-    # set state of last camera stepper direction
+    endstops_thread.join()  # wait for endstop thread to trigger
 
     pass
 
 
-def rotate_camera_position_off_endstop():
+def reset_camera_position(
+        stepper_motor: StepperMotorDriver,
+        switch_adcs: list,
+        endstops: list,  # should only ever be two tbh
+        stepper_duty_cycle: float,
+        stepper_frequency: float,
+        stepper_dir: str,
+        steps_to_untrigger: int,
+        bumps: int = 2,
+    ):
     """
     move camera until off of endstop, or endstop is un-triggered
     :return:
     """
 
-    return
+    # update adcs for switches
+    for adc in switch_adcs:
+        adc.read()
+
+    # at least on endstop must be triggered for this function to make sense
+    triggered = False
+    for endstop in endstops:
+        if endstop.state:
+            triggered = True
+
+    if not triggered:
+        logging.info("No endstop switch is triggered, no need to reset position!")
+        return
+
+    # TODO ideally we have a function to find the number of steps required to back off
+    # an endstop switch but for now we just set it manually
+
+    # last known dir is stepper dir - get opposite dir to back off switch
+    stepper_dir = [d for d in stepper_motor.motor_directions if d != stepper_dir][0]
+
+    stepper_motor.rotate_steps(
+        direction=stepper_dir,
+        duty_cyle=stepper_duty_cycle,
+        freq=stepper_frequency,
+        steps=steps_to_untrigger
+    )
+
+    triggered = False
+    for endstop in endstops:
+        if endstop.state:
+            triggered = True
+
+    if not triggered:
+        logging.info('Successfully reset camera position, confirming...')
+
+    # bump the stop a few times to confirm
+    for i in range(0, bumps):
+        # swap dir
+        stepper_dir = [d for d in stepper_motor.motor_directions if d != stepper_dir][0]
+
+        stepper_motor.rotate_steps(
+            direction=stepper_dir,
+            duty_cyle=stepper_motor.default_duty_cycle,
+            freq=stepper_motor.default_frequency,
+            steps=steps_to_untrigger
+        )
+
+        triggered = False
+        for endstop in endstops:
+            if endstop.state:
+                triggered = True
+
+        # if no stop is triggered bump has failed
+        if not triggered:
+            logging.info("Failed to confirm camera position status")
+            return
+
+        # swap dir
+        stepper_dir = [d for d in stepper_motor.motor_directions if d != stepper_dir][0]
+
+        stepper_motor.rotate_steps(
+            direction=stepper_dir,
+            duty_cyle=stepper_motor.default_duty_cycle,
+            freq=stepper_motor.default_frequency,
+            steps=steps_to_untrigger
+        )
+
+        triggered = False
+        for endstop in endstops:
+            if endstop.state:
+                triggered = True
+
+        # if no stop is triggered bump has succeeded
+        if not triggered:
+            logging.info(f"Confirmed stepper position: bump {i}")
+            # stepper dir should be set to pointing away from the endstop switch
+        else:
+            logging.info("Failed to confirm camera position status")
+            return
+
+    return stepper_dir  # return just in case, although should be mutated by stepper_dir arg
 
 
 def find_full_ring_rotation_steps():
@@ -141,7 +220,7 @@ def find_full_ring_rotation_steps():
 
 
 def detect_switches_triggers(
-        switch_adc,
+        switch_adcs: list,
         switches: list,
         trigger_event
 ):
@@ -152,7 +231,9 @@ def detect_switches_triggers(
     :return:
     """
 
-    switch_adc.read()
+    for adc in switch_adcs:
+        adc.read()
+
     while not trigger_event.is_set():
 
         for switch in switches:
@@ -165,7 +246,7 @@ def detect_switches_triggers(
 
 
 def detect_switches_untriggers(
-        switch_adc,
+        switch_adcs: list,
         switches: list,
         trigger_event
 ):
@@ -174,7 +255,9 @@ def detect_switches_untriggers(
     :return:
     """
 
-    switch_adc.read()
+    for adc in switch_adcs:
+        adc.read()
+
     while not trigger_event.is_set():
         for switch in switches:
             switch.read()
