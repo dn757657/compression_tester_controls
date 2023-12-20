@@ -130,14 +130,18 @@ def init_components(
 
     endstop_params = init_vars.get('endstop1')
     endstop1 = DiPoleSwitch(
-        channel1=camera_endstops_adc.channel_states[endstop_params.get('channel1')],
-        channel2=camera_endstops_adc.channel_states[endstop_params.get('channel2')],
+        channels_obj=camera_endstops_adc,
+        channels_obj_attr='channel_states',
+        channel1=endstop_params.get('channel1'),
+        channel2=endstop_params.get('channel2'),
         trigger_threshold=endstop_params.get('trigger_threshold'),
         trigger_above_threshold=endstop_params.get('trigger_above_threshold')
     )
 
     endstop_params = init_vars.get('endstop2')
     endstop2 = DiPoleSwitch(
+        channels_obj=camera_endstops_adc,
+        channels_obj_attr='channel_states',
         channel1=camera_endstops_adc.channel_states[endstop_params.get('channel1')],
         channel2=camera_endstops_adc.channel_states[endstop_params.get('channel2')],
         trigger_threshold=endstop_params.get('trigger_threshold'),

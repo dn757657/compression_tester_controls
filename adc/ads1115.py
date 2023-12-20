@@ -88,7 +88,6 @@ class ADS1115:
                 volt_samples[channel] = volt_sample
 
         self.channel_states = volt_samples  # update state
-        print(f"adc state = {self.channel_states}")
         return volt_samples
 
 # def init_ads1115(

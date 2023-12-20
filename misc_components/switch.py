@@ -3,6 +3,8 @@
 class DiPoleSwitch:
     def __init__(
             self,
+            channels_obj,
+            channels_obj_attr,
             channel1,
             channel2,
             trigger_threshold: float,
@@ -15,6 +17,9 @@ class DiPoleSwitch:
         :param trigger_threshold: difference in channels denoting a trigger event
         :param trigger_above_threshold: is switch on above threshold
         """
+        self.channels_obj = channels_obj
+        self.channels_obj_attr = channels_obj_attr
+
         self.channel1 = channel1
         self.channel2 = channel2
 
@@ -25,6 +30,14 @@ class DiPoleSwitch:
 
         pass
 
+    @property
+    def get_channel1(self):
+        return self.channels_obj.attr(self.channels_obj_attr)[self.channel1]
+
+    @property
+    def get_channel2(self):
+        return self.channels_obj.attr(self.channels_obj_attr)[self.channel2]
+
     def read(self):
         """
         sample an end stop to determine if triggered
@@ -34,7 +47,7 @@ class DiPoleSwitch:
         :return:
         """
 
-        print(f'switch_state: chan1 = {self.channel1}, chan2 = {self.channel2}')
+        #print(f'switch_state: chan1 = {self.channel1}, chan2 = {self.channel2}')
 
         # TODO need to set state in here? - no outside since we need to know the direction
         # the motor is going to know which endstop state to set
@@ -47,13 +60,13 @@ class DiPoleSwitch:
     def is_triggered(
             self
     ):
-        if abs(self.channel1 - self.channel2) > self.trigger_threshold:
+        if abs(self.get_channel1() - self.get_channel2()) > self.trigger_threshold:
             if self.trigger_above_threshold == True:
                 return True
             else:
                 return False
 
-        if abs(self.channel1 - self.channel2) <= self.trigger_threshold:
+        if abs(self.get_channel1() - self.get_channel2()) <= self.trigger_threshold:
             if self.trigger_above_threshold == True:
                 return False
             else:

@@ -34,34 +34,34 @@ def main():
 
     stepper_dir = STATE.get('camera_stepper_last_dir')
     camera_stepper_steps_to_untrigger_endstop = STATE.get('camera_stepper_steps_to_untrigger_endstop')
-    
-    es1 = COMPS.get('endstop1')
-    es2 = COMPS.get('endstop2')
-    print(f'es1: {es1.state}\nes2: {es2.state}')
+    while True:
+        es1 = COMPS.get('endstop1')
+        es2 = COMPS.get('endstop2')
+        print(f'es1: {es1.state}\nes2: {es2.state}')
 
-    adc = COMPS.get('camera_endstops_adc')
-    print(f'{adc.channel_states}')
+        adc = COMPS.get('camera_endstops_adc')
+        print(f'{adc.channel_states}')
 
-    print(f'{stepper_dir}')
-    camera_stepper = COMPS.get('camera_stepper')
-    rotate_camera_position_onto_endstop(
-        stepper_motor=camera_stepper,
-        switch_adcs=[COMPS.get('camera_endstops_adc')],
-        endstops=[COMPS.get('endstop1'), COMPS.get('endstop2')],
-        stepper_duty_cycle=camera_stepper.default_duty_cycle,
-        stepper_frequency=camera_stepper.default_frequency,
-        stepper_dir=stepper_dir
-    )
-
-    stepper_dir = reset_camera_position(
-        stepper_motor=camera_stepper,
-        switch_adcs=[COMPS.get('camera_endstops_adc')],
-        endstops=[COMPS.get('endstop1'), COMPS.get('endstop2')],
-        stepper_duty_cycle=camera_stepper.default_duty_cycle,
-        stepper_frequency=camera_stepper.default_frequency,
-        stepper_dir=stepper_dir,
-        steps_to_untrigger=camera_stepper_steps_to_untrigger_endstop
-    )
+    # print(f'{stepper_dir}')
+    # camera_stepper = COMPS.get('camera_stepper')
+    # rotate_camera_position_onto_endstop(
+    #     stepper_motor=camera_stepper,
+    #     switch_adcs=[COMPS.get('camera_endstops_adc')],
+    #     endstops=[COMPS.get('endstop1'), COMPS.get('endstop2')],
+    #     stepper_duty_cycle=camera_stepper.default_duty_cycle,
+    #     stepper_frequency=camera_stepper.default_frequency,
+    #     stepper_dir=stepper_dir
+    # )
+    #
+    # stepper_dir = reset_camera_position(
+    #     stepper_motor=camera_stepper,
+    #     switch_adcs=[COMPS.get('camera_endstops_adc')],
+    #     endstops=[COMPS.get('endstop1'), COMPS.get('endstop2')],
+    #     stepper_duty_cycle=camera_stepper.default_duty_cycle,
+    #     stepper_frequency=camera_stepper.default_frequency,
+    #     stepper_dir=stepper_dir,
+    #     steps_to_untrigger=camera_stepper_steps_to_untrigger_endstop
+    # )
 
 
 if __name__ == '__main__':
