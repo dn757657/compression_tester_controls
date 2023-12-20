@@ -62,13 +62,13 @@ class DiPoleSwitch:
     def is_triggered(
             self
     ):
-        if abs(self.get_channel1() - self.get_channel2()) > self.trigger_threshold:
+        if abs(self.get_channel1 - self.get_channel2) > self.trigger_threshold:
             if self.trigger_above_threshold == True:
                 return True
             else:
                 return False
 
-        if abs(self.get_channel1() - self.get_channel2()) <= self.trigger_threshold:
+        if abs(self.get_channel1 - self.get_channel2) <= self.trigger_threshold:
             if self.trigger_above_threshold == True:
                 return False
             else:
