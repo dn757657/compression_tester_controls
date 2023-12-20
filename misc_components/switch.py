@@ -32,11 +32,13 @@ class DiPoleSwitch:
 
     @property
     def get_channel1(self):
-        return self.channels_obj.attr(self.channels_obj_attr)[self.channel1]
+        adc_channel_samples = getattr(self.channels_obj, self.channels_obj_attr)
+        return adc_channel_samples[self.channel1]
 
     @property
     def get_channel2(self):
-        return self.channels_obj.attr(self.channels_obj_attr)[self.channel2]
+        adc_channel_samples = getattr(self.channels_obj, self.channels_obj_attr)
+        return adc_channel_samples[self.channel2]
 
     def read(self):
         """
