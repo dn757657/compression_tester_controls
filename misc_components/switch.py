@@ -34,7 +34,7 @@ class DiPoleSwitch:
         :return:
         """
 
-        print(f'{abs(self.channel1 - self.channel2)}')
+        print(f'switch_state: chan1 = {self.channel1}, chan2 = {self.channel2}')
 
         # TODO need to set state in here? - no outside since we need to know the direction
         # the motor is going to know which endstop state to set

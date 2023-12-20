@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from pathlib import Path
 from typing import Union
 
-from utils import load_sys_json, write_sys_json
+from system.utils import load_sys_json, write_sys_json
 from motors.stepper_controls import StepperMotorDriver
 from adc.ads1115 import ADS1115
 from misc_components.switch import DiPoleSwitch
@@ -36,7 +36,7 @@ DEFAULT_INIT_PARAMS = {
         'cw_pin_high': False,
         'disable_high': False,
         'step_on_rising_edge': False,
-        'default_duty_cyle': (3/3.5)*100,
+        'default_duty_cycle': (3/3.5)*100,
         'default_frequency': 1000
     },
 
@@ -47,7 +47,7 @@ DEFAULT_INIT_PARAMS = {
         'cw_pin_high': False,
         'disable_high': False,
         'step_on_rising_edge': True,
-        'default_duty_cyle': 50,
+        'default_duty_cycle': 50,
         'default_frequency': 500
     },
 
@@ -116,6 +116,11 @@ def init_components(
     :return:
     """
     # TODO add some error handling here if components cant be intiialized
+    
+    # this sucks but it works for now
+    pi_channels = [v for k, v in init_vars.get('camera_stepper').items() if 'pin' in k]
+    pi_channels = pi_channels + [v for k, v in init_vars.get('crushing_stepper').items() if 'pin' in k]
+    init_pi_pins(channel_list=pi_channels, pin_mode=init_vars.get('rpi4').get('pin_mode'))
 
     camera_stepper = StepperMotorDriver(**init_vars.get('camera_stepper'))
     crushing_stepper = StepperMotorDriver(**init_vars.get('crushing_stepper'))
@@ -123,25 +128,25 @@ def init_components(
     force_sensor_adc = ADS1115(**init_vars.get('force_sensor_adc'))
     camera_endstops_adc = ADS1115(**init_vars.get('camera_endstops_adc'))
 
-    endstop_params = init_vars.get('end_stop1')
+    endstop_params = init_vars.get('endstop1')
     endstop1 = DiPoleSwitch(
-        channel1=force_sensor_adc.channel_states[endstop_params.get('channel1')],
-        channel2=force_sensor_adc.channel_states[endstop_params.get('channel2')],
+        channel1=camera_endstops_adc.channel_states[endstop_params.get('channel1')],
+        channel2=camera_endstops_adc.channel_states[endstop_params.get('channel2')],
         trigger_threshold=endstop_params.get('trigger_threshold'),
         trigger_above_threshold=endstop_params.get('trigger_above_threshold')
     )
 
-    endstop_params = init_vars.get('end_stop2')
+    endstop_params = init_vars.get('endstop2')
     endstop2 = DiPoleSwitch(
-        channel1=force_sensor_adc.channel_states[endstop_params.get('channel1')],
-        channel2=force_sensor_adc.channel_states[endstop_params.get('channel2')],
+        channel1=camera_endstops_adc.channel_states[endstop_params.get('channel1')],
+        channel2=camera_endstops_adc.channel_states[endstop_params.get('channel2')],
         trigger_threshold=endstop_params.get('trigger_threshold'),
         trigger_above_threshold=endstop_params.get('trigger_above_threshold')
     )
 
     # this sucks but it works for now
-    pi_channels = [v for k, v in init_vars.items() if 'pin' in k]
-    init_pi_pins(channel_list=pi_channels, pin_mode=init_vars.get('rpi4').get('pin_mode'))
+    #pi_channels = [v for k, v in init_vars.items() if 'pin' in k]
+    #init_pi_pins(channel_list=pi_channels, pin_mode=init_vars.get('rpi4').get('pin_mode'))
 
     comps = {
         'camera_stepper': camera_stepper,
