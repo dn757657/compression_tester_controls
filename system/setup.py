@@ -70,7 +70,8 @@ DEFAULT_INIT_PARAMS = {
 
 STATE_DEFAULTS = {
     'camera_stepper_last_dir': "cw",
-    'camera_stepper_steps_to_untrigger_endstop': 112  # determined manually for now - set auto later
+    'camera_stepper_steps_to_untrigger_endstop': 112,  # determined manually for now - set auto later
+    'steps_to_rotate_camera': 0
 }
 
 SYSTEM_JSON_FILEPATH = os.path.join(".", "system_files.json")

@@ -1,7 +1,7 @@
 import threading
 
 from system.setup import load_state, load_init_vars, save_state, init_components
-from protocols import rotate_camera_position_onto_endstop, reset_camera_position
+from protocols import rotate_camera_position_onto_endstop, reset_camera_position, find_full_camera_rotation_steps
 
 # might need to be careful with states of state and init params
 STATE = load_state()
@@ -35,19 +35,26 @@ COMPS = init_components(INIT_PARAMS)
 def main():
 
     stepper_dir = STATE.get('camera_stepper_last_dir')
+    # steps_to_rotate_camera
 
-    rotate_camera_position_onto_endstop(
+    steps = find_full_camera_rotation_steps(
         stepper_dir=stepper_dir,
-        trigger_event=threading.Event()
     )
-
-    stepper_dir = reset_camera_position(
-        stepper_dir=stepper_dir,
-        trigger_event=threading.Event(),
-        verification_cycles=3
-    )
-
+    print(f"Steps to rotate camera: {steps}")
+    # rotate_camera_position_onto_endstop(
+    #     stepper_dir=stepper_dir,
+    #     trigger_event=threading.Event()
+    # )
+    #
+    # stepper_dir = reset_camera_position(
+    #     stepper_dir=stepper_dir,
+    #     trigger_event=threading.Event(),
+    #     verification_cycles=1
+    # )
+    # STATE['camera_stepper_last_dir'] = stepper_dir
     save_state(state=STATE)
+
+
 
 
 if __name__ == '__main__':

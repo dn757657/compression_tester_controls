@@ -1,6 +1,7 @@
 # anything in this file should be able to run in a thread
 import threading
 import logging
+import timeit
 
 from typing import List
 
@@ -145,7 +146,6 @@ def reset_camera_position(
     :param stepper_frequency:
     :return:
     """
-
     logging.info(f'Resetting camera stepper position...')
 
     # set some defaults
@@ -268,66 +268,32 @@ def reset_camera_position(
     # return stepper_dir  # return just in case, although should be mutated by stepper_dir arg
 
 
-def find_full_ring_rotation_steps():
-    # TODO
-    # funcs needed
-    # continuous sampling for adc
-    # continuous stepper motor rotation
+def find_full_camera_rotation_steps(
+        stepper_dir: str,
+        stepper_frequency: float = 500,
+):
 
-    # if previous direction or last triggered stop or currently triggered stop? - store in json and load globals?
-    # go in that dir or towards end stop
-    # if not go cw - from front of unit
-    # go slow until one end stop is reached
-    # verify stop is reached by tapping? - maybe different protocol
+    logging.info(f'Finding full camera rotation steps...')
 
-    return
+    stepper_dir = reset_camera_position(
+        stepper_dir=stepper_dir,
+        trigger_event=threading.Event(),
+        verification_cycles=1
+    )
 
+    start = timeit.default_timer()
+    rotate_camera_position_onto_endstop(
+        stepper_dir=stepper_dir,
+        trigger_event=threading.Event(),
+        stepper_frequency=stepper_frequency
+    )
+    end = timeit.default_timer()
 
-# def read_endstop_state(
-#         sample1: float,
-#         sample2: float,
-#         trigger_threshold: float,
-#         trigger_above_threshold: bool,
-# ):
-#     """
-#     sample an end stop to determine if triggered
-#     endstop switch could be an object also but probably not necessary
-#     return bool
-#     :param channels: must be of length 2? list of strings
-#     :return:
-#     """
-#
-#     print(f'{abs(sample1 - sample2)}')
-#
-#     # TODO need to set state in here? - no outside since we need to know the direction
-#     # the motor is going to know which endstop state to set
-#     triggered = endstop_is_triggered(
-#         sample1=sample1,
-#         sample2=sample2,
-#         trigger_threshold=trigger_threshold,
-#         trigger_above_threshold=trigger_above_threshold
-#     )
-#
-#     return triggered
-#
-#
-# def endstop_is_triggered(
-#         sample1: float,
-#         sample2: float,
-#         trigger_threshold: float,
-#         trigger_above_threshold: bool
-# ):
-#     if abs(sample1 - sample2) > trigger_threshold:
-#         if trigger_above_threshold == True:
-#             return True
-#         else:
-#             return False
-#
-#     if abs(sample1 - sample2) <= trigger_threshold:
-#         if trigger_above_threshold == True:
-#             return False
-#         else:
-#             return True
+    total_time = end - start
+    total_steps = stepper_frequency * total_time
+    total_whole_steps = round(total_steps, ndigits=None)
+
+    return total_whole_steps
 
 
 def get_switch_states(
@@ -358,53 +324,3 @@ def monitor_switches_until_state_reached(
             trigger_event.set()
 
     pass
-
-
-# def detect_switches_triggers(
-#         switch_adcs: list,
-#         switches: list,
-#         trigger_event
-# ):
-#     """
-#     sample both camera ring endstops until one is triggered
-#     return the one that was triggered
-#     break function when end stop triggered?
-#     :return:
-#     """
-#
-#     #for adc in switch_adcs:
-#     #    adc.read()
-#
-#     while not trigger_event.is_set():
-#         for adc in switch_adcs:
-#             adc.read()
-#         for switch in switches:
-#             switch.read()
-#             if switch.state == True:
-#
-#                 trigger_event.set()
-#
-#     pass
-#
-#
-# def detect_switches_untriggers(
-#         switch_adcs: list,
-#         switches: list,
-#         trigger_event
-# ):
-#     """
-#     sample switches and return trigger event when no switch is triggered
-#     :return:
-#     """
-#
-#     for adc in switch_adcs:
-#         adc.read()
-#
-#     while not trigger_event.is_set():
-#         for switch in switches:
-#             switch.read()
-#             if switch.state == True:  # if either is true then break
-#                 break
-#         trigger_event.set()  # if neither triggered then trigger event
-#
-#     pass
