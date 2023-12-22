@@ -62,3 +62,38 @@ def eosr50_capture_and_save(
         print("Failed to configure EOS R50.")
 
     pass
+
+
+def eosr50_continuous_capture_and_save(
+        port,
+        filename,
+        stop_event
+):
+    """
+    can use date characters like %Y in filename see naming standard?
+    :param port: get ports from gphoto for attached cameras
+    :param filename: must end in .jpg
+    :return:
+    """
+    i = 0
+    while stop_event.is_set():
+        # sudo gphoto2 --capture-image-and-download -filename "%Y%m%d%H%M%S.jpg"
+        filename = filename + str(i)  # will need some sort of uid system eventually
+        try:
+            subprocess.run([
+                'sudo',
+                'gphoto2',
+                '--port', port,
+                '--capture-image-and-download',
+                '--filename', filename,
+                '--keep'
+            ],
+                check=True
+            )
+            print(f"Image {filename} Captured")
+            i += 1  # only increment if captured
+
+        except subprocess.CalledProcessError:
+            print("Failed to configure EOS R50.")
+
+    pass

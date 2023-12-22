@@ -1,7 +1,9 @@
 import threading
 
 from system.setup import load_state, load_init_vars, save_state, init_components
-from protocols import rotate_camera_position_onto_endstop, reset_camera_position, find_full_camera_rotation_steps
+from protocols import rotate_camera_position_onto_endstop, reset_camera_position, \
+    find_full_camera_rotation_steps, rotate_camera_position_onto_endstop_with_cameras
+from camera.canon_eosr50 import eosr50_init, gphoto2_get_active_ports
 
 # might need to be careful with states of state and init params
 STATE = load_state()
@@ -35,12 +37,6 @@ COMPS = init_components(INIT_PARAMS)
 def main():
 
     stepper_dir = STATE.get('camera_stepper_last_dir')
-    # steps_to_rotate_camera
-
-    steps = find_full_camera_rotation_steps(
-        stepper_dir=stepper_dir,
-    )
-    print(f"Steps to rotate camera: {steps}")
     # rotate_camera_position_onto_endstop(
     #     stepper_dir=stepper_dir,
     #     trigger_event=threading.Event()
@@ -51,7 +47,18 @@ def main():
     #     trigger_event=threading.Event(),
     #     verification_cycles=1
     # )
-    # STATE['camera_stepper_last_dir'] = stepper_dir
+
+    cam_ports = gphoto2_get_active_ports()
+    for port in cam_ports:
+        eosr50_init(port)
+
+    rotate_camera_position_onto_endstop_with_cameras(
+        stepper_dir=stepper_dir,
+        camera_ports=cam_ports,
+        trigger_event=threading.Event()
+    )
+
+    STATE['camera_stepper_last_dir'] = stepper_dir
     save_state(state=STATE)
 
 

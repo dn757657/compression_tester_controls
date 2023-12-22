@@ -66,12 +66,19 @@ DEFAULT_INIT_PARAMS = {
     'rpi4': {
         'pin_mode': 'BCM'
     },
+
+    'system': {
+        'camera_stepper_steps_to_untrigger_endstop': 112,  # determined manually for now - set auto later
+        'steps_to_rotate_camera': 54600
+    },
+
+    'canonEOSR50_1': {
+        'seconds_per_photo': 1.5
+    }
 }
 
 STATE_DEFAULTS = {
     'camera_stepper_last_dir': "cw",
-    'camera_stepper_steps_to_untrigger_endstop': 112,  # determined manually for now - set auto later
-    'steps_to_rotate_camera': 0
 }
 
 SYSTEM_JSON_FILEPATH = os.path.join(".", "system_files.json")

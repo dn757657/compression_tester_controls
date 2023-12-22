@@ -7,6 +7,7 @@ from typing import List
 
 from motors.stepper_controls import StepperMotorDriver
 from system.setup import load_state, load_init_vars, save_state, init_components
+from camera.canon_eosr50 import eosr50_continuous_capture_and_save
 
 # might need to be careful with states of state and init params
 # STATE = load_state()
@@ -109,6 +110,63 @@ def rotate_camera_position_onto_endstop(
         stepper_frequency = stepper_motor.default_frequency
 
     logging.info(f'Rotating camera stepper until end-stop triggered...')
+
+    rotate_motor_until_switch_state(
+        stepper_motor=stepper_motor,
+        switch_adcs=endstop_adcs,
+        switches=endstops,
+        stepper_duty_cycle=stepper_duty_cycle,
+        stepper_frequency=stepper_frequency,
+        stepper_dir=stepper_dir,
+        trigger_event=trigger_event,
+        switch_trigger_state=[True, False]  # just one of the endstops needs to be triggered
+    )
+
+    return
+
+
+def rotate_camera_position_onto_endstop_with_cameras(
+        stepper_dir: str,
+        trigger_event: threading.Event,
+        camera_ports: list,
+        photo_base_filename: str = 'test_capture',
+        stepper_motor: StepperMotorDriver = COMPS.get('camera_stepper'),
+        endstop_adcs: list = [COMPS.get('camera_endstops_adc')],
+        endstops: list = [COMPS.get('endstop1'), COMPS.get('endstop2')],
+        stepper_duty_cycle: float = None,
+        stepper_frequency: float = None,
+):
+    """
+    check if endstop is triggered
+    if not move in last known direction
+    if yes then need to verify which stop its on
+    move until endstop triggered
+    :return:
+    """
+
+    # set some defaults
+    if not stepper_duty_cycle:
+        stepper_duty_cycle = stepper_motor.default_duty_cycle
+
+    if not stepper_frequency:
+        stepper_frequency = stepper_motor.default_frequency
+
+    logging.info(f'Rotating and activating camera until end-stop triggered...')
+
+    camera_threads = list()
+    for port in camera_ports:
+        camera_thread = threading.Thread(
+            target=eosr50_continuous_capture_and_save,
+            args=(
+                port,
+                photo_base_filename,
+                trigger_event
+            )
+        )
+        camera_threads.append(camera_thread)
+
+    for t in camera_threads:
+        t.start()
 
     rotate_motor_until_switch_state(
         stepper_motor=stepper_motor,
@@ -278,7 +336,8 @@ def find_full_camera_rotation_steps(
     stepper_dir = reset_camera_position(
         stepper_dir=stepper_dir,
         trigger_event=threading.Event(),
-        verification_cycles=1
+        verification_cycles=1,
+        stepper_frequency=stepper_frequency
     )
 
     start = timeit.default_timer()
