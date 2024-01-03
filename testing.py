@@ -36,11 +36,11 @@ COMPS = init_components(INIT_PARAMS)
 
 def camera_step():
 
-    reset_camera_position(
-        state=STATE,
-        trigger_event=threading.Event(),
-        verification_cycles=3
-    )
+    # reset_camera_position(
+    #     state=STATE,
+    #     trigger_event=threading.Event(),
+    #     verification_cycles=3
+    # )
 
     cam_ports = gphoto2_get_active_ports()
     for port in cam_ports:
@@ -55,11 +55,11 @@ def camera_step():
         trigger_event=threading.Event()
     )
 
-    reset_camera_position(
-        state=STATE,
-        trigger_event=threading.Event(),
-        verification_cycles=3
-    )
+    # reset_camera_position(
+    #     state=STATE,
+    #     trigger_event=threading.Event(),
+    #     verification_cycles=3
+    # )
 
     save_state(state=STATE)
 
