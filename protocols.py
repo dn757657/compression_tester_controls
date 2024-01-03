@@ -311,13 +311,13 @@ def reset_camera_position(
     if True in switch_states:  # switch is triggered, resting on endstop, go opposite dir
         stepper_dir = [d for d in stepper_motor.motor_directions if d != stepper_dir][0]  # swap dir
 
-    switch_trigger_state = list()
+    switch_states_to_seek = list()
     for i in range(0, verification_cycles):
         if True in switch_states:
-            switch_trigger_state = [switch_trigger_state.append(False) for state in switch_states]
+            [switch_states_to_seek.append(False) for state in switch_states]
         else:
-            switch_trigger_state = [switch_trigger_state.append(False) for s in range(0, len(switch_states) - 1)]
-            switch_trigger_state.append(True)  # one true
+            [switch_states_to_seek.append(False) for s in range(0, len(switch_states) - 1)]
+            switch_states_to_seek.append(True)  # one true
 
         # first seek to trigger an endstop
         rotate_motor_until_switch_state(
@@ -328,11 +328,12 @@ def reset_camera_position(
             stepper_frequency=stepper_frequency,
             stepper_dir=stepper_dir,
             trigger_event=trigger_event,
-            switch_trigger_state=switch_trigger_state
+            switch_trigger_state=switch_states_to_seek
         )
         trigger_event = threading.Event()  # reset trigger 
         stepper_dir = [d for d in stepper_motor.motor_directions if d != stepper_dir][0]
-        switch_states = switch_trigger_state  # assume swithc state is the sought state if gets here
+        switch_states = switch_states_to_seek  # assume swithc state is the sought state if gets here
+        switch_states_to_seek = list()
 
     # ensure off trigger - loop may not end off trigger
     if True in switch_states:  # this is on trigger
