@@ -61,6 +61,8 @@ def camera_step():
         verification_cycles=3
     )
 
+    save_state(state=STATE)
+
     pass
 
 
