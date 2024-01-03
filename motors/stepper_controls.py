@@ -106,6 +106,7 @@ class StepperMotorDriver:
             duty_cyle: float,
             freq: float,
             steps: int,
+            stop_event
     ):
         """
 
@@ -118,8 +119,10 @@ class StepperMotorDriver:
         self.enable_driver()
         self.set_dir(direction=direction)
 
-        for step in range(0, steps):
-            self.step(duty_cycle=duty_cyle, freq=freq)
+        while not stop_event.is_set():
+            for step in range(0, steps):
+                self.step(duty_cycle=duty_cyle, freq=freq)
+            stop_event.set()  # set if steps completed
 
         return
 
