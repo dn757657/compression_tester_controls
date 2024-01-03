@@ -311,11 +311,12 @@ def reset_camera_position(
     if True in switch_states:  # switch is triggered, resting on endstop, go opposite dir
         stepper_dir = [d for d in stepper_motor.motor_directions if d != stepper_dir][0]  # swap dir
 
+    switch_trigger_state = list()
     for i in range(0, verification_cycles):
         if True in switch_states:
             switch_trigger_state = [switch_trigger_state.append(False) for state in switch_states]
         else:
-            switch_trigger_state = [switch_trigger_state.append(False) for state in switch_states[0:-1]]
+            switch_trigger_state = [switch_trigger_state.append(False) for s in range(0, len(switch_states) - 1)]
             switch_trigger_state.append(True)  # one true
 
         # first seek to trigger an endstop
