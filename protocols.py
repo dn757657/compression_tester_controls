@@ -238,6 +238,7 @@ def reset_camera_position(
             trigger_event=trigger_event,
             switch_trigger_state=[False, False]
         )
+        stepper_dir = [d for d in stepper_motor.motor_directions if d != stepper_dir][0]
         trigger_event = threading.Event()  # reset trigger 
 
     logging.info(f'Camera position reset.')
