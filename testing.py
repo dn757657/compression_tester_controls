@@ -64,10 +64,10 @@ def camera_step():
 
 def main():
     stepper_dir = STATE.get('camera_stepper_last_dir')
-    # rotate_camera_position_onto_endstop(
-    #     stepper_dir=stepper_dir,
-    #     trigger_event=threading.Event()
-    # )
+    rotate_camera_position_onto_endstop(
+        stepper_dir=stepper_dir,
+        trigger_event=threading.Event()
+    )
     
     stepper_dir = reset_camera_position(
         stepper_dir=stepper_dir,
