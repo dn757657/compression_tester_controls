@@ -333,7 +333,7 @@ def reset_camera_position(
         trigger_event = threading.Event()  # reset trigger 
         stepper_dir = [d for d in stepper_motor.motor_directions if d != stepper_dir][0]
         switch_states = switch_states_to_seek  # assume swithc state is the sought state if gets here
-        switch_states_to_seek = list()
+        switch_states_to_seek = list()  # reset seeking state
 
     # ensure off trigger - loop may not end off trigger
     if True in switch_states:  # this is on trigger

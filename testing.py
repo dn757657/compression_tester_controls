@@ -36,47 +36,37 @@ COMPS = init_components(INIT_PARAMS)
 
 def camera_step():
 
-    stepper_dir = STATE.get('camera_stepper_last_dir')
-    # rotate_camera_position_onto_endstop(
-    #     stepper_dir=stepper_dir,
-    #     trigger_event=threading.Event()
-    # )
-    #
-    # stepper_dir = reset_camera_position(
-    #     stepper_dir=stepper_dir,
-    #     trigger_event=threading.Event(),
-    #     verification_cycles=1
-    # )
-
     cam_ports = gphoto2_get_active_ports()
     for port in cam_ports:
         eosr50_init(port)
 
-    rotate_camera_position_onto_endstop_with_cameras(
-        stepper_dir=stepper_dir,
-        camera_ports=cam_ports,
-        trigger_event=threading.Event()
-    )
-
-    STATE['camera_stepper_last_dir'] = stepper_dir
-    save_state(state=STATE)
-
-
-def main():
-    # stepper_dir = STATE.get('camera_stepper_last_dir')
-    # rotate_camera_position_onto_endstop(
-    #     # stepper_dir=stepper_dir,
-    #     trigger_event=threading.Event()
-    # )
-    print(f"initial last known dir: {STATE.get('camera_stepper_last_dir')}")
-    
     reset_camera_position(
         state=STATE,
         trigger_event=threading.Event(),
         verification_cycles=3
     )
 
-    print(f"final last knwon dirL {STATE.get('camera_stepper_last_dir')}")
+    # use last known dir
+    stepper_dir = STATE.get('camera_stepper_last_dir')
+    rotate_camera_position_onto_endstop_with_cameras(
+        stepper_dir=stepper_dir,
+        camera_ports=cam_ports,
+        trigger_event=threading.Event()
+    )
+    pass
+
+
+def main():
+    camera_step()
+    # print(f"initial last known dir: {STATE.get('camera_stepper_last_dir')}")
+    
+    # reset_camera_position(
+    #     state=STATE,
+    #     trigger_event=threading.Event(),
+    #     verification_cycles=3
+    # )
+
+    # print(f"final last knwon dirL {STATE.get('camera_stepper_last_dir')}")
     
     pass
 
