@@ -49,7 +49,7 @@ def camera_step():
     # use last known dir
     stepper_dir = STATE.get('camera_stepper_last_dir')
     rotate_camera_position_onto_endstop_with_cameras(
-        state=STATE
+        state=STATE,
         stepper_dir=stepper_dir,
         camera_ports=cam_ports,
         trigger_event=threading.Event()
