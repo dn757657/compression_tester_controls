@@ -66,7 +66,7 @@ def eosr50_capture_and_save(
 
 def eosr50_continuous_capture_and_save(
         port,
-        filename,
+        filename_base,
         stop_event
 ):
     """
@@ -78,7 +78,7 @@ def eosr50_continuous_capture_and_save(
     i = 0
     while not stop_event.is_set():
         # sudo gphoto2 --capture-image-and-download -filename "%Y%m%d%H%M%S.jpg"
-        filename = filename + str(i) + '.jpg'  # will need some sort of uid system eventually
+        filename = f"{filename_base}_{str(i)}.jpg"  # will need some sort of uid system eventually
         try:
             subprocess.run([
                 'sudo',
