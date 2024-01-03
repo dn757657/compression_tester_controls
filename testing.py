@@ -68,12 +68,15 @@ def main():
     #     # stepper_dir=stepper_dir,
     #     trigger_event=threading.Event()
     # )
+    print(f'initial last known dir: {STATE.get('camera_stepper_last_dir')}')
     
-    STATE = reset_camera_position(
+    reset_camera_position(
         state=STATE,
         trigger_event=threading.Event(),
         verification_cycles=3
     )
+
+    print(f'final last knwon dirL {STATE.get('camera_stepper_last_dir')}')
     
     pass
 
