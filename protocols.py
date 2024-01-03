@@ -327,6 +327,7 @@ def reset_camera_position(
 
         # first seek to trigger an endstop
         rotate_motor_until_switch_state(
+            state=state,
             stepper_motor=stepper_motor,
             switch_adcs=endstop_adcs,
             switches=endstops,
@@ -345,6 +346,7 @@ def reset_camera_position(
     if True in switch_states:  # this is on trigger
         # move off trigger - direction should already be swapped from loop
         rotate_motor_until_switch_state(
+                state=state,
                 stepper_motor=stepper_motor,
                 switch_adcs=endstop_adcs,
                 switches=endstops,
