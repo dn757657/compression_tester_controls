@@ -36,15 +36,15 @@ COMPS = init_components(INIT_PARAMS)
 
 def camera_step():
 
-    cam_ports = gphoto2_get_active_ports()
-    for port in cam_ports:
-        eosr50_init(port)
-
     reset_camera_position(
         state=STATE,
         trigger_event=threading.Event(),
         verification_cycles=3
     )
+
+    cam_ports = gphoto2_get_active_ports()
+    for port in cam_ports:
+        eosr50_init(port)
 
     # use last known dir
     stepper_dir = STATE.get('camera_stepper_last_dir')
@@ -53,6 +53,13 @@ def camera_step():
         camera_ports=cam_ports,
         trigger_event=threading.Event()
     )
+
+    reset_camera_position(
+        state=STATE,
+        trigger_event=threading.Event(),
+        verification_cycles=3
+    )
+
     pass
 
 
