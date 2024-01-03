@@ -18,6 +18,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 def rotate_motor_until_switch_state(
+        state,
         stepper_motor: StepperMotorDriver,
         switch_adcs: list,
         switches: list,
@@ -82,10 +83,13 @@ def rotate_motor_until_switch_state(
 
     logging.info(f'Switch state, {switch_trigger_state}, reached.')
 
+    state['camera_stepper_last_dir'] = stepper_dir
+
     pass
 
 
 def rotate_motor_until_switch_state_or_steps_reached(
+        state,
         stepper_motor: StepperMotorDriver,
         switch_adcs: list,
         switches: list,
@@ -196,6 +200,7 @@ def rotate_camera_position_onto_endstop(
 
 
 def rotate_camera_position_onto_endstop_with_cameras(
+        state,
         stepper_dir: str,
         trigger_event: threading.Event,
         camera_ports: list,
@@ -239,6 +244,7 @@ def rotate_camera_position_onto_endstop_with_cameras(
         t.start()
 
     rotate_motor_until_switch_state(
+        state,
         stepper_motor=stepper_motor,
         switch_adcs=endstop_adcs,
         switches=endstops,
