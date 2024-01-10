@@ -18,7 +18,8 @@ def main():
     for port in cam_ports:
         eosr50_init(port)
         cam_settings = gpohoto2_get_camera_settings(port)
-        print(cam_settings)
+        for setting, value in cam_settings.items():
+            print(setting, ':', value)
     
     pass
 
