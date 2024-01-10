@@ -8,6 +8,7 @@ from typing import List
 from motors.stepper_controls import StepperMotorDriver
 from system.setup import load_state, load_init_vars, save_state, init_components
 from camera.canon_eosr50 import eosr50_continuous_capture_and_save
+from system.utils import num_photos_2_cam_stepper_freq
 
 # might need to be careful with states of state and init params
 # STATE = load_state()
@@ -210,6 +211,7 @@ def rotate_camera_position_onto_endstop_with_cameras(
         endstops: list = [COMPS.get('endstop1'), COMPS.get('endstop2')],
         stepper_duty_cycle: float = None,
         stepper_frequency: float = None,
+        num_photos: int = None
 ):
     """
     check if endstop is triggered
@@ -218,6 +220,11 @@ def rotate_camera_position_onto_endstop_with_cameras(
     move until endstop triggered
     :return:
     """
+
+    if num_photos:
+        stepper_frequency = num_photos_2_cam_stepper_freq(
+            num_photos=num_photos,
+        )
 
     # set some defaults
     if not stepper_duty_cycle:

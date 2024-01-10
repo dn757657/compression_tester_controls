@@ -31,3 +31,21 @@ def write_sys_json(
         json.dump(state, file, indent=4)
 
     pass
+
+
+def num_photos_2_cam_stepper_freq(
+        num_photos: int,
+        seconds_per_photo: int = 1.5,
+        steps_per_rotation: int = 54600,
+):
+    """
+    num photos is photos desired per rotation
+    need to estimate since cam is inconsistent
+    :param num_photos:
+    :param seconds_per_photo:
+    :return:
+    """
+
+    freq = 1 / (num_photos * seconds_per_photo * steps_per_rotation)
+
+    return freq

@@ -10,7 +10,7 @@ INIT_PARAMS = load_init_vars()
 COMPS = init_components(INIT_PARAMS)
 
 
-def trial_step():
+def trial_step(num_photos: int = None, **kwargs):
 
     reset_camera_position(
         state=STATE,
@@ -28,7 +28,9 @@ def trial_step():
         state=STATE,
         stepper_dir=stepper_dir,
         camera_ports=cam_ports,
-        trigger_event=threading.Event()
+        trigger_event=threading.Event(),
+        num_photos=num_photos,
+        **kwargs
     )
     save_state(state=STATE)
 
