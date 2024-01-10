@@ -46,6 +46,6 @@ def num_photos_2_cam_stepper_freq(
     :return:
     """
 
-    freq = 1 / (num_photos * seconds_per_photo * steps_per_rotation)
+    freq = 1 / (num_photos * seconds_per_photo * (1 / steps_per_rotation))
 
     return freq
