@@ -36,7 +36,7 @@ def trial_step():
 
 
 def main():
-    camera_step()
+    trial_step()
 
     pass
 
