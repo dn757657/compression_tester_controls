@@ -89,30 +89,40 @@ def sample_a201_until_force_applied(
         std: float,
         pre_samples: np.array,
         rf: float = 50000,
-        noise_stds: int = 3
+        noise_stds: int = 3,
+        sample_avg_count: int = 100,
+        limits_avg_count: int = 1000
 ):
 
     logging.info(f"Establishing Sensor Noise...")
     running_samples = pre_samples
 
+    idx = max(-limits_avg_count, -len(running_samples))
+    running_limit_samples = running_samples[idx:]
+    running_limit_avg = np.average(running_limit_samples)
+
     while True:
         rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
-        running_samples = np.append(running_samples, [rs])
+        outlier_upper = running_limit_avg + ((noise_stds + round(noise_stds/2, 0)) * std)
+        outlier_lower = running_limit_avg - ((noise_stds + round(noise_stds/2, 0)) * std)
 
-        idx = max(-10, -len(running_samples))
-        running_samples_10 = running_samples[idx:]
-        idx = max(-1000, -len(running_samples))
-        running_samples_1000 = running_samples[idx:]
+        if outlier_lower < rs < outlier_upper:  # outlier filter
+            running_samples = np.append(running_samples, [rs])
+
+        idx = max(-sample_avg_count, -len(running_samples))
+        running_samples = running_samples[idx:]
+        idx = max(-limits_avg_count, -len(running_samples))
+        running_limit_samples = running_samples[idx:]
         
-        running_avg_10 = np.average(running_samples_10)
-        running_avg_1000 = np.average(running_samples_1000)
-        running_upper_limit = running_avg_1000 + (noise_stds * std)
-        running_lower_limit = running_avg_1000 - (noise_stds * std)
+        running_sample_avg = np.average(running_samples)
+        running_limit_avg = np.average(running_limit_samples)
+        running_upper_limit = running_limit_avg + (noise_stds * std)
+        running_lower_limit = running_limit_avg - (noise_stds * std)
 
-        print(f"{running_lower_limit} < {running_avg_10} < {running_upper_limit}")
-        if running_avg_10 > running_upper_limit:
+        print(f"{running_lower_limit} < {running_sample_avg} < {running_upper_limit}")
+        if running_sample_avg > running_upper_limit:
             trigger_event.set()
-        if running_avg_10 < running_lower_limit:
+        if running_sample_avg < running_lower_limit:
             trigger_event.set()
         if trigger_event.is_set():
             break
@@ -129,6 +139,8 @@ def rotate_stepper_until_force_applied(
         rf: float = 50000,
         noise_stds: int = None,
         noise_count: int = None,
+        sample_avg_count: int = None,
+        limits_avg_count: int = None,
         stepper_duty_cycle: float = None,
         stepper_frequency: float = None,
 ):
@@ -154,7 +166,9 @@ def rotate_stepper_until_force_applied(
             std,
             pre_samples,
             rf,
-            noise_stds
+            noise_stds,
+            sample_avg_count,
+            limits_avg_count
         )
     )
 

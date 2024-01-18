@@ -31,7 +31,9 @@ def test():
         trigger_event=threading.Event(),
         rf=50000,
         noise_stds=3,
-        noise_count=100
+        noise_count=100,
+        sample_avg_count=100,
+        limits_avg_count=1000
     )
 
 
@@ -48,15 +50,17 @@ def test_force_sensitivity():
         rf=50000,
         noise_stds=3,
         std=std,
-        pre_samples=pre_samples
+        pre_samples=pre_samples,
+        sample_avg_count=100,
+        limits_avg_count=1000
     )
 
 
 def main():
 
     #move_crusher(direction='ccw', steps=1000)
-    test()
-    #test_force_sensitivity()
+    # test()
+    test_force_sensitivity()
 
     pass
 
