@@ -21,7 +21,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 def sample_A201_Rs(sensor_adc, rf: float = 50000):
     sensor_adc.read()
-    states = sensor_adc.states
+    states = sensor_adc.channel_states
 
     vout = abs(states.get('A1') - states.get('A0'))
     vref = abs(states.get('A3') - states.get('A2'))
