@@ -58,39 +58,44 @@ def establish_A201_noise_limits(
     return noise_floor, noise_ceiling
 
 
+def get_running_avg(length: int, samples: np.array):
+    idx = max(-length, -len(samples))
+    samples = samples[idx:]
+    return np.average(samples)
+
+
 def sample_a201_until_force_applied(
         sensor_adc,
-        noise_floor: float,
-        noise_ceiling: float,
         trigger_event: threading.Event,
         rf: float = 50000,
-        avg_count: int = 100
+        avg_count: int = 100,
+        offset_stds: float = 3
 ):
 
-    # noise_floor, noise_ceiling = establish_A201_noise_limits(
-    #     sensor_adc=sensor_adc,
-    #     num_samples=num_samples,
-    #     offset_stds=offset_stds,
-    #     rf=rf
-    # )
-    #
-    # print(f"noise floor:   {noise_floor}\n"
-    #       f"noise ceiling: {noise_ceiling}")
-
+    logging.info(f"Establishing Sensor Noise...")
     running_samples = np.array([])
+    while True:
+        sample = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
+        running_samples = np.append(running_samples, [sample])
+
+        if len(running_samples) >= avg_count:
+            break
 
     while not trigger_event.is_set():
         rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         running_samples = np.append(running_samples, [rs])
+
         idx = max(-avg_count, -len(running_samples))
         running_samples = running_samples[idx:]
+        running_avg = np.average(running_samples)
+        running_std = np.std(running_samples)
+        running_upper_limit = running_avg + (offset_stds * running_std)
+        running_lower_limit = running_avg - (offset_stds * running_std)
 
-        sample = np.average(running_samples)
-
-        print(f"{noise_floor} < {rs} < {noise_ceiling}")
-        if sample > noise_ceiling:
+        print(f"{running_lower_limit} < {running_avg} < {running_upper_limit}")
+        if running_avg > running_upper_limit:
             trigger_event.set()
-        if sample < noise_floor:
+        if running_avg < running_lower_limit:
             trigger_event.set()
 
     pass

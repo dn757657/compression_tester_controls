@@ -27,25 +27,17 @@ def test():
         state=STATE,
         sensor_adc=COMPS.get('force_sensor_adc'),
         stepper_motor=COMPS.get('crushing_stepper'),
-        stepper_dir='cw',
+        stepper_dir='ccw',
         trigger_event=threading.Event(),
     )
 
 
 def test_force_sensitivity():
-    rf = 50000
-    noise_floor, noise_ceiling = establish_A201_noise_limits(
-        sensor_adc=COMPS.get('force_sensor_adc'),
-        rf=50000
-
-    )
-
     sample_a201_until_force_applied(
         sensor_adc=COMPS.get('force_sensor_adc'),
-        noise_floor=noise_floor,
-        noise_ceiling=noise_ceiling,
         trigger_event=threading.Event(),
-        rf=rf,
+        rf=50000,
+        offset_stds=3
     )
 
 
