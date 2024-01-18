@@ -9,6 +9,7 @@ from motors.stepper_controls import StepperMotorDriver
 from system.setup import load_state, load_init_vars, save_state, init_components
 from camera.canon_eosr50 import eosr50_continuous_capture_and_save
 from system.utils import num_photos_2_cam_stepper_freq
+from sensors.A201 import A201_resistance
 
 # might need to be careful with states of state and init params
 # STATE = load_state()
@@ -16,6 +17,18 @@ INIT_PARAMS = load_init_vars()
 COMPS = init_components(INIT_PARAMS)
 
 logging.getLogger().setLevel(logging.INFO)
+
+
+def sample_A201_Rs(sensor_adc, rf: float = 50000):
+    sensor_adc.read()
+    states = sensor_adc.states
+
+    vout = abs(states.get('A1') - states.get('A0'))
+    vref = abs(states.get('A3') - states.get('A2'))
+
+    rs = A201_resistance(vin=vref, vout=vout, rf=rf)
+
+    return rs
 
 
 def rotate_motor_until_switch_state(
@@ -161,6 +174,7 @@ def rotate_motor_until_switch_state_or_steps_reached(
 
 
 def rotate_camera_position_onto_endstop(
+        state,
         stepper_dir: str,
         trigger_event: threading.Event,
         stepper_motor: StepperMotorDriver = COMPS.get('camera_stepper'),
@@ -187,6 +201,7 @@ def rotate_camera_position_onto_endstop(
     logging.info(f'Rotating camera stepper until end-stop triggered...')
 
     rotate_motor_until_switch_state(
+        state=state,
         stepper_motor=stepper_motor,
         switch_adcs=endstop_adcs,
         switches=endstops,
@@ -251,7 +266,7 @@ def rotate_camera_position_onto_endstop_with_cameras(
         t.start()
 
     rotate_motor_until_switch_state(
-        state,
+        state=state,
         stepper_motor=stepper_motor,
         switch_adcs=endstop_adcs,
         switches=endstops,
@@ -263,27 +278,6 @@ def rotate_camera_position_onto_endstop_with_cameras(
     )
 
     return
-
-
-#         trigger_event=trigger_event,
-#         switch_trigger_state=[True, False]
-#     )
-#     trigger_event = threading.Event()    
-#     stepper_dir = [d for d in stepper_motor.motor_directions if d != stepper_dir][0]
-
-#     rotate_motor_until_switch_state_or_steps_reached(
-#         stepper_motor=stepper_motor,
-#         switch_adcs=endstop_adcs,
-#         switches=endstops,
-#         stepper_duty_cycle=stepper_duty_cycle,
-#         stepper_frequency=stepper_frequency,
-#         stepper_dir=stepper_dir,
-#         steps=200,
-#         trigger_event=trigger_event,
-#         switch_trigger_state=[True, False]
-#     )
-
-#     pass
 
 
 def reset_camera_position(
@@ -332,7 +326,6 @@ def reset_camera_position(
             [switch_states_to_seek.append(False) for s in range(0, len(switch_states) - 1)]
             switch_states_to_seek.append(True)  # one true
 
-        # first seek to trigger an endstop
         rotate_motor_until_switch_state(
             state=state,
             stepper_motor=stepper_motor,

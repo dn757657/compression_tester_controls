@@ -1,6 +1,7 @@
 import subprocess
 import os
 import re
+import uuid
 
 
 def gpohoto2_get_camera_settings(port):
@@ -82,8 +83,8 @@ def eosr50_capture_and_save(
 
 def eosr50_continuous_capture_and_save(
         port,
-        filename_base,
-        stop_event
+        stop_event,
+        file_ext: str = 'jpeg',
 ):
     """
     can use date characters like %Y in filename see naming standard?
@@ -94,7 +95,7 @@ def eosr50_continuous_capture_and_save(
     i = 0
     while not stop_event.is_set():
         # sudo gphoto2 --capture-image-and-download -filename "%Y%m%d%H%M%S.jpg"
-        filename = f"{filename_base}_{str(i)}.jpg"  # will need some sort of uid system eventually
+        filename = f"{uuid.uuid4()}.{file_ext}"  # will need some sort of uid system eventually
         try:
             subprocess.run([
                 'sudo',

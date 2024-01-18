@@ -35,7 +35,7 @@ def write_sys_json(
 
 def num_photos_2_cam_stepper_freq(
         num_photos: int,
-        seconds_per_photo: int = 1.5,
+        seconds_per_photo: int = 1.45,
         steps_per_rotation: int = 54600,
 ):
     """
@@ -48,4 +48,4 @@ def num_photos_2_cam_stepper_freq(
 
     freq = 1 / (num_photos * seconds_per_photo * (1 / steps_per_rotation))
 
-    return freq
+    return round(freq, ndigits=0)
