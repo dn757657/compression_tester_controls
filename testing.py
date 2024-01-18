@@ -2,7 +2,7 @@ import threading
 import subprocess
 
 from system.setup import load_state, load_init_vars, save_state, init_components
-from protocols import rotate_stepper_until_force_applied
+from protocols import rotate_stepper_until_force_applied, sample_a201_until_force_applied, establish_A201_noise_limits
 from camera.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, gpohoto2_get_camera_settings
 
 # might need to be careful with states of state and init params
@@ -32,10 +32,28 @@ def test():
     )
 
 
+def test_force_sensitivity():
+    rf = 50000
+    noise_floor, noise_ceiling = establish_A201_noise_limits(
+        sensor_adc=COMPS.get('force_sensor_adc'),
+        rf=50000
+
+    )
+
+    sample_a201_until_force_applied(
+        sensor_adc=COMPS.get('force_sensor_adc'),
+        noise_floor=noise_floor,
+        noise_ceiling=noise_ceiling,
+        trigger_event=threading.Event(),
+        rf=rf,
+    )
+
+
 def main():
 
-    move_crusher(direction='ccw', steps=1000)
+    #move_crusher(direction='ccw', steps=1000)
     # test()
+    test_force_sensitivity()
 
     pass
 
