@@ -35,6 +35,7 @@ def sample_A201_Rs(sensor_adc, rf: float = 50000):
 def establish_A201_noise_limits(
         sensor_adc,
         num_samples: int = 100,
+        offset_stds: float = 3,
         rf: float = 50000
 ):
     samples = list()
@@ -49,10 +50,35 @@ def establish_A201_noise_limits(
     avg = np.average(samples)
     std = np.std(samples)
 
-    noise_ceiling = avg + (3 * std)
-    noise_floor = avg - (3 * std)
+    noise_ceiling = avg + (offset_stds * std)
+    noise_floor = avg - (offset_stds * std)
 
     return noise_floor, noise_ceiling
+
+
+def sample_a201_until_force_applied(
+        sensor_adc,
+        trigger_event: threading.Event,
+        num_samples: int = 100,
+        offset_stds: float = 3,
+        rf: float = 50000,
+):
+
+    noise_floor, noise_ceiling = establish_A201_noise_limits(
+        sensor_adc=sensor_adc,
+        num_samples=num_samples,
+        offset_stds=offset_stds,
+        rf=rf
+    )
+
+    while not trigger_event.is_set():
+        rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
+        if rs > noise_ceiling:
+            trigger_event.set()
+        if rs < noise_floor:
+            trigger_event.set()
+
+    pass
 
 
 def rotate_motor_until_switch_state(
