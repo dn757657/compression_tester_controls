@@ -2,6 +2,7 @@
 import threading
 import logging
 import timeit
+import numpy as np
 
 from typing import List
 
@@ -29,6 +30,25 @@ def sample_A201_Rs(sensor_adc, rf: float = 50000):
     rs = A201_resistance(vin=vref, vout=vout, rf=rf)
 
     return rs
+
+
+def establish_A201_noise_limits(
+        sensor_adc,
+        num_samples: int = 1000,
+        rf: float = None
+):
+    samples = list()
+    while len(samples) < num_samples:
+        rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
+        samples.append(rs)
+
+    avg = np.average(samples)
+    std = np.std(samples)
+
+    noise_ceiling = avg + (3 * std)
+    noise_floor = avg - (3 * std)
+
+    return noise_floor, noise_ceiling
 
 
 def rotate_motor_until_switch_state(

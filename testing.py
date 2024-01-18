@@ -2,7 +2,7 @@ import threading
 import subprocess
 
 from system.setup import load_state, load_init_vars, save_state, init_components
-from protocols import sample_A201_Rs
+from protocols import sample_A201_Rs, establish_A201_noise_limits
 from camera.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, gpohoto2_get_camera_settings
 
 # might need to be careful with states of state and init params
@@ -13,9 +13,13 @@ COMPS = init_components(INIT_PARAMS)
 
 def main():
 
-    while True:
-        rs = sample_A201_Rs(sensor_adc=COMPS.get('force_sensor_adc'))
-        print(f"rs = {rs}")
+    noise_floor, noise_ceiling = establish_A201_noise_limits(
+        sensor_adc=COMPS.get('force_sensor_adc'),
+        num_samples=1000,
+    )
+
+    print(f"NOISE FLOOR  : {noise_floor}\n"
+          f"NOISE CEILING: {noise_ceiling}\n")
 
     pass
 
