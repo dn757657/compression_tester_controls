@@ -35,12 +35,15 @@ def sample_A201_Rs(sensor_adc, rf: float = 50000):
 def establish_A201_noise_limits(
         sensor_adc,
         num_samples: int = 1000,
-        rf: float = None
+        rf: float = 50000
 ):
     samples = list()
-    while len(samples) < num_samples:
+    while True:
         rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         samples.append(rs)
+
+        if len(samples) >= num_samples:
+            break
 
     avg = np.average(samples)
     std = np.std(samples)
