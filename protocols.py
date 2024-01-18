@@ -71,8 +71,12 @@ def sample_a201_until_force_applied(
         rf=rf
     )
 
+    print(f"noise floor:   {noise_floor}\n"
+          f"noise ceiling: {noise_ceiling}")
+
     while not trigger_event.is_set():
         rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
+        print(f"{noise_floor} < {rs} < {noise_ceiling}")
         if rs > noise_ceiling:
             trigger_event.set()
         if rs < noise_floor:
