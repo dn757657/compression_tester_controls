@@ -80,23 +80,29 @@ def sample_a201_until_force_applied(
 
         if len(running_samples) >= avg_count:
             break
-
+    std = np.std(running_samples)
     while not trigger_event.is_set():
         rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         running_samples = np.append(running_samples, [rs])
 
-        idx = max(-avg_count, -len(running_samples))
-        running_samples = running_samples[idx:]
-        running_avg = np.average(running_samples)
-        running_std = np.std(running_samples)
-        running_upper_limit = running_avg + (offset_stds * running_std)
-        running_lower_limit = running_avg - (offset_stds * running_std)
+        idx = max(-10, -len(running_samples))
+        running_samples_10 = running_samples[idx:]
+        idx = max(-1000, -len(running_samples))
+        running_samples_1000 = running_samples[idx:]
+        
+        running_avg_10 = np.average(running_samples_10)
+        running_avg_1000 = np.average(running_samples_1000)
+        running_std = np.std(running_samples_1000)
+        running_upper_limit = running_avg_1000 + (offset_stds * std)
+        running_lower_limit = running_avg_1000 - (offset_stds * std)
 
-        print(f"{running_lower_limit} < {running_avg} < {running_upper_limit}")
-        if running_avg > running_upper_limit:
+        print(f"{running_lower_limit} < {running_avg_10} < {running_upper_limit}")
+        if running_avg_10 > running_upper_limit:
             trigger_event.set()
-        if running_avg < running_lower_limit:
+        if running_avg_10 < running_lower_limit:
             trigger_event.set()
+        if trigger_event.is_set():
+            break
 
     pass
 
@@ -123,12 +129,12 @@ def rotate_stepper_until_force_applied(
 
     logging.info(f'Seeking Force Sensor.')
 
-    noise_floor, noise_ceiling = establish_A201_noise_limits(
-        sensor_adc=sensor_adc,
-        num_samples=num_samples,
-        offset_stds=offset_stds,
-        rf=rf
-    )
+    #noise_floor, noise_ceiling = establish_A201_noise_limits(
+    #    sensor_adc=sensor_adc,
+    #    num_samples=num_samples,
+    #    offset_stds=offset_stds,
+    #    rf=rf
+    #)
 
     stepper_thread = threading.Thread(
         target=stepper_motor.rotate,
@@ -144,10 +150,8 @@ def rotate_stepper_until_force_applied(
         target=sample_a201_until_force_applied,
         args=(
             sensor_adc,
-            noise_floor,
-            noise_ceiling,
             trigger_event,
-            rf
+            rf,
         )
     )
 

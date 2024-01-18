@@ -44,8 +44,8 @@ def test_force_sensitivity():
 def main():
 
     #move_crusher(direction='ccw', steps=1000)
-    # test()
-    test_force_sensitivity()
+    test()
+    #test_force_sensitivity()
 
     pass
 
