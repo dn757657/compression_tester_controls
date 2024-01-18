@@ -78,16 +78,19 @@ class ADS1115:
         """
 
         volt_samples = {}
+        try:
+            for channel in self.channel_labels:
+                if channel not in self.channel_labels:
+                    logging.info(f'Channel {channel} not in available channels: {self.channel_labels}, Skipping')
+                else:
+                    bit_sample = AnalogIn(self.device, self.channel_map.get(channel)).value
+                    volt_sample = self.bits_to_volts(bits_val=bit_sample)
+                    volt_samples[channel] = volt_sample
 
-        for channel in self.channel_labels:
-            if channel not in self.channel_labels:
-                logging.info(f'Channel {channel} not in available channels: {self.channel_labels}, Skipping')
-            else:
-                bit_sample = AnalogIn(self.device, self.channel_map.get(channel)).value
-                volt_sample = self.bits_to_volts(bits_val=bit_sample)
-                volt_samples[channel] = volt_sample
+            self.channel_states = volt_samples  # update state
+        except OSError:
+            self.read()  # retry
 
-        self.channel_states = volt_samples  # update state
         return volt_samples
 
 # def init_ads1115(

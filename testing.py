@@ -34,9 +34,9 @@ def test():
 
 def main():
 
-    move_crusher(direction='cw', steps=100)
+    move_crusher(direction='ccw', steps=1000)
     # test()
-    
+
     pass
 
 

@@ -2,6 +2,8 @@
 import threading
 import logging
 import timeit
+
+import numpy
 import numpy as np
 
 from typing import List
@@ -62,6 +64,7 @@ def sample_a201_until_force_applied(
         noise_ceiling: float,
         trigger_event: threading.Event,
         rf: float = 50000,
+        avg_count: int = 100
 ):
 
     # noise_floor, noise_ceiling = establish_A201_noise_limits(
@@ -74,12 +77,20 @@ def sample_a201_until_force_applied(
     # print(f"noise floor:   {noise_floor}\n"
     #       f"noise ceiling: {noise_ceiling}")
 
+    running_samples = np.array([])
+
     while not trigger_event.is_set():
         rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
+        running_samples = np.append(running_samples, [rs])
+        idx = max(-avg_count, -len(running_samples))
+        running_samples = running_samples[idx:]
+
+        sample = np.average(running_samples)
+
         print(f"{noise_floor} < {rs} < {noise_ceiling}")
-        if rs > noise_ceiling:
+        if sample > noise_ceiling:
             trigger_event.set()
-        if rs < noise_floor:
+        if sample < noise_floor:
             trigger_event.set()
 
     pass
