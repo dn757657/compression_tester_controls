@@ -2,7 +2,7 @@ import threading
 import subprocess
 
 from system.setup import load_state, load_init_vars, save_state, init_components
-from protocols import sample_A201_Rs, establish_A201_noise_limits, sample_a201_until_force_applied
+from protocols import rotate_stepper_until_force_applied
 from camera.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, gpohoto2_get_camera_settings
 
 # might need to be careful with states of state and init params
@@ -11,16 +11,32 @@ INIT_PARAMS = load_init_vars()
 COMPS = init_components(INIT_PARAMS)
 
 
-def main():
-
-    sample_a201_until_force_applied(
-        sensor_adc=COMPS.get('force_sensor_adc'),
-        num_samples=100,
-        rf=50000,
-        offset_stds=3,
-        trigger_event=threading.Event()
+def move_crusher(direction: str, steps: int):
+    stepper = COMPS.get('crushing_stepper')
+    stepper.rotate_steps(
+        direction=direction,
+        duty_cyle=stepper.default_duty_cycle,
+        freq=stepper.default_frequency,
+        steps=steps,
+        stop_event=threading.Event()
     )
 
+
+def test():
+    rotate_stepper_until_force_applied(
+        state=STATE,
+        sensor_adc=COMPS.get('force_sensor_adc'),
+        stepper_motor=COMPS.get('crushing_stepper'),
+        stepper_dir='cw',
+        trigger_event=threading.Event(),
+    )
+
+
+def main():
+
+    move_crusher(direction='cw', steps=100)
+    # test()
+    
     pass
 
 

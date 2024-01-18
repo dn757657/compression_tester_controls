@@ -58,21 +58,21 @@ def establish_A201_noise_limits(
 
 def sample_a201_until_force_applied(
         sensor_adc,
+        noise_floor: float,
+        noise_ceiling: float,
         trigger_event: threading.Event,
-        num_samples: int = 100,
-        offset_stds: float = 3,
         rf: float = 50000,
 ):
 
-    noise_floor, noise_ceiling = establish_A201_noise_limits(
-        sensor_adc=sensor_adc,
-        num_samples=num_samples,
-        offset_stds=offset_stds,
-        rf=rf
-    )
-
-    print(f"noise floor:   {noise_floor}\n"
-          f"noise ceiling: {noise_ceiling}")
+    # noise_floor, noise_ceiling = establish_A201_noise_limits(
+    #     sensor_adc=sensor_adc,
+    #     num_samples=num_samples,
+    #     offset_stds=offset_stds,
+    #     rf=rf
+    # )
+    #
+    # print(f"noise floor:   {noise_floor}\n"
+    #       f"noise ceiling: {noise_ceiling}")
 
     while not trigger_event.is_set():
         rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
@@ -83,6 +83,65 @@ def sample_a201_until_force_applied(
             trigger_event.set()
 
     pass
+
+
+def rotate_stepper_until_force_applied(
+        state,
+        sensor_adc,
+        stepper_motor: StepperMotorDriver,
+        stepper_dir: str,
+        trigger_event: threading.Event,
+        num_samples: int = 100,
+        offset_stds: float = 4,
+        rf: float = 50000,
+        stepper_duty_cycle: float = None,
+        stepper_frequency: float = None,
+):
+
+    # set some defaults
+    if not stepper_duty_cycle:
+        stepper_duty_cycle = stepper_motor.default_duty_cycle
+
+    if not stepper_frequency:
+        stepper_frequency = stepper_motor.default_frequency
+
+    logging.info(f'Seeking Force Sensor.')
+
+    noise_floor, noise_ceiling = establish_A201_noise_limits(
+        sensor_adc=sensor_adc,
+        num_samples=num_samples,
+        offset_stds=offset_stds,
+        rf=rf
+    )
+
+    stepper_thread = threading.Thread(
+        target=stepper_motor.rotate,
+        args=(
+            stepper_dir,  # direction
+            stepper_duty_cycle,  # duty cycle
+            stepper_frequency,  # frequency
+            trigger_event
+        )
+    )
+
+    force_sensor_thread = threading.Thread(
+        target=sample_a201_until_force_applied,
+        args=(
+            sensor_adc,
+            noise_floor,
+            noise_ceiling,
+            trigger_event,
+            rf
+        )
+    )
+
+    force_sensor_thread.start()
+    stepper_thread.start()
+    force_sensor_thread.join()  # wait for endstop thread to trigger
+
+    logging.info(f'Force Sensor Triggered.')
+
+    return state
 
 
 def rotate_motor_until_switch_state(
