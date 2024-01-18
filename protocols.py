@@ -34,13 +34,14 @@ def sample_A201_Rs(sensor_adc, rf: float = 50000):
 
 def establish_A201_noise_limits(
         sensor_adc,
-        num_samples: int = 1000,
+        num_samples: int = 100,
         rf: float = 50000
 ):
     samples = list()
     while True:
         rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         samples.append(rs)
+        print(f"{rs}")
 
         if len(samples) >= num_samples:
             break
