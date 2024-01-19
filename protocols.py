@@ -159,8 +159,8 @@ def rolling_cusum(window, samples, h, k):
     anomalies = np.where((sh > h) | (sl < -h))[0]
 
     print(f"norm_sample: {norm_samples[-1]}\n"
-          f"sh:          {sh}\n"
-          f"sl:          {sl}\n")
+          f"sh:          {sh[-1]}\n"
+          f"sl:          {sl[-1]}\n")
     pass
 
 
