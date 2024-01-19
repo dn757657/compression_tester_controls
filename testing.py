@@ -56,11 +56,34 @@ def test_force_sensitivity():
     )
 
 
+def a201_cusum():
+    import numpy as np
+    from protocols import sample_A201_Rs
+
+    sensor_adc = COMPS.get('force_sensor_sdc')
+    rf = 50000
+    cusum = 0
+
+    samples = np.array([])
+    while True:
+        sample = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
+        samples = np.append(samples, [sample])
+
+        idx = max(-100, -len(samples))
+        samples = samples[idx:]
+
+        avg = np.average(samples)
+        diff = sample - avg
+        cusum += diff
+        print(f"cusum: {cusum}")
+
+
 def main():
 
+    a201_cusum()
     # move_crusher(direction='cw', steps=2000)
     # test()
-    test_force_sensitivity()
+    # test_force_sensitivity()
 
     pass
 
