@@ -94,17 +94,22 @@ def sample_a201_until_force_applied(
     # logging.info(f"Establishing Sensor Noise...")
 
     samples = np.array([])
+    norm_samples = np.array([])
     cusum = 0
     while True:
         sample = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         samples = np.append(samples, [sample])
 
-        idx = max(-sample_avg_len, -len(samples))
-        samples = samples[idx:]
+        rolling_cusum(window=100, samples=samples, h=1, k=0.01)
 
-        avg = np.average(samples)
-        diff = sample - avg
-        cusum += diff/avg
+        # idx = max(-sample_avg_len, -len(samples))
+        # samples = samples[idx:]
+        #
+        # avg = np.average(samples)
+        # std = np.std(samples)
+        # diff = sample - avg
+        # diff_norm = diff / std
+        # cusum += diff_norm
 
         if abs(cusum) > cusum_limit:
             trigger_event.set()
@@ -136,6 +141,24 @@ def sample_a201_until_force_applied(
     #     if trigger_event.is_set():
     #         break
 
+    pass
+
+
+def rolling_cusum(window, samples, h, k):
+    idx = max(-window, -len(samples))
+    samples = samples[idx:]  # cut to window
+
+    avg = np.mean(samples)
+    std = np.std(samples)
+
+    norm_samples = (samples - avg) / std
+    sh = np.maximum.accumulate(norm_samples - k)
+    sl = np.minimum.accumulate(norm_samples + k)
+
+    # Identify indices where anomalies are detected
+    anomalies = np.where((sh > h) | (sl < -h))[0]
+
+    print(f"anomolies: {anomalies}")
     pass
 
 
