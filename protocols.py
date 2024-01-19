@@ -100,18 +100,7 @@ def sample_a201_until_force_applied(
         sample = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         samples = np.append(samples, [sample])
 
-        rolling_cusum(window=100, samples=samples, h=1, k=0.01)
-
-        # idx = max(-sample_avg_len, -len(samples))
-        # samples = samples[idx:]
-        #
-        # avg = np.average(samples)
-        # std = np.std(samples)
-        # diff = sample - avg
-        # diff_norm = diff / std
-        # cusum += diff_norm
-
-        if abs(cusum) > cusum_limit:
+        if detect_anomoly_rolling_cusum(window=100, samples=samples, h=1, k=0.01)
             trigger_event.set()
             break
 
@@ -144,7 +133,7 @@ def sample_a201_until_force_applied(
     pass
 
 
-def rolling_cusum(window, samples, h, k):
+def detect_anomoly_rolling_cusum(window, samples, h, k):
     idx = max(-window, -len(samples))
     samples = samples[idx:]  # cut to window
 
@@ -158,10 +147,15 @@ def rolling_cusum(window, samples, h, k):
     # Identify indices where anomalies are detected
     anomalies = np.where((sh > h) | (sl < -h))[0]
 
-    print(f"norm_sample: {norm_samples[-1]}\n"
-          f"sh:          {sh[-1]}\n"
-          f"sl:          {sl[-1]}\n")
-    pass
+    print(f"h : {h}\n"
+          f"sh: {sh[-1]}\n"
+          f"sl: {sl[-1]}\n")
+    if sh > h:
+        return True
+    if sl < -h:
+        return True
+
+    return False
 
 
 def rotate_stepper_until_force_applied(
