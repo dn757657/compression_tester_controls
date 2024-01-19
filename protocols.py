@@ -158,7 +158,9 @@ def rolling_cusum(window, samples, h, k):
     # Identify indices where anomalies are detected
     anomalies = np.where((sh > h) | (sl < -h))[0]
 
-    print(f"anomolies: {anomalies}")
+    print(f"norm_sample: {norm_samples[-1]}\n"
+          f"sh:          {sh}\n"
+          f"sl:          {sl}\n")
     pass
 
 
