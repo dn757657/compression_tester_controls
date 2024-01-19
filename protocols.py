@@ -86,46 +86,55 @@ def establish_A201_noise_std(
 def sample_a201_until_force_applied(
         sensor_adc,
         trigger_event: threading.Event,
-        std: float,
-        pre_samples: np.array,
         rf: float = 50000,
-        noise_stds: int = 3,
-        sample_avg_count: int = 100,
-        limits_avg_count: int = 1000
+        sample_avg_len: int = 100,
+        cusum_limit: float = 0.5,
 ):
 
-    logging.info(f"Establishing Sensor Noise...")
-    running_samples = pre_samples
+    # logging.info(f"Establishing Sensor Noise...")
 
-    idx = max(-limits_avg_count, -len(running_samples))
-    running_limit_samples = running_samples[idx:]
-    running_limit_avg = np.average(running_limit_samples)
-
+    samples = np.array([])
+    cusum = 0
     while True:
-        rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
-        outlier_upper = running_limit_avg + ((noise_stds + round(noise_stds/2, 0)) * std)
-        outlier_lower = running_limit_avg - ((noise_stds + round(noise_stds/2, 0)) * std)
+        sample = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
+        samples = np.append(samples, [sample])
 
-        if outlier_lower < rs < outlier_upper:  # outlier filter
-            running_samples = np.append(running_samples, [rs])
+        idx = max(-sample_avg_len, -len(samples))
+        samples = samples[idx:]
 
-        idx = max(-sample_avg_count, -len(running_samples))
-        running_samples = running_samples[idx:]
-        idx = max(-limits_avg_count, -len(running_samples))
-        running_limit_samples = running_samples[idx:]
-        
-        running_sample_avg = np.average(running_samples)
-        running_limit_avg = np.average(running_limit_samples)
-        running_upper_limit = running_limit_avg + (noise_stds * std)
-        running_lower_limit = running_limit_avg - (noise_stds * std)
+        avg = np.average(samples)
+        diff = sample - avg
+        cusum += diff/avg
 
-        print(f"{running_lower_limit} < {running_sample_avg} < {running_upper_limit}")
-        if running_sample_avg > running_upper_limit:
+        if abs(cusum) > cusum_limit:
             trigger_event.set()
-        if running_sample_avg < running_lower_limit:
-            trigger_event.set()
-        if trigger_event.is_set():
             break
+
+    # while True:
+    #     rs = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
+    #     outlier_upper = running_limit_avg + ((noise_stds + round(noise_stds/2, 0)) * std)
+    #     outlier_lower = running_limit_avg - ((noise_stds + round(noise_stds/2, 0)) * std)
+    #
+    #     if outlier_lower < rs < outlier_upper:  # outlier filter
+    #         running_samples = np.append(running_samples, [rs])
+    #
+    #     idx = max(-sample_avg_count, -len(running_samples))
+    #     running_samples = running_samples[idx:]
+    #     idx = max(-limits_avg_count, -len(running_samples))
+    #     running_limit_samples = running_samples[idx:]
+    #
+    #     running_sample_avg = np.average(running_samples)
+    #     running_limit_avg = np.average(running_limit_samples)
+    #     running_upper_limit = running_limit_avg + (noise_stds * std)
+    #     running_lower_limit = running_limit_avg - (noise_stds * std)
+    #
+    #     print(f"{running_lower_limit} < {running_sample_avg} < {running_upper_limit}")
+    #     if running_sample_avg > running_upper_limit:
+    #         trigger_event.set()
+    #     if running_sample_avg < running_lower_limit:
+    #         trigger_event.set()
+    #     if trigger_event.is_set():
+    #         break
 
     pass
 
@@ -136,11 +145,9 @@ def rotate_stepper_until_force_applied(
         stepper_motor: StepperMotorDriver,
         stepper_dir: str,
         trigger_event: threading.Event,
-        rf: float = 50000,
-        noise_stds: int = None,
-        noise_count: int = None,
-        sample_avg_count: int = None,
-        limits_avg_count: int = None,
+        rf: float = None,
+        sample_avg_len: int = None,
+        cusum_limit: float = None,
         stepper_duty_cycle: float = None,
         stepper_frequency: float = None,
 ):
@@ -152,23 +159,20 @@ def rotate_stepper_until_force_applied(
     if not stepper_frequency:
         stepper_frequency = stepper_motor.default_frequency
 
-    std, pre_samples = establish_A201_noise_std(
-        sensor_adc=sensor_adc,
-        rf=rf,
-        noise_count=noise_count
-    )
+    # std, pre_samples = establish_A201_noise_std(
+    #     sensor_adc=sensor_adc,
+    #     rf=rf,
+    #     noise_count=noise_count
+    # )
 
     force_sensor_thread = threading.Thread(
         target=sample_a201_until_force_applied,
         args=(
             sensor_adc,
             trigger_event,
-            std,
-            pre_samples,
             rf,
-            noise_stds,
-            sample_avg_count,
-            limits_avg_count
+            sample_avg_len,
+            cusum_limit
         )
     )
 
