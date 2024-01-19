@@ -100,7 +100,7 @@ def sample_a201_until_force_applied(
         sample = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         samples = np.append(samples, [sample])
 
-        if detect_anomoly_rolling_cusum(window=100, samples=samples, h=1, k=0.01)
+        if detect_anomoly_rolling_cusum(window=100, samples=samples, h=1, k=0.01):
             trigger_event.set()
             break
 
