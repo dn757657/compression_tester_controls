@@ -150,9 +150,9 @@ def detect_anomoly_rolling_cusum(window, samples, h, k):
     print(f"h : {h}\n"
           f"sh: {sh[-1]}\n"
           f"sl: {sl[-1]}\n")
-    if sh > h:
+    if sh[-1] > h:
         return True
-    if sl < -h:
+    if sl[-1] < -h:
         return True
 
     return False
