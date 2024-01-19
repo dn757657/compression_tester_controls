@@ -46,8 +46,8 @@ def test_force_sensitivity():
         sensor_adc=COMPS.get('force_sensor_adc'),
         trigger_event=threading.Event(),
         rf=50000,
-        sample_avg_len=100,
-        cusum_limit=0.5
+        h=5,
+        k=.01
     )
 
 

@@ -86,21 +86,21 @@ def establish_A201_noise_std(
 def sample_a201_until_force_applied(
         sensor_adc,
         trigger_event: threading.Event,
+        h: float,
+        k: float,
         rf: float = 50000,
-        sample_avg_len: int = 100,
-        cusum_limit: float = 0.5,
 ):
 
     # logging.info(f"Establishing Sensor Noise...")
 
     samples = np.array([])
-    norm_samples = np.array([])
-    cusum = 0
+    # norm_samples = np.array([])
+    # cusum = 0
     while True:
         sample = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         samples = np.append(samples, [sample])
 
-        if detect_anomoly_rolling_cusum(window=100, samples=samples, h=1, k=0.01):
+        if detect_anomoly_rolling_cusum(window=100, samples=samples, h=h, k=k):
             trigger_event.set()
             break
 
@@ -141,11 +141,9 @@ def detect_anomoly_rolling_cusum(window, samples, h, k):
     std = np.std(samples)
 
     norm_samples = (samples - avg) / std
-    sh = np.maximum.accumulate(norm_samples - k)
-    sl = np.minimum.accumulate(norm_samples + k)
-
-    # Identify indices where anomalies are detected
-    anomalies = np.where((sh > h) | (sl < -h))[0]
+    norm_samples = norm_samples - k
+    sh = np.maximum.accumulate(np.maximum(norm_samples, 0))
+    sl = np.minimum.accumulate(np.minimum(norm_samples, 0))
 
     print(f"h : {h}\n"
           f"sh: {sh[-1]}\n"
