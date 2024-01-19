@@ -60,7 +60,7 @@ def a201_cusum():
     import numpy as np
     from protocols import sample_A201_Rs
 
-    sensor_adc = COMPS.get('force_sensor_sdc')
+    sensor_adc = COMPS.get('force_sensor_adc')
     rf = 50000
     cusum = 0
 
@@ -69,12 +69,13 @@ def a201_cusum():
         sample = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         samples = np.append(samples, [sample])
 
-        idx = max(-100, -len(samples))
-        samples = samples[idx:]
+        if len(samples) > 100:
+            idx = max(-100, -len(samples))
+            samples = samples[idx:]
 
-        avg = np.average(samples)
-        diff = sample - avg
-        cusum += diff
+            avg = np.average(samples)
+            diff = sample - avg
+            cusum += diff
         print(f"cusum: {cusum}")
 
 
