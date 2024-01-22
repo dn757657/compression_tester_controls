@@ -90,12 +90,12 @@ def sample_a201_until_force_applied(
         k: float,
         rf: float = 50000,
         cusum_window: int = 100,
-        pre_samples: np.array = None
+        pre_samples: np.array = np.array([])
 ):
 
     # logging.info(f"Establishing Sensor Noise...")
 
-    if pre_samples:  # allow for some pre sampling for stabilization
+    if pre_samples.size != 0:  # allow for some pre sampling for stabilization
         samples = pre_samples
     else:
         samples = np.array([])
