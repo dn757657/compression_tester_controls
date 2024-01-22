@@ -2,7 +2,8 @@ import threading
 import subprocess
 
 from system.setup import load_state, load_init_vars, save_state, init_components
-from protocols import rotate_stepper_until_force_applied, sample_a201_until_force_applied, establish_A201_noise_std
+from protocols import rotate_stepper_until_force_applied, sample_a201_until_force_applied, \
+    establish_A201_noise_std, sample_A201_Rs
 from camera.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, gpohoto2_get_camera_settings
 
 # might need to be careful with states of state and init params
@@ -23,6 +24,14 @@ def move_crusher(direction: str, steps: int):
 
 
 def test():
+
+    import numpy as np
+    num_pre_samples = 100
+    pre_samples = np.array([])
+    for i in range(0, num_pre_samples):
+        sample = sample_A201_Rs(sensor_adc=COMPS.get('force_sensor_adc'), rf=50000)
+        pre_samples = np.append(pre_samples, [sample])
+
     rotate_stepper_until_force_applied(
         state=STATE,
         sensor_adc=COMPS.get('force_sensor_adc'),
@@ -30,8 +39,10 @@ def test():
         stepper_dir='ccw',
         trigger_event=threading.Event(),
         rf=50000,
-        sample_avg_len=100,
-        cusum_limit=0.5
+        h=7,
+        k=0.1,
+        cusum_window=100,
+        pre_samples=pre_samples
     )
 
 
@@ -41,13 +52,21 @@ def test_force_sensitivity():
     #     rf=50000,
     #     noise_count=100
     # )
+    import numpy as np
+    num_pre_samples = 100
+    pre_samples = np.array([])
+    for i in range(0, num_pre_samples):
+        sample = sample_A201_Rs(sensor_adc=COMPS.get('force_sensor_adc'), rf=50000)
+        pre_samples = np.append(pre_samples, [sample])
 
     sample_a201_until_force_applied(
         sensor_adc=COMPS.get('force_sensor_adc'),
         trigger_event=threading.Event(),
         rf=50000,
-        h=5,
-        k=.01
+        h=7,
+        k=0.1,
+        cusum_window=100,
+        pre_samples=pre_samples
     )
 
 

@@ -89,18 +89,24 @@ def sample_a201_until_force_applied(
         h: float,
         k: float,
         rf: float = 50000,
+        cusum_window: int = 100,
+        pre_samples: np.array = None
 ):
 
     # logging.info(f"Establishing Sensor Noise...")
 
-    samples = np.array([])
+    if pre_samples:  # allow for some pre sampling for stabilization
+        samples = pre_samples
+    else:
+        samples = np.array([])
+
     # norm_samples = np.array([])
     # cusum = 0
     while True:
         sample = sample_A201_Rs(sensor_adc=sensor_adc, rf=rf)
         samples = np.append(samples, [sample])
 
-        if detect_anomoly_rolling_cusum(window=100, samples=samples, h=h, k=k):
+        if detect_anomoly_rolling_cusum(window=cusum_window, samples=samples, h=h, k=k):
             trigger_event.set()
             break
 
@@ -163,10 +169,12 @@ def rotate_stepper_until_force_applied(
         stepper_dir: str,
         trigger_event: threading.Event,
         rf: float = None,
-        sample_avg_len: int = None,
-        cusum_limit: float = None,
+        h: float = None,
+        k: float = None,
+        cusum_window: int = None,
         stepper_duty_cycle: float = None,
         stepper_frequency: float = None,
+        pre_samples: np.array = None
 ):
 
     # set some defaults
@@ -187,9 +195,11 @@ def rotate_stepper_until_force_applied(
         args=(
             sensor_adc,
             trigger_event,
+            h,
+            k,
             rf,
-            sample_avg_len,
-            cusum_limit
+            cusum_window,
+            pre_samples
         )
     )
 
