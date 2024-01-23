@@ -23,7 +23,7 @@ def move_crusher(direction: str, steps: int):
     )
 
 
-def test():
+def move_upper_platon_to_lower():
 
     import numpy as np
     num_pre_samples = 100
@@ -46,28 +46,28 @@ def test():
     )
 
 
-def test_force_sensitivity():
-    # std, pre_samples = establish_A201_noise_std(
-    #     sensor_adc=COMPS.get('force_sensor_adc'),
-    #     rf=50000,
-    #     noise_count=100
-    # )
-    import numpy as np
-    num_pre_samples = 100
-    pre_samples = np.array([])
-    for i in range(0, num_pre_samples):
-        sample = sample_A201_Rs(sensor_adc=COMPS.get('force_sensor_adc'), rf=50000)
-        pre_samples = np.append(pre_samples, [sample])
-
-    sample_a201_until_force_applied(
-        sensor_adc=COMPS.get('force_sensor_adc'),
-        trigger_event=threading.Event(),
-        rf=50000,
-        h=7,
-        k=0.1,
-        cusum_window=100,
-        pre_samples=pre_samples
-    )
+# def test_force_sensitivity():
+#     # std, pre_samples = establish_A201_noise_std(
+#     #     sensor_adc=COMPS.get('force_sensor_adc'),
+#     #     rf=50000,
+#     #     noise_count=100
+#     # )
+#     import numpy as np
+#     num_pre_samples = 100
+#     pre_samples = np.array([])
+#     for i in range(0, num_pre_samples):
+#         sample = sample_A201_Rs(sensor_adc=COMPS.get('force_sensor_adc'), rf=50000)
+#         pre_samples = np.append(pre_samples, [sample])
+#
+#     sample_a201_until_force_applied(
+#         sensor_adc=COMPS.get('force_sensor_adc'),
+#         trigger_event=threading.Event(),
+#         rf=50000,
+#         h=7,
+#         k=0.1,
+#         cusum_window=100,
+#         pre_samples=pre_samples
+#     )
 
 
 # def a201_cusum():
@@ -95,12 +95,20 @@ def test_force_sensitivity():
 #             break
 #         print(f"cusum: {cusum}")
 
+def test():
+    import time
+    from encoders.E5 import RotaryEncoder
+    # Example usage
+    encoder = RotaryEncoder(pin_a=12, pin_b=16, pin_index=18)
+
+    move_crusher('ccw', steps=1000)
+    while True:
+        print("Position:", encoder.get_position())
+        time.sleep(1)
+
 
 def main():
-
-    # move_crusher(direction='cw', steps=2000)
-    # test()
-    test_force_sensitivity()
+    test()
 
     pass
 

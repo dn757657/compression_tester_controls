@@ -52,7 +52,8 @@ def eosr50_init(
 
 def eosr50_capture_and_save(
         port,
-        filename
+        file_name: str = uuid.uuid4(),
+        file_ext: str = 'jpeg',
 ):
     """
     can use date characters like %Y in filename see naming standard?
@@ -62,6 +63,7 @@ def eosr50_capture_and_save(
     """
 
     # sudo gphoto2 --capture-image-and-download -filename "%Y%m%d%H%M%S.jpg"
+    filename = f"{file_name}.{file_ext}"
     try:
         subprocess.run([
             'sudo',
@@ -84,6 +86,7 @@ def eosr50_capture_and_save(
 def eosr50_continuous_capture_and_save(
         port,
         stop_event,
+        file_name: str = uuid.uuid4(),
         file_ext: str = 'jpeg',
 ):
     """
@@ -95,7 +98,7 @@ def eosr50_continuous_capture_and_save(
     i = 0
     while not stop_event.is_set():
         # sudo gphoto2 --capture-image-and-download -filename "%Y%m%d%H%M%S.jpg"
-        filename = f"{uuid.uuid4()}.{file_ext}"  # will need some sort of uid system eventually
+        filename = f"{file_name}.{file_ext}"  # will need some sort of uid system eventually
         try:
             subprocess.run([
                 'sudo',
