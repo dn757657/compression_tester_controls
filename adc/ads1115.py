@@ -58,11 +58,13 @@ class ADCChannel(Observer):
             self,
             name: str,
             i2c_device,
-            i2c_device_channel
+            i2c_device_channel,
+            device_lock: threading.Lock
     ):
         super().__init__()
         self.channel = AnalogIn(i2c_device, i2c_device_channel)
         self.name = name
+        self.lock = device_lock
 
         pass
 
@@ -102,10 +104,12 @@ class ADS1115:
         self.gain = gain
         self.address = address
 
-        self.a0 = ADCChannel(i2c_device=self.device, name='a0', i2c_device_channel=ADS.P0)
-        self.a1 = ADCChannel(i2c_device=self.device, name='a1', i2c_device_channel=ADS.P1)
-        self.a2 = ADCChannel(i2c_device=self.device, name='a2', i2c_device_channel=ADS.P2)
-        self.a3 = ADCChannel(i2c_device=self.device, name='a3', i2c_device_channel=ADS.P3)
+        lock = threading.Lock()
+
+        self.a0 = ADCChannel(i2c_device=self.device, name='a0', i2c_device_channel=ADS.P0, device_lock=lock)
+        self.a1 = ADCChannel(i2c_device=self.device, name='a1', i2c_device_channel=ADS.P1, device_lock=lock)
+        self.a2 = ADCChannel(i2c_device=self.device, name='a2', i2c_device_channel=ADS.P2, device_lock=lock)
+        self.a3 = ADCChannel(i2c_device=self.device, name='a3', i2c_device_channel=ADS.P3, device_lock=lock)
 
         self.channels = [
             self.a0,
