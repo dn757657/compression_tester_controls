@@ -97,14 +97,20 @@ def move_upper_platon_to_lower():
 
 def test():
     import time
-    from encoders.E5 import RotaryEncoder
-    # Example usage
-    encoder = RotaryEncoder(pin_a=12, pin_b=16, pin_index=18)
 
-    move_crusher('ccw', steps=1000)
-    while True:
-        print("Position:", encoder.get_position())
-        time.sleep(1)
+    adc = COMPS.get('force_sensor_adc')
+    for channel in adc.channels:
+        channel.start()
+
+    try:
+        while True:
+            for channel in adc.channels:
+                print(f"{channel.name}: {channel.sample()}")
+            time.sleep(5)  # Adjust the sampling interval as needed
+    except KeyboardInterrupt:
+        print("Stopping...")
+        for channel in adc:
+            channel.stop_running()
 
 
 def main():

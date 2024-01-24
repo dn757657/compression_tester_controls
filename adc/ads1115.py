@@ -1,10 +1,73 @@
 import board
 import busio
+import threading
 import logging
+
 import adafruit_ads1x15.ads1115 as ADS
-from adafruit_ads1x15.analog_in import AnalogIn
+import numpy as np
 
 from typing import List
+
+from adafruit_ads1x15.analog_in import AnalogIn
+
+
+class Observer:
+    def __init__(self):
+        self.running = False
+        self.data = np.array([])
+        self.lock = threading.Lock()
+
+    def start(self):
+        """Start the continuous process in a new thread."""
+        self.running = True
+        self.thread = threading.Thread(target=self._run)
+        self.thread.start()
+
+    def _run(self):
+        """The method that runs continuously in the background."""
+        while self.running:
+            new_samples = self._read()
+            with self.lock:
+                self.data = np.append(self.data, new_samples)
+
+    def _read(self):
+        new_samples = np.array([])
+        return new_samples
+
+    def sample_n(self, n: int):
+        """Method to sample the current data."""
+        with self.lock:
+            idx = max(-n, -len(self.data))
+            samples = self.data[idx:]
+            return samples
+
+    def sample(self):
+        """Method to sample the current data."""
+        with self.lock:
+            sample = self.data[-1]
+            return sample
+
+    def stop_running(self):
+        """Stop the continuous process."""
+        self.running = False
+        self.thread.join()
+
+
+class ADCChannel(Observer):
+    def __init__(
+            self,
+            name: str,
+            i2c_device,
+            i2c_device_channel
+    ):
+        super().__init__()
+        self.channel = AnalogIn(i2c_device, i2c_device_channel)
+        self.name = name
+
+        pass
+
+    def _read(self):
+        return np.array([self.channel.value])
 
 
 class ADS1115:
@@ -12,9 +75,8 @@ class ADS1115:
             self,
             gain: float,
             address: hex,
-            channel_labels: List[str]
     ):
-        ads1115_gains = [
+        gains = [
             2/3,
             1,
             2,
@@ -23,12 +85,11 @@ class ADS1115:
             16
         ]
 
-        if gain not in ads1115_gains:
-            raise ValueError(f'Gain must be one of: {[g for g in ads1115_gains]}')
+        if gain not in gains:
+            raise ValueError(f'Gain must be one of: {[g for g in gains]}')
 
         self.gain = gain
         self.address = address
-        self.channel_labels = channel_labels
 
         i2c = busio.I2C(board.SCL, board.SDA)
         self.device = ADS.ADS1115(
@@ -36,15 +97,21 @@ class ADS1115:
             address=self.address,
             gain=self.gain
         )
-        self.channels = [
-            ADS.P0,
-            ADS.P1,
-            ADS.P2,
-            ADS.P3
-        ]
-        self.channel_map = dict(zip(self.channel_labels, self.channels))
 
-        self.channel_states = self.read()
+        self.gain = gain
+        self.address = address
+
+        self.a0 = ADCChannel(i2c_device=self.device, name='a0', i2c_device_channel=ADS.P0)
+        self.a1 = ADCChannel(i2c_device=self.device, name='a1', i2c_device_channel=ADS.P1)
+        self.a2 = ADCChannel(i2c_device=self.device, name='a2', i2c_device_channel=ADS.P2)
+        self.a3 = ADCChannel(i2c_device=self.device, name='a3', i2c_device_channel=ADS.P3)
+
+        self.channels = [
+            self.a0,
+            self.a1,
+            self.a2,
+            self.a3
+        ]
 
         pass
 
@@ -68,30 +135,25 @@ class ADS1115:
 
         return volts_val
 
-    def read(
-            self,
-    ):
-        """
-        sample channels requested from i2c ADS1115 device
-        :param req_channels: list of channels as named on board
-        :return: dict indexed by channel name
-        """
-
-        volt_samples = {}
-        try:
-            for channel in self.channel_labels:
-                if channel not in self.channel_labels:
-                    logging.info(f'Channel {channel} not in available channels: {self.channel_labels}, Skipping')
-                else:
-                    bit_sample = AnalogIn(self.device, self.channel_map.get(channel)).value
-                    volt_sample = self.bits_to_volts(bits_val=bit_sample)
-                    volt_samples[channel] = volt_sample
-
-            self.channel_states = volt_samples  # update state
-        except OSError:
-            self.read()  # retry
-
-        return volt_samples
+    # def _read(
+    #         self,
+    # ):
+    #     """
+    #     sample channels requested from i2c ADS1115 device
+    #     :param req_channels: list of channels as named on board
+    #     :return: dict indexed by channel name
+    #     """
+    #
+    #     volt_samples = {}
+    #     try:
+    #         for channel in self.channels:
+    #             chan
+    #
+    #         self.channel_states = volt_samples  # update state
+    #     except OSError:
+    #         self.read()  # retry
+    #
+    #     return volt_samples
 
 # def init_ads1115(
 #         gain: float,

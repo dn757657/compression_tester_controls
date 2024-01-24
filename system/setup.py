@@ -54,7 +54,6 @@ DEFAULT_INIT_PARAMS = {
     'force_sensor_adc': {
         'address': 0x48,
         'gain': 2/3,
-        'channel_labels': ["A0", "A1", "A2", "A3"],
     },
 
     'camera_endstops_adc': {
