@@ -48,7 +48,7 @@ class Observer:
             try:
                 sample = self.data[-1]
             except IndexError:
-                sample = None
+                sample = np.array([])
             return sample
 
     def stop_running(self):
