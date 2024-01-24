@@ -116,10 +116,13 @@ def adc_observer():
 
 def encoder_test():
     import Encoder
-    
-    enc = Encoder.Encoder(23, 24)
-    print(f"{enc.read()}")
+    import time
 
+    enc = Encoder.Encoder(23, 24)
+
+    while True:
+        print(f"{enc.read()}")
+        time.sleep(1)
 
 
 def main():
