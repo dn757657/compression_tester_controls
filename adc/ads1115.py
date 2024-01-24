@@ -64,13 +64,14 @@ class ADCChannel(Observer):
         super().__init__()
         self.channel = AnalogIn(i2c_device, i2c_device_channel)
         self.name = name
-        self.lock = device_lock
+        self.device_lock = device_lock
 
         pass
 
     def _read(self):
-        print(f"{self.name}:{self.channel.value}")
-        return np.array([self.channel.value])
+        with self.device_lock:
+            print(f"{self.name}:{self.channel.value}")
+            return np.array([self.channel.value])
 
 
 class ADS1115:
