@@ -45,13 +45,10 @@ class Observer:
     def sample(self):
         """Method to sample the current data."""
         with self.lock:
-            while True:
-                try:
-                    sample = self.data[-1]
-                    break
-                except IndexError:
-                    time.sleep(0.01)
-                    continue
+            try:
+                sample = self.data[-1]
+            except IndexError:
+                sample = None
             return sample
 
     def stop_running(self):
