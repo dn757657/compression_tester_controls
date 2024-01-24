@@ -102,15 +102,15 @@ def test():
     for channel in adc.channels:
         channel.start()
 
-    # try:
-    #     while True:
-    #         for channel in adc.channels:
-    #             print(f"{channel.name}: {channel.sample()}")
-    #         time.sleep(5)  # Adjust the sampling interval as needed
-    # except KeyboardInterrupt:
-    #     print("Stopping...")
-    #     for channel in adc:
-    #         channel.stop_running()
+    try:
+        while True:
+            for channel in adc.channels:
+                print(f"{channel.name}: {adc.bits_to_volts(channel.sample())}")
+            time.sleep(5)  # Adjust the sampling interval as needed
+    except KeyboardInterrupt:
+        print("Stopping...")
+        for channel in adc:
+            channel.stop_running()
 
 
 def main():

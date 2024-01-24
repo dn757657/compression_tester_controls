@@ -70,7 +70,6 @@ class ADCChannel(Observer):
 
     def _read(self):
         with self.device_lock:
-            print(f"{self.name}:{self.channel.value}")
             return np.array([self.channel.value])
 
 
