@@ -2,6 +2,7 @@ import board
 import busio
 import threading
 import logging
+import time
 
 import adafruit_ads1x15.ads1115 as ADS
 import numpy as np
@@ -44,7 +45,13 @@ class Observer:
     def sample(self):
         """Method to sample the current data."""
         with self.lock:
-            sample = self.data[-1]
+            while True:
+                try:
+                    sample = self.data[-1]
+                    break
+                except IndexError:
+                    time.sleep(0.01)
+                    continue
             return sample
 
     def stop_running(self):

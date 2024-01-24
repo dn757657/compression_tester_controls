@@ -100,7 +100,8 @@ def test():
 
     adc = COMPS.get('force_sensor_adc')
     for channel in adc.channels:
-        channel.start()
+        if not channel.running:
+            channel.start()
 
     try:
         while True:
@@ -109,7 +110,7 @@ def test():
             time.sleep(5)  # Adjust the sampling interval as needed
     except KeyboardInterrupt:
         print("Stopping...")
-        for channel in adc:
+        for channel in adc.channels:
             channel.stop_running()
 
 
