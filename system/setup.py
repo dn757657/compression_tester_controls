@@ -59,7 +59,6 @@ DEFAULT_INIT_PARAMS = {
     'camera_endstops_adc': {
         'address': 0x49,
         'gain': 2/3,
-        'channel_labels': ["A0", "A1", "A2"]
     },
 
     'rpi4': {

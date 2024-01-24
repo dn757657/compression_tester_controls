@@ -26,7 +26,7 @@ class DiPoleSwitch:
         self.trigger_threshold = trigger_threshold
         self.trigger_above_threshold = trigger_above_threshold
 
-        self.state = self.read()
+        # self.state = self.read()
 
         pass
 

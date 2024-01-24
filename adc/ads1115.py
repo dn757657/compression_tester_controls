@@ -67,6 +67,7 @@ class ADCChannel(Observer):
         pass
 
     def _read(self):
+        print(f"{self.channel.value}")
         return np.array([self.channel.value])
 
 
