@@ -95,7 +95,7 @@ def move_upper_platon_to_lower():
 #             break
 #         print(f"cusum: {cusum}")
 
-def test():
+def adc_observer():
     import time
 
     adc = COMPS.get('force_sensor_adc')
@@ -114,8 +114,16 @@ def test():
             channel.stop_running()
 
 
+def encoder_test():
+    import Encoder
+    
+    enc = Encoder.Encoder(23, 24)
+    print(f"{enc.read()}")
+
+
+
 def main():
-    test()
+    encoder_test()
 
     pass
 
