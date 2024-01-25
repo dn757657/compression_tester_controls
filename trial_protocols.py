@@ -9,6 +9,8 @@ STATE = load_state()
 INIT_PARAMS = load_init_vars()
 COMPS = init_components(INIT_PARAMS)
 
+# TODO start all observers in the setup bit - reconfigure any observers that arent currently
+
 
 def trial_step(num_photos: int = None, **kwargs):
 
@@ -17,6 +19,12 @@ def trial_step(num_photos: int = None, **kwargs):
         trigger_event=threading.Event(),
         verification_cycles=3
     )
+
+    # TODO add force limit monitoring for motor move
+    # TODO add strain limit monitoring for motor move
+    #  make is flexible in case it goes a little over, or define the steps,
+    #  then check if the machine is within a certain distance of the step?
+    #  using cam or encoder etc
 
     cam_ports = gphoto2_get_active_ports()
     for port in cam_ports:
