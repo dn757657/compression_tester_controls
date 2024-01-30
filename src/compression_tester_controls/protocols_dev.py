@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from components.factory import HardwareFactory
+from .components.factory import HardwareFactory
 
 
 REQUIRED_CONFIG_ATTRS = ['name', 'type']

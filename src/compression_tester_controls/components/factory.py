@@ -18,4 +18,5 @@ class HardwareFactory:
             type = config.get(id_key)
 
         if 'stepper'.lower() in type.lower():
+            config = config.pop('type', None)
             return StepperMotorDriver(**config)
