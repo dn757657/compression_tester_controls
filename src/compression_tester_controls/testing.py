@@ -1,10 +1,7 @@
 import threading
-import subprocess
 
-from system.setup import load_state, load_init_vars, save_state, init_components
-from protocols import rotate_stepper_until_force_applied, sample_a201_until_force_applied, \
-    establish_A201_noise_std, sample_A201_Rs
-from camera.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, gpohoto2_get_camera_settings
+from src.compression_tester_controls.system.setup import load_state, load_init_vars, init_components
+from src.compression_tester_controls.protocols import rotate_stepper_until_force_applied, sample_A201_Rs
 
 # might need to be careful with states of state and init params
 STATE = load_state()

@@ -3,16 +3,15 @@ import threading
 import logging
 import timeit
 
-import numpy
 import numpy as np
 
 from typing import List
 
-from motors.stepper_controls import StepperMotorDriver
-from system.setup import load_state, load_init_vars, save_state, init_components
-from camera.canon_eosr50 import eosr50_continuous_capture_and_save
-from system.utils import num_photos_2_cam_stepper_freq
-from sensors.A201 import A201_resistance
+from src.compression_tester_controls.motors import StepperMotorDriver
+from src.compression_tester_controls.system.setup import load_init_vars, init_components
+from src.compression_tester_controls.camera import eosr50_continuous_capture_and_save
+from src.compression_tester_controls.system.utils import num_photos_2_cam_stepper_freq
+from src.compression_tester_controls.sensors import A201_resistance
 
 # might need to be careful with states of state and init params
 # STATE = load_state()

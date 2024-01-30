@@ -1,8 +1,8 @@
 import threading
 
-from system.setup import load_state, load_init_vars, save_state, init_components
-from protocols import reset_camera_position, rotate_camera_position_onto_endstop_with_cameras
-from camera.canon_eosr50 import eosr50_init, gphoto2_get_active_ports
+from src.compression_tester_controls.system.setup import load_state, load_init_vars, save_state, init_components
+from src.compression_tester_controls.protocols import reset_camera_position, rotate_camera_position_onto_endstop_with_cameras
+from src.compression_tester_controls.camera import eosr50_init, gphoto2_get_active_ports
 
 # might need to be careful with states of state and init params
 STATE = load_state()

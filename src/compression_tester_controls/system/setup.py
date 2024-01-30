@@ -1,18 +1,14 @@
-import json
 import os
 import sys
 
 # so we can find other same level packages
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
-from pathlib import Path
-from typing import Union
-
-from system.utils import load_sys_json, write_sys_json
-from motors.stepper_controls import StepperMotorDriver
-from adc.ads1115 import ADS1115
-from misc_components.switch import DiPoleSwitch
-from rpi.setup import init_pi_pins
+from src.compression_tester_controls.system.utils import load_sys_json, write_sys_json
+from src.compression_tester_controls.motors.stepper_controls import StepperMotorDriver
+from src.compression_tester_controls.adc.ads1115 import ADS1115
+from src.compression_tester_controls.misc_components.switch import DiPoleSwitch
+from src.compression_tester_controls.rpi.setup import init_pi_pins
 
 DEFAULT_INIT_PARAMS = {
     'endstop1': {
@@ -79,12 +75,12 @@ STATE_DEFAULTS = {
     'camera_stepper_last_dir': "cw",
 }
 
-SYSTEM_JSON_FILEPATH = os.path.join(".", "system_files.json")
+SYSTEM_JSON_FILEPATH = os.path.join("", "system_files.json")
 STATE_JSON_KEY = 'state_json_fp'
 INIT_JSON_KEY = 'init_json_fp'
 SYSTEM_FILES_DEFAULTS = {
-    STATE_JSON_KEY: os.path.join(".", "system_state_variables.json"),
-    INIT_JSON_KEY: os.path.join(".", "system_initialization_parameters.json")
+    STATE_JSON_KEY: os.path.join("", "system_state_variables.json"),
+    INIT_JSON_KEY: os.path.join("", "system_initialization_parameters.json")
 }
 
 SYSTEM_FILES = load_sys_json(SYSTEM_JSON_FILEPATH, SYSTEM_FILES_DEFAULTS)
