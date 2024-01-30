@@ -14,5 +14,6 @@ big_stepper.rotate(freq=500, duty_cyle=85, direction='cw')
 start = time.time()
 while True:
     print(f"{enc.read()}")
-    if time.time() - start >= 10:
+    if time.time() - start >= 1:
         big_stepper.stop()
+        break
