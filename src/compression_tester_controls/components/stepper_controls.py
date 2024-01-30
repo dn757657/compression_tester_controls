@@ -116,7 +116,6 @@ class StepperMotorDriver:
         pass
 
     def stop(self):
-        self.pwd_chan.stop()
         self.pwd_chan = None
         logging.info(f"{self.name}: stopped")
         pass
