@@ -31,7 +31,7 @@ class StepperMotorDriver:
         self.step_pin = step_pin
 
         # init pwd channel with random frequency
-        self.pwd_chan = GPIO.PWM(self.step_pin, 50)
+        self.pwd_chan = None
 
         # set directionality, is pin high clockwise
         self.cw_pin_high = cw_pin_high
@@ -100,11 +100,14 @@ class StepperMotorDriver:
         :param freq: operational frequency in 1/s
         :return:
         """
-
-        self.enable_driver()
-        self.set_dir(direction=direction)
-        self.pwd_chan = GPIO.PWM(self.step_pin, freq)  # pin, freq
-        self.pwd_chan.start(duty_cyle)
+        if not self.pwd_chan:
+            self.enable_driver()
+            self.set_dir(direction=direction)
+            self.pwd_chan = GPIO.PWM(self.step_pin, freq)  # pin, freq
+            self.pwd_chan.start(duty_cyle)
+        else:
+            self.pwd_chan.ChangeFrequency(freq)
+            self.pwd_chan.ChangeDutyCycle(duty_cyle)
 
         logging.info(f"{self.name}: rotating: \n"
                      f"\tduty-cycle: {duty_cyle}\n"
@@ -114,6 +117,7 @@ class StepperMotorDriver:
 
     def stop(self):
         self.pwd_chan.stop()
+        self.pwd_chan = None
         logging.info(f"{self.name}: stopped")
         pass
 
