@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from .components.factory import HardwareFactory
+from components.factory import HardwareFactory
 
 
 REQUIRED_CONFIG_ATTRS = ['name', 'type']
@@ -11,11 +11,15 @@ REQUIRED_CONFIG_ATTRS = ['name', 'type']
 def load_configs(
         base_dir: str = f"./components/configs",
         config_file_ext: str = 'json'
-):
+):  
+    
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    print(f"{script_path}")
+
     component_configs = dict()
-    for file in os.listdir(f"{base_dir}"):
+    for file in os.listdir(f"{script_path}/{base_dir}"):
         if file.endswith(f".{config_file_ext}"):
-            with open(f"{base_dir}/{file}", "r") as f:
+            with open(f"{script_path}/{base_dir}/{file}", "r") as f:
 
                 d = json.load(f)
                 all_reqd_attrs = True
