@@ -49,12 +49,14 @@ class ADCChannel(Observer):
 class ADS1115:
     def __init__(
             self,
+            name: str,
             gain: float,
             address: hex,
     ):
         if gain not in ADS1115_GAINS:
             raise ValueError(f'Gain must be one of: {[g for g in ADS1115_GAINS]}')
 
+        self.name = name
         self.gain = gain
         self.address = address
 
