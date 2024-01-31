@@ -51,10 +51,15 @@ class ADS1115:
             self,
             name: str,
             gain: float,
-            address: hex,
+            address,
     ):
         if gain not in ADS1115_GAINS:
             raise ValueError(f'Gain must be one of: {[g for g in ADS1115_GAINS]}')
+        if not isinstance(address, hex):
+            try:
+                address = hex(address)
+            except TypeError:
+                logging.info(f"Cannot cast {address} as Hex - Aborting ads1115 init.")
 
         self.name = name
         self.gain = gain
