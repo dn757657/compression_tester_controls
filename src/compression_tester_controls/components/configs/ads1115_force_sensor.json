@@ -1,0 +1,6 @@
+{
+    "name": "force_sensor",
+    "type": "ads1115",
+    "address": "0x48",
+    "gain": "2/3"
+}

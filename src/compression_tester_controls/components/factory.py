@@ -1,6 +1,8 @@
 import logging
+import Encoder
 
 from .stepper_controls import StepperMotorDriver
+from .ads1115 import ADS1115
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
@@ -20,3 +22,12 @@ class HardwareFactory:
         if 'stepper'.lower() in type.lower():
             config.pop('type', None)
             return StepperMotorDriver(**config)
+        
+        elif 'encoder'.lower() in type.lower():
+            config.pop('type', None)
+            config.pop('name', None)
+            return Encoder.Encoder(**config)
+        
+        elif 'ads1115'.lower() in type.lower():
+            config.pop('type', None)
+            return ADS1115(**config)

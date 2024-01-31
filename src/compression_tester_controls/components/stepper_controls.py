@@ -111,7 +111,8 @@ class StepperMotorDriver:
 
         logging.info(f"{self.name}: rotating: \n"
                      f"\tduty-cycle: {duty_cyle}\n"
-                     f"\tfrequency : {freq}")
+                     f"\tfrequency : {freq}\n"
+                     f"\tdirection : {direction}")
 
         pass
 
