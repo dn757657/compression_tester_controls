@@ -28,8 +28,8 @@ class HardwareFactory:
             config.pop('name', None)
             return Encoder.Encoder(**config)
         
-        elif 'ads1115'.lower() in type.lower():
-            config.pop('type', None)
-            config.update({'address', hex(config.get('address'))})
+        # elif 'ads1115'.lower() in type.lower():
+            # config.pop('type', None)
+            # config.update({'address', hex(config.get('address'))})
 
-            return ADS1115(**config)
+            # return ADS1115(**config)

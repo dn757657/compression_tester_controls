@@ -18,11 +18,10 @@ print(f"{components.__str__()}")
 enc_pos = enc.read()
 
 pid.output_limits = (0, 1000)
-pid.sample_time(0.01)
-pid.update(enc_pos)
+pid.sample_time = 0.01
 
 err = 0.1
-while (setpoint - (setpoint * err)) > setpoint > (setpoint + (setpoint * err)):
+while (setpoint - (setpoint * err)) > enc.read() > (setpoint + (setpoint * err)):
     enc_pos = enc.read()
 
     freq = pid(enc_pos)
