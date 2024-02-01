@@ -22,7 +22,7 @@ def get_encoder_position(ser, port='/dev/ttyACM0', baudrate=9600,):
     else:
         return None
 
-ser = serial.Serial('COM4', 9600, timeout=1)
+ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
 time.sleep(2)
 configs = load_configs()
 components = inst_components(component_configs=configs)
