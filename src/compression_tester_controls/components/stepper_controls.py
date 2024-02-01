@@ -103,23 +103,31 @@ class StepperMotorDriver:
 
         if freq < 0:  # swap direction if frequency negative
             direction = [x for x in MOTOR_DIRECTIONS != direction][0]
-        elif freq == 0:
-            self.stop()
-            pass
+            freq = abs(freq)
+        # elif freq == 0:
+            # self.stop()
+            # pass
+        self.set_dir(direction=direction)
+
+        logging.info(f"{self.name}: rotating: \n"
+                     f"\tduty-cycle: {duty_cyle}\n"
+                     f"\tfrequency : {freq}\n"
+                     f"\tdirection : {direction}")
+
 
         if not self.pwd_chan:
             self.enable_driver()
-            self.set_dir(direction=direction)
+            # self.set_dir(direction=direction)
             self.pwd_chan = GPIO.PWM(self.step_pin, freq)  # pin, freq
             self.pwd_chan.start(duty_cyle)
         else:
             self.pwd_chan.ChangeFrequency(freq)
             self.pwd_chan.ChangeDutyCycle(duty_cyle)
 
-        logging.info(f"{self.name}: rotating: \n"
-                     f"\tduty-cycle: {duty_cyle}\n"
-                     f"\tfrequency : {freq}\n"
-                     f"\tdirection : {direction}")
+        # logging.info(f"{self.name}: rotating: \n"
+                    #  f"\tduty-cycle: {duty_cyle}\n"
+                    #  f"\tfrequency : {freq}\n"
+                    #  f"\tdirection : {direction}")
 
         pass
 

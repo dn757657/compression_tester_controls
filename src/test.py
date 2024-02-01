@@ -21,13 +21,13 @@ pid.output_limits = (0, 1000)
 pid.sample_time = 0.01
 
 err = 0.1
-while (setpoint - (setpoint * err)) > enc.read() > (setpoint + (setpoint * err)):
+while True:
     enc_pos = enc.read()
 
     freq = pid(enc_pos)
     big_stepper.rotate(
         freq=freq,
-        direction='cw',
+        direction='ccw',
         duty_cycle=85
     )
 
