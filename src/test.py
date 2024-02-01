@@ -1,4 +1,4 @@
-import Encoder
+# import Encoder
 import time
 import serial
 
@@ -6,26 +6,38 @@ from simple_pid import PID
 from compression_tester_controls.protocols_dev import load_configs, inst_components
 
 
-def get_encoder_position(port='/dev/ttyACM0', baudrate=9600):
-    with serial.Serial(port, baudrate, timeout=1) as ser:
-        # Send request
-        ser.write(b'R')  # Request encoder position
-        time.sleep(0.1)  # Short delay to ensure data is processed
-        
-        # Read response
-        if ser.in_waiting > 0:
-            position = ser.readline().decode().strip()
-            return int(position)
-        else:
-            return None
+def get_encoder_position(ser, port='/dev/ttyACM0', baudrate=9600,):
+    # with serial.Serial(port, baudrate, timeout=1) as ser:
+        # time.sleep(2)  # Allow time for serial connection to initialize
+    ser.flushInput()  # Clear input buffer
 
+    # Send request
+    ser.write(b'R')  # Request encoder position
+    time.sleep(0.001)   # Short delay to ensure data is processed
+    
+    # Read response
+    if ser.in_waiting > 0:
+        position = ser.readline().decode().strip()
+        return int(position)
+    else:
+        return None
 
+ser = serial.Serial('COM4', 9600, timeout=1)
+time.sleep(2)
 configs = load_configs()
 components = inst_components(component_configs=configs)
 
-enc_pos = get_encoder_position()
+stepper = components.get('big_stepper')
+stepper.rotate(freq=-500, duty_cyle=85)
 
-print(f"enc pos: {enc_pos}")
+start = time.time()
+while True:
+    enc_pos = get_encoder_position(port='COM4', ser=ser)
+
+    print(f"enc pos: {enc_pos}")
+    if (time.time() - start)  > 1:
+        stepper.stop()
+        break
 
 # big_stepper = components.get("big_stepper")
 # #big_stepper.rotate(freq=-500, duty_cyle=85)
