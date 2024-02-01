@@ -104,9 +104,9 @@ class StepperMotorDriver:
         if freq < 0:  # swap direction if frequency negative
             direction = [x for x in MOTOR_DIRECTIONS != direction][0]
             freq = abs(freq)
-        # elif freq == 0:
-            # self.stop()
-            # pass
+        elif freq == 0:
+            self.stop()
+            return
         self.set_dir(direction=direction)
 
         logging.info(f"{self.name}: rotating: \n"
@@ -132,9 +132,10 @@ class StepperMotorDriver:
         pass
 
     def stop(self):
-        self.pwd_chan.stop()
-        self.pwd_chan = None
-        logging.info(f"{self.name}: stopped")
+        if self.pwd_chan:
+            self.pwd_chan.stop()
+            self.pwd_chan = None
+            logging.info(f"{self.name}: stopped")
         pass
 
 

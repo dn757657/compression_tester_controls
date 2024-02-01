@@ -28,9 +28,9 @@ while True:
     big_stepper.rotate(
         freq=freq,
         direction='ccw',
-        duty_cycle=85
+        duty_cyle=85
     )
 
     if (setpoint - (setpoint * err)) > setpoint > (setpoint + (setpoint * err)):
-        big_stepper.stop()
+        # big_stepper.stop()
         break
