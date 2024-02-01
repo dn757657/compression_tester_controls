@@ -89,7 +89,7 @@ class StepperMotorDriver:
 
     def rotate(
             self,
-            direction: str,
+            #direction: str,
             duty_cyle: float,
             freq: float,
     ):
@@ -102,10 +102,13 @@ class StepperMotorDriver:
         """
 
         if freq < 0:  # swap direction if frequency negative
-            direction = [x for x in MOTOR_DIRECTIONS != direction][0]
+            #direction = [x for x in MOTOR_DIRECTIONS != direction][0]
+            direction = 'cw'
             freq = abs(freq)
+        elif freq > 0:
+            direction = 'ccw'
         elif freq == 0:
-            self.stop()
+            #self.stop()
             return
         self.set_dir(direction=direction)
 
