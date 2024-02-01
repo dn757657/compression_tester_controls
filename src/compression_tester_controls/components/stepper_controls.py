@@ -100,6 +100,13 @@ class StepperMotorDriver:
         :param freq: operational frequency in 1/s
         :return:
         """
+
+        if freq < 0:  # swap direction if frequency negative
+            direction = [x for x in MOTOR_DIRECTIONS != direction][0]
+        elif freq == 0:
+            self.stop()
+            pass
+
         if not self.pwd_chan:
             self.enable_driver()
             self.set_dir(direction=direction)

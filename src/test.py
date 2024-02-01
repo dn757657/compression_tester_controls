@@ -7,4 +7,31 @@ from compression_tester_controls.protocols_dev import load_configs, inst_compone
 configs = load_configs()
 components = inst_components(component_configs=configs)
 
+big_stepper = components.get("big_stepper")
+enc = components.get("e5")
+
+setpoint = 100
+pid = PID(10, 0, 0, setpoint=setpoint)
+
 print(f"{components.__str__()}")
+
+enc_pos = enc.read()
+
+pid.output_limits = (0, 1000)
+pid.sample_time(0.01)
+pid.update(enc_pos)
+
+err = 0.1
+while (setpoint - (setpoint * err)) > setpoint > (setpoint + (setpoint * err)):
+    enc_pos = enc.read()
+
+    freq = pid(enc_pos)
+    big_stepper.rotate(
+        freq=freq,
+        direction='cw',
+        duty_cycle=85
+    )
+
+    if (setpoint - (setpoint * err)) > setpoint > (setpoint + (setpoint * err)):
+        big_stepper.stop()
+        break
