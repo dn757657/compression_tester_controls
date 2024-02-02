@@ -55,10 +55,11 @@ def inst_components(
         name = config.get('name')
         for k in config.keys():
             ref_tag = '_ref'
+            new_config = None
             if ref_tag.lower() in k.lower():
                 obj_ref = config.get(k)
                 print(f"assigning {k} object reference")
-                config.pop(k)  # drop old
+                # config.pop(k)  # drop old
 
                 s = obj_ref.split(".")
                 if len(s) > 2:
@@ -71,10 +72,12 @@ def inst_components(
                     logging.info(f"No component named: {ref_obj_name}, referenced in config: {name}")
                     continue
                 try:
-                    config[k.rsplit('_', 1)[0]] = getattr(comp, ref_obj_attr)
+                    new_config[k.rsplit('_', 1)[0]] = getattr(comp, ref_obj_attr)
                 except ValueError:
                     logging.info(f"Component: {ref_obj_name} does not have attribute: {ref_obj_attr} - referenced in config: {name}")
                     continue
+            if new_config:
+                config = config | new_config
 
         # config_objects = [x for x in config.values() if "." in x]
         # for ob in config_objects:
