@@ -25,8 +25,8 @@ class HardwareFactory:
             return StepperMotorDriver(**config)
         
         # TODO need to implement with decoder
-        elif 'encoder'.lower() in type.lower():
-            return Encoder.Encoder(**config)
+        # elif 'encoder'.lower() in type.lower():
+            # return Encoder.Encoder(**config)
         
         elif 'ads1115'.lower() in type.lower():
             return ADS1115(**config)
