@@ -4,7 +4,7 @@ import os
 
 from collections import OrderedDict
 
-#from .components.factory import HardwareFactory
+from .components.factory import HardwareFactory
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
@@ -93,7 +93,7 @@ def inst_components(
         #         comp = components.get(ref_obj_name)
         #         config[ob] = comp.ref_obj_attr
 
-        #components[name] = HardwareFactory().create_component(config=config)
+        components[name] = HardwareFactory().create_component(config=config)
 
     return components
 
