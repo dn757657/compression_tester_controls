@@ -38,7 +38,7 @@ class ADCChannel(Observer):
         self.name = name
         self.device_lock = device_lock
 
-        logging.info(f"started")
+        logging.info(f"{self.name} started")
 
         pass
 
@@ -58,7 +58,7 @@ class ADS1115:
         if gain not in ADS1115_GAINS:
             raise ValueError(f'Gain must be one of: {[g for g in ADS1115_GAINS]}')
         try:
-            address = hex(int(address, 16))
+            address = int(address, 16)
         except TypeError:
             logging.info(f"Cannot cast {address} as Hex - Aborting ads1115 init.")
 
