@@ -90,14 +90,13 @@ class StepperMotorDriver:
 
     def rotate(
             self,
-            #direction: str,
-            duty_cyle: float,
+            duty_cycle: float,
             freq: float,
     ):
         """
 
         :param direction:
-        :param duty_cyle: should be between zero and 100
+        :param duty_cycle: should be between zero and 100
         :param freq: operational frequency in 1/s
         :return:
         """
@@ -114,7 +113,7 @@ class StepperMotorDriver:
         self.set_dir(direction=direction)
 
         logging.info(f"{self.name}: rotating: \n"
-                     f"\tduty-cycle: {duty_cyle}\n"
+                     f"\tduty-cycle: {duty_cycle}\n"
                      f"\tfrequency : {freq}\n"
                      f"\tdirection : {direction}")
 
@@ -122,10 +121,10 @@ class StepperMotorDriver:
         if not self.pwd_chan:
             self.enable_driver()
             self.pwd_chan = GPIO.PWM(self.step_pin, freq)  # pin, freq
-            self.pwd_chan.start(duty_cyle)
+            self.pwd_chan.start(duty_cycle)
         else:
             self.pwd_chan.ChangeFrequency(freq)
-            self.pwd_chan.ChangeDutyCycle(duty_cyle)
+            self.pwd_chan.ChangeDutyCycle(duty_cycle)
 
         pass
 

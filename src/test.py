@@ -6,8 +6,13 @@ from simple_pid import PID
 from compression_tester_controls.protocols_dev import load_configs, inst_components
 
 
+def init():
+    configs = load_configs()
+    components = inst_components(component_configs=configs)
+    return components
 
-def main():
+
+def test():
 
     configs = load_configs()
     components = inst_components(component_configs=configs)
@@ -27,22 +32,22 @@ def main():
         print("Stopping...")
         for channel in adc.channels:
             channel.stop_running()
-# def adc_observer(adc):
 
-#     for channel in adc.channels:
-#         if not channel.running:
-#             channel.start()
 
-#     try:
-#         while True:
-#             for channel in adc.channels:
-#                 print(f"{channel.name}: {adc.bits_to_volts(channel.sample())}")
-#             time.sleep(0.1)  # Adjust the sampling interval as needed
-#     except KeyboardInterrupt:
-#         print("Stopping...")
-#         for channel in adc.channels:
-#             channel.stop_running()
+from .compression_tester_controls.protocols import sample_a201_until_force_applied
+def platon_sensing_test():
+    components = init()
+    adc = components.get('force_sensor_adc')
+    a201 = components.get('A201')
+    big_stepper = components.get('big_stepper')
+
+    sample_a201_until_force_applied(
+        force_sensor_adc=adc,
+        force_sensor=a201,
+        big_stepper=big_stepper
+    )
+
 
 
 if __name__ == '__main__':
-    main()
+    platon_sensing_test()

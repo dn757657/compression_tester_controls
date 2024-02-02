@@ -94,6 +94,7 @@ class ADS1115:
 
         # states are always in volts
         self.state = dict()
+        self.state_n = dict()
         self.state_SMA = dict()
 
         logging.info(f"{self.name}: initialized")
@@ -116,6 +117,24 @@ class ADS1115:
     def get_state(self, unit: str = 'volts'):
         self._update(unit=unit)
         return self.state
+    
+
+    def _update_n(self, unit: str, n: int):
+        if unit not in ADS1115_UNITS:
+            logging.error(f"{self.name}: incorrect units provided. Must be in {ADS1115_UNITS.__str__()}")
+        
+        for channel in self.channels:
+            if unit == 'volts':
+                self.state_n[channel.name] = self.bits_to_volts(channel.sample_n(n=n))
+            elif unit == 'bits':
+                self.state_n[channel.name] = channel.sample_n(n=n)
+
+        pass
+
+    def get_state_n(self, n: int, unit: str = 'volts'):
+        self._update_n(n=n, unit=unit)
+        return self.state_n
+
 
     def _update_SMA(self, n: int, unit: str):
         if unit not in ADS1115_UNITS:
