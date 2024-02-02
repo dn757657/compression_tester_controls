@@ -72,6 +72,8 @@ def inst_components(
                     logging.info(f"No component named: {ref_obj_name}, referenced in config: {name}")
                     continue
                 try:
+                    if not new_config:
+                        new_config = dict()
                     new_config[k.rsplit('_', 1)[0]] = getattr(comp, ref_obj_attr)
                 except ValueError:
                     logging.info(f"Component: {ref_obj_name} does not have attribute: {ref_obj_attr} - referenced in config: {name}")

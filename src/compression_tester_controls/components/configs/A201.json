@@ -5,6 +5,6 @@
     "vref_neg_ref": "force_sensor_adc.a2",
     "name": "A201",
     "type": "A201",
-    "rf": 0,
+    "rf": 50000,
     "init_priority": 3
 }

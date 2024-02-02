@@ -14,10 +14,11 @@ class A201:
             vout_neg,
             vref_plus,
             vref_neg,
-            rf: float = 0
+            rf: float = 0,
+            **kwargs
             ) -> None:
         
-        self.name == name
+        self.name = name
 
         self._vout_plus = vout_plus
         self._vout_neg = vout_neg
@@ -26,11 +27,12 @@ class A201:
         
         self.vout = None
         self.vref = None
+        self.rf = rf
 
         self.rs = None
         self.load = None
 
-        logging.info(f"A201 Flexiforce initialized with Rf Value: {self.rf}\n")
+        logging.info(f"A201 Flexiforce initialized with Rf Value: {self.rf}")
         if self.rf == 0:
             logging.info(f"MEASUREMENTS INVALID - NO RF PROVIDED")
 
