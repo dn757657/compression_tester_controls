@@ -1,6 +1,6 @@
 ./.idea/
 ./arduino/
-./src/scratch.py
+src/scratch.py
 *.iml
 
 # Byte-compiled / optimized / DLL files

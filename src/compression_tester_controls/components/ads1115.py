@@ -23,6 +23,11 @@ ADS1115_GAINS = [
     16
 ]
 
+ADS1115_UNITS = [
+    'volts',
+    'bits'
+]
+
 
 class ADCChannel(Observer):
     def __init__(
@@ -86,9 +91,45 @@ class ADS1115:
             self.a3
         ]
 
+        # states are always in volts
+        self.state = dict()
+        self.state_SMA = dict()
+
         logging.info(f"{self.name}: initialized")
 
         pass
+
+    
+    def _update(self, unit: str):
+        if unit not in ADS1115_UNITS:
+            logging.error(f"{self.name}: incorrect units provided. Must be in {ADS1115_UNITS.__str__()}")
+        
+        for channel in self.channels:
+            if unit == 'volts':
+                self.state[channel.name] = self.bits_to_volts(channel.sample())
+            elif unit == 'bits':
+                self.state[channel.name] = channel.sample()
+
+        pass
+
+    def get_state(self, unit: str = 'volts'):
+        self._update(unit=unit)
+        return self.state
+
+    def _update_SMA(self, n: int, unit: str):
+        if unit not in ADS1115_UNITS:
+            logging.error(f"{self.name}: incorrect units provided. Must be in {ADS1115_UNITS.__str__()}")
+        
+        for channel in self.channels:
+            if unit == 'volts':
+                self.state_SMA[channel.name] = self.bits_to_volts(np.average(channel.sample_n(n=n)))
+            elif unit == 'bits':
+                self.state_SMA[channel.name] = np.average(channel.sample_n(n=n))
+        pass
+
+    def get_state_SMA(self, n: int,  unit: str = 'volts'):
+        self._update_SMA(n=n, unit=unit)
+        return self.state_SMA
 
     def bits_to_volts(
                 self,

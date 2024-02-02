@@ -10,25 +10,12 @@ class A201:
     def __init__(
             self,
             name: str,
-            vout_plus,
-            vout_neg,
-            vref_plus,
-            vref_neg,
             rf: float = 0,
             **kwargs
             ) -> None:
         
         self.name = name
-
-        self._vout_plus = vout_plus
-        self._vout_neg = vout_neg
-        self._vref_plus = vref_plus
-        self._vref_neg = vref_neg
-        
-        self.vout = None
-        self.vref = None
         self.rf = rf
-
         self.rs = None
         self.load = None
 
@@ -38,51 +25,67 @@ class A201:
 
         pass
     
-    def _update_channels(self, n_samples: int = None):
-        """
-        add n samples to define a running average
-        """
-        if n_samples:
-            self.vout = np.average(self._vout_plus.sample_n(n=n_samples) - self._vout_neg.sample_n(n=n_samples))
-            self.vref = np.average(self._vref_plus.sample_n(n=n_samples) - self._vref_neg.sample_n(n=n_samples))
-        else:
-            self.vout = self._vout_plus.sample() - self._vout_neg.sample()
-            self.vref = self._vref_plus.sample() - self._vref_neg.sample()
+    # def _update_channels(self, n_samples: int = None):
+    #     """
+    #     add n samples to define a running average
+    #     """
+    #     if n_samples:
+    #         self.vout = np.average(self._vout_plus.sample_n(n=n_samples) - self._vout_neg.sample_n(n=n_samples))
+    #         self.vref = np.average(self._vref_plus.sample_n(n=n_samples) - self._vref_neg.sample_n(n=n_samples))
+    #     else:
+    #         self.vout = self._vout_plus.sample() - self._vout_neg.sample()
+    #         self.vref = self._vref_plus.sample() - self._vref_neg.sample()
 
-        pass
+    #     pass
 
-    def _update_rs(self):
+    def _update_rs(self, vout: float, vref: float):
         try:
-            self.rs = self.rf/((self.vout/self.vref) - 1)
+            self.rs = self.rf/((vout / vref) - 1)
         except ZeroDivisionError:
             self.rs = 0
         pass
 
-    def _update_load(self):
-        self.load = self.rs * 1
+    def get_rs(self, vout: float, vref: float):
+        self._update_rs(vout=vout, vref=vref)
+        return self.rs
+
+    def _update_load(self, vout: float, vref: float):
+        self._update_rs(vout=vout, vref=vref)
+        try:
+            self.load = self.rs * 1
+        except ZeroDivisionError:
+            self.load = 0
         pass
 
-    def _update(self, n_samples: int = None):
-        self._update_channels(n_samples=n_samples)
-        self._update_rs()
-        self._update_load()
-        pass
+    def get_load(self, vout: float, vref: float):
+        self._update_load(vout=vout, vref=vref)
+        return self.load
 
-    def sample(self, n_samples: int = None):
-        self._update(n_samples=n_samples)
+    # def _update_load(self):
+    #     self.load = self.rs * 1
+    #     pass
 
-        print(f"{self.name} Vout: {self.vout}")
-        print(f"{self.name} Vref: {self.vref}")
+    # def _update(self, n_samples: int = None):
+    #     self._update_channels(n_samples=n_samples)
+    #     self._update_rs()
+    #     self._update_load()
+    #     pass
 
-        return self.load, self.rs
+    # def sample(self, n_samples: int = None):
+    #     self._update(n_samples=n_samples)
+
+    #     print(f"{self.name} Vout: {self.vout}")
+    #     print(f"{self.name} Vref: {self.vref}")
+
+    #     return self.load, self.rs
     
-    def determine_rf(self, rs: float):
+    def get_rf(self, rs: float):
         """
         pass in known rs to determine adjustable rf pot resistance
         """
         try:
-            self.rf = rs * ((self.vout/self.vref) - 1)
+            rf = rs * ((self.vout/self.vref) - 1)
         except ZeroDivisionError:
-            self.rf = None
-        return self.rf        
+            rf = None
+        return rf        
 
