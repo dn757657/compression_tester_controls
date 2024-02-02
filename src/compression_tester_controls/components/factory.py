@@ -29,10 +29,6 @@ class HardwareFactory:
             # return Encoder.Encoder(**config)
         
         elif 'ads1115'.lower() in type.lower():
-            c = ADS1115(**config)
-            for chan in c.channels:
-                chan.start()
-            
             return ADS1115(**config)
         
         elif 'A201'.lower() in type.lower():

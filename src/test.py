@@ -9,9 +9,6 @@ from compression_tester_controls.protocols_dev import load_configs, inst_compone
 configs = load_configs()
 components = inst_components(component_configs=configs)
 
-time.sleep(1)
-
-a201 = components.get('A201')
-load, rs = a201.sample(n_samples = 100)
-
-print(f"A201 Rs: {rs}")
+a = components.get('force_sensor_adc')
+x = a.a0.sample()
+print(x)
