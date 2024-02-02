@@ -52,7 +52,7 @@ class A201:
     def _update_load(self, vout: float, vref: float):
         self._update_rs(vout=vout, vref=vref)
         try:
-            self.load = self.rs * 1
+            self.load = 1 / self.rs
         except ZeroDivisionError:
             self.load = 0
         pass
