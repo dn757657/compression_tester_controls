@@ -70,6 +70,10 @@ class A201:
 
     def sample(self, n_samples: int = None):
         self._update(n_samples=n_samples)
+
+        print(f"{self.name} Vout: {self.vout}")
+        print(f"{self.name} Vref: {self.vref}")
+
         return self.load, self.rs
     
     def determine_rf(self, rs: float):

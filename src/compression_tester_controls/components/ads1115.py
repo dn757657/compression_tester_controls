@@ -86,6 +86,8 @@ class ADS1115:
             self.a3
         ]
 
+        logging.info(f"{self.name}: initialized")
+
         pass
 
     def bits_to_volts(
