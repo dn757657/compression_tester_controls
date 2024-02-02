@@ -1,6 +1,7 @@
 {
-    "name": "force_sensor",
+    "name": "force_sensor_adc",
     "type": "ads1115",
     "address": "0x48",
-    "gain": 0.6666666666666666
+    "gain": 0.6666666666666666,
+    "init_priority": 1
 }

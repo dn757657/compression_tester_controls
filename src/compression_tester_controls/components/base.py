@@ -3,7 +3,7 @@ import numpy as np
 
 
 class Observer:
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.running = False
         self.data = np.array([])
         self.lock = threading.Lock()

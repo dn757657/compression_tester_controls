@@ -1,0 +1,10 @@
+{
+    "vout_plus_ref": "force_sensor_adc.a1",
+    "vout_neg_ref": "force_sensor_adc.a0",
+    "vref_plus_ref": "force_sensor_adc.a3",
+    "vref_neg_ref": "force_sensor_adc.a2",
+    "name": "A201",
+    "type": "A201",
+    "rf": 0,
+    "init_priority": 3
+}

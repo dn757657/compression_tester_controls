@@ -2,5 +2,6 @@
     "name": "e5",
     "type": "encoder",
     "A": 23,
-    "B": 24
+    "B": 24,
+    "init_priority": 2
 }

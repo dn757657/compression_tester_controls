@@ -30,9 +30,10 @@ class ADCChannel(Observer):
             name: str,
             i2c_device,
             i2c_device_channel,
-            device_lock: threading.Lock
+            device_lock: threading.Lock,
+            **kwargs 
     ):
-        super().__init__()
+        super().__init__(**kwargs)
         self.channel = AnalogIn(i2c_device, i2c_device_channel)
         self.name = name
         self.device_lock = device_lock
@@ -52,14 +53,14 @@ class ADS1115:
             name: str,
             gain: float,
             address,
+            **kwargs
     ):
         if gain not in ADS1115_GAINS:
             raise ValueError(f'Gain must be one of: {[g for g in ADS1115_GAINS]}')
-        if not isinstance(address, hex):
-            try:
-                address = hex(address)
-            except TypeError:
-                logging.info(f"Cannot cast {address} as Hex - Aborting ads1115 init.")
+        try:
+            address = hex(int(address, 16))
+        except TypeError:
+            logging.info(f"Cannot cast {address} as Hex - Aborting ads1115 init.")
 
         self.name = name
         self.gain = gain

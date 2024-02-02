@@ -16,7 +16,8 @@ class StepperMotorDriver:
             step_pin: int,
             cw_pin_high: bool,
             disable_high: bool,
-            name: str = 'motor'
+            name: str = 'motor',
+            **kawrgs
     ):
         self.name = name
 
@@ -120,17 +121,11 @@ class StepperMotorDriver:
 
         if not self.pwd_chan:
             self.enable_driver()
-            # self.set_dir(direction=direction)
             self.pwd_chan = GPIO.PWM(self.step_pin, freq)  # pin, freq
             self.pwd_chan.start(duty_cyle)
         else:
             self.pwd_chan.ChangeFrequency(freq)
             self.pwd_chan.ChangeDutyCycle(duty_cyle)
-
-        # logging.info(f"{self.name}: rotating: \n"
-                    #  f"\tduty-cycle: {duty_cyle}\n"
-                    #  f"\tfrequency : {freq}\n"
-                    #  f"\tdirection : {direction}")
 
         pass
 

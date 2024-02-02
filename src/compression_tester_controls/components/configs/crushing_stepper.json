@@ -5,5 +5,6 @@
   "dsbl_pin": 22,
   "step_pin": 13,
   "cw_pin_high": false,
-  "disable_high": false
+  "disable_high": false,
+  "init_priority": 2
 }
