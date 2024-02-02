@@ -43,6 +43,7 @@ class ADCChannel(Observer):
         self.name = name
         self.device_lock = device_lock
 
+        self.start()
         logging.info(f"{self.name} started")
 
         pass
