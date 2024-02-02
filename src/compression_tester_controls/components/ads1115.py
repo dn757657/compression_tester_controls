@@ -121,10 +121,13 @@ class ADS1115:
             logging.error(f"{self.name}: incorrect units provided. Must be in {ADS1115_UNITS.__str__()}")
         
         for channel in self.channels:
-            if unit == 'volts':
-                self.state_SMA[channel.name] = self.bits_to_volts(np.average(channel.sample_n(n=n)))
-            elif unit == 'bits':
-                self.state_SMA[channel.name] = np.average(channel.sample_n(n=n))
+            try:
+                if unit == 'volts':
+                    self.state_SMA[channel.name] = self.bits_to_volts(np.average(channel.sample_n(n=n)))
+                elif unit == 'bits':
+                    self.state_SMA[channel.name] = np.average(channel.sample_n(n=n))
+            except:
+                logging.log("no samples mate")
         pass
 
     def get_state_SMA(self, n: int,  unit: str = 'volts'):
