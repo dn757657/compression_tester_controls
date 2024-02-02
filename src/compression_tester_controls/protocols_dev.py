@@ -98,6 +98,59 @@ def inst_components(
     return components
 
 
+from .components.ads1115 import ADS1115
+from .components.stepper import StepperMotorDriver
+from .components.A201 import A201
+import numpy as np
+
+
+def sample_a201_until_force_applied(
+        force_sensor_adc: ADS1115,
+        big_stepper: StepperMotorDriver,
+        force_sensor: A201,
+        cusum_h: float = 7,
+        cusum_k: float = 0.1,
+        sma_window: int = 100,
+):
+
+    #big_stepper.rotate(freq=-500, duty_cycle=85)
+
+    while True:
+        state_n = force_sensor_adc.get_state_n(n=sma_window, unit='volts')
+        vouts = state_n.get('a1') - state_n.get('a0')
+        vrefs = state_n.get('a3') - state_n.get('a2')
+        rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
+        print(f"{rs}")
+        if detect_anomoly_rolling_cusum(samples=rs, h=cusum_h, k=cusum_k):
+            #big_stepper.stop()
+            break
+
+    pass
+
+def detect_anomoly_rolling_cusum(samples, h, k):
+    # idx = max(-window, -len(samples))
+    # samples = samples[idx:]  # cut to window
+
+    avg = np.mean(samples)
+    std = np.std(samples)
+
+    norm_samples = (samples - avg) / std
+    norm_samples = norm_samples - k
+    sh = np.maximum.accumulate(np.maximum(norm_samples, 0))
+    sl = np.minimum.accumulate(np.minimum(norm_samples, 0))
+
+    # print(f"h : {h}\n"
+        #   f"sh: {sh[-1]}\n"
+        #   f"sl: {sl[-1]}\n")
+    if sh[-1] > h:
+        return True
+    if sl[-1] < -h:
+        return True
+
+    return False
+
+
 if __name__ == '__main__':
     configs = load_configs()
     inst_components(component_configs=configs)
+

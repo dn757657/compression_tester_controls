@@ -34,7 +34,7 @@ def test():
             channel.stop_running()
 
 
-from .compression_tester_controls.protocols import sample_a201_until_force_applied
+from .compression_tester_controls.protocols_dev import sample_a201_until_force_applied
 def platon_sensing_test():
     components = init()
     adc = components.get('force_sensor_adc')
