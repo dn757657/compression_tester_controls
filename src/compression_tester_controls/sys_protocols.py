@@ -17,7 +17,7 @@ COMPONENTS = sys_init()
 
 def trial_init(
         force_sensor_adc_sma_window: int = 100,
-        stepper_freq: int = -500,
+        stepper_freq: int = 500,
         stepper_dc: float = 85
 ):
     force_sensor_adc = COMPONENTS.get('force_sensor_adc')

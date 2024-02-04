@@ -1,5 +1,6 @@
 {    
     "name": "big_stepper_PID",
+    "type": "PID",
     "Kp": 5,
     "Ki": 0, 
     "Kd": 0,
