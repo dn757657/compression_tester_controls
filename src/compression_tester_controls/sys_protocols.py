@@ -25,7 +25,7 @@ def trial_init(
     big_stepper_pid = COMPONENTS.get('big_stepper_PID')
     force_sensor = COMPONENTS.get('A201')
     enc = COMPONENTS.get('e5')
-#    big_stepper.rotate(freq=-500, duty_cycle=85)
+
     while True:
         state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
         states = [x.size for x in state_n.values()]
@@ -71,10 +71,39 @@ def trial_init(
             break 
 
     logging.info(f"Platons Aligned @ {enc.read()}...")
+    logging.info(f"Platons Returning Home...")
 
+    big_stepper_pid.setpoint = 0
+    error = 1
+    while True:
+        fnew = big_stepper_pid(enc.read())
+        big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
 
-    big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
-    time.sleep(5)
-    big_stepper.stop()
+        if (new_target - error) < enc.read() <= (new_target + error):
+            big_stepper.stop()
+            break
+
+    x = input("Insert Sample and Press ENTER:")
+
+    logging.info("Aligning Platon to Sample...")
+    bumps = 3
+    for i in range(0, bumps):
+        big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
+
+        anomoly = False
+        while not anomoly:
+            anomoly = detect_force_anomoly(
+                force_sensor_adc=force_sensor_adc,
+                force_sensor=force_sensor
+            )
+        
+        big_stepper.stop()
+        # TODO could check enc position and see if theyre the same, failsafe against cusum errors
+
+        big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
+        time.sleep(3)
+        big_stepper.stop()
+
+    logging.info("Sample Found - Trial Ready.")
 
     pass

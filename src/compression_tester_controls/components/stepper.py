@@ -125,7 +125,7 @@ class StepperMotorDriver:
             self.pwd_chan.ChangeDutyCycle(duty_cycle)
 
         pass
-
+    
     def stop(self):
         if self.pwd_chan:
             self.pwd_chan.stop()
