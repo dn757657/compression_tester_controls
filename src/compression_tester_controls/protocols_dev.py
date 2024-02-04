@@ -119,9 +119,15 @@ def detect_force_anomoly(
 
     while True:
         state_n = force_sensor_adc.get_state_n(n=sma_window, unit='volts')
-        vouts = state_n.get('a1') - state_n.get('a0')
-        vrefs = state_n.get('a3') - state_n.get('a2')
-        
+        try:
+            vouts = state_n.get('a1') - state_n.get('a0')
+        except ValueError:
+            vouts = np.array([])
+        try:
+            vrefs = state_n.get('a3') - state_n.get('a2')
+        except ValueError:
+            vrefs = np.array([])
+
         if vrefs.size >= sma_window:
             break
         if vouts.size >= sma_window:
