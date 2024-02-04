@@ -18,7 +18,7 @@ COMPONENTS = sys_init()
 def trial_init(
         force_sensor_adc_sma_window: int = 100,
         stepper_freq: int = -500,
-        stepper_dc = float = 85
+        stepper_dc: float = 85
 ):
     force_sensor_adc = COMPONENTS.get('force_sensor_adc')
     big_stepper = COMPONENTS.get('big_stepper')
@@ -27,9 +27,14 @@ def trial_init(
     while True:
         state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
         states = [x.size for x in state_n.values()]
-        states = [x for x in states if x >= force_sensor_adc_sma_window]
-        
-        if False in states:
+        x = list()
+        for state in states:
+            if state >= force_sensor_adc_sma_window:
+                x.append(True)
+            else:
+                x.append(False)
+
+        if False in x:
             logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
             time.sleep(0.5)
         else:
