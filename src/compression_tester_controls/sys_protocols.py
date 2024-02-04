@@ -73,7 +73,8 @@ def trial_init(
     logging.info(f"Platons Aligned @ {enc.read()}...")
     logging.info(f"Platons Returning Home...")
 
-    big_stepper_pid.setpoint = 0
+    new_target = 0
+    big_stepper_pid.setpoint = new_target
     while True:
         fnew = big_stepper_pid(enc.read())
         big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
@@ -87,9 +88,9 @@ def trial_init(
     logging.info("Aligning Platon to Sample...")
     bumps = 3
     for i in range(0, bumps):
-        big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
-        time.sleep(3)
-        big_stepper.stop()
+        # big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
+        # time.sleep(3)
+        # big_stepper.stop()
 
         big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
 
@@ -102,10 +103,11 @@ def trial_init(
         
         big_stepper.stop()
         # TODO could check enc position and see if theyre the same, failsafe against cusum errors
-        # if i != bumps:
-            # big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
-            # time.sleep(3)
-            # big_stepper.stop()
+        print(f"bumps: {i}, bumps: {bumps - 1}")
+        if i != bumps - 1:
+            big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
+            time.sleep(3)
+            big_stepper.stop()
 
     logging.info("Sample Found - Trial Ready.")
 
