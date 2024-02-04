@@ -1,7 +1,8 @@
 {    
-    "Kp": 1.0,
-    "Ki": 0.0, 
-    "Kd": 0.0,
+    "name": "big_stepper_PID",
+    "Kp": 5,
+    "Ki": 0, 
+    "Kd": 0,
     "setpoint": 0,
     "sample_time": 0.01,
     "upper_output_limit": 500,

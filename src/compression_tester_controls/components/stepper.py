@@ -116,7 +116,6 @@ class StepperMotorDriver:
                      f"\tfrequency : {freq}\n"
                      f"\tdirection : {direction}")
 
-
         if not self.pwd_chan:
             self.enable_driver()
             self.pwd_chan = GPIO.PWM(self.step_pin, freq)  # pin, freq

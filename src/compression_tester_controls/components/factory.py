@@ -44,4 +44,6 @@ class HardwareFactory:
             config.pop('upper_output_limit', None)
             config.pop('lower_output_limit', None)
             config['output_limits'] = output_limits
+
+            config.pop('name', None)
             return PID(**config)
