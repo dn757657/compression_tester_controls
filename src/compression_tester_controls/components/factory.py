@@ -47,4 +47,5 @@ class HardwareFactory:
 
             config.pop('name', None)
             config.pop('type', None)
+            config.pop('init_priority', None)
             return PID(**config)
