@@ -99,10 +99,10 @@ def trial_init(
         
         big_stepper.stop()
         # TODO could check enc position and see if theyre the same, failsafe against cusum errors
-
-        big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
-        time.sleep(3)
-        big_stepper.stop()
+        if i != bumps:
+            big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
+            time.sleep(3)
+            big_stepper.stop()
 
     logging.info("Sample Found - Trial Ready.")
 
