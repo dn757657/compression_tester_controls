@@ -31,7 +31,6 @@ class StepperMotorDriver:
         self.dsbl_pin = dsbl_pin
         self.step_pin = step_pin
 
-        # init pwd channel with random frequency
         self.pwd_chan = None
 
         # set directionality, is pin high clockwise

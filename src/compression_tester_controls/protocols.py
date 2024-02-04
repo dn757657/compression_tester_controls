@@ -2,6 +2,7 @@
 import threading
 import logging
 import timeit
+import time
 
 import numpy as np
 
@@ -95,16 +96,19 @@ def sample_a201_until_force_applied(
         sma_window: int = 100,
 ):
 
-    #big_stepper.rotate(freq=-500, duty_cycle=85)
+    big_stepper.rotate(freq=-500, duty_cycle=85)
 
     while True:
         state_n = force_sensor_adc.get_state_n(n=sma_window, unit='volts')
         vouts = state_n.get('a1') - state_n.get('a0')
         vrefs = state_n.get('a3') - state_n.get('a2')
+        if vrefs.size < sma_window or vouts.size < sma_window:
+            logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
+            continue
         rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
-        print(f"{rs}")
+        # print(f"{rs}")
         if detect_anomoly_rolling_cusum(samples=rs, h=cusum_h, k=cusum_k):
-            #big_stepper.stop()
+            big_stepper.stop()
             break
 
     pass

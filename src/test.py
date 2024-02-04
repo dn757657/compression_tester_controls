@@ -34,17 +34,15 @@ def test():
             channel.stop_running()
 
 
-from compression_tester_controls.protocols_dev import sample_a201_until_force_applied
+from compression_tester_controls.protocols_dev import detect_force_anomoly
 def platon_sensing_test():
     components = init()
     adc = components.get('force_sensor_adc')
     a201 = components.get('A201')
-    big_stepper = components.get('big_stepper')
 
-    sample_a201_until_force_applied(
+    detect_force_anomoly(
         force_sensor_adc=adc,
         force_sensor=a201,
-        big_stepper=big_stepper
     )
 
 
