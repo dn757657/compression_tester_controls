@@ -1,0 +1,13 @@
+{    
+    "Kp": 1.0,
+    "Ki": 0.0, 
+    "Kd": 0.0,
+    "setpoint": 0,
+    "sample_time": 0.01,
+    "upper_output_limit": 500,
+    "lower_output_limit": -500,
+    "auto_mode": true,
+    "proportional_on_measurement": false,
+    "differential_on_measurement": true,
+    "starting_output": 0.0
+}

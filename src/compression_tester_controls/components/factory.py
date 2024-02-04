@@ -1,6 +1,8 @@
 import logging
 import Encoder
 
+from simple_pid import PID
+
 from .stepper import StepperMotorDriver
 from .ads1115 import ADS1115
 from .A201 import A201
@@ -25,8 +27,8 @@ class HardwareFactory:
             return StepperMotorDriver(**config)
         
         # TODO need to implement with decoder
-        # elif 'encoder'.lower() in type.lower():
-            # return Encoder.Encoder(**config)
+        elif 'encoder'.lower() in type.lower():
+            return Encoder.Encoder(A=config.get('A'), B=config.get('B'))
         
         elif 'ads1115'.lower() in type.lower():
             return ADS1115(**config)
@@ -34,3 +36,12 @@ class HardwareFactory:
         elif 'A201'.lower() in type.lower():
             return A201(**config)
         
+        elif 'PID'.lower() in type.lower():
+            upper_output_limit = config.get('upper_output_limit')
+            lower_output_limit = config.get('lower_output_limit')
+            output_limits = (lower_output_limit, upper_output_limit)
+            
+            config.pop('upper_output_limit', None)
+            config.pop('lower_output_limit', None)
+            config['output_limits'] = output_limits
+            return PID(**config)

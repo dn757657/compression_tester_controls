@@ -113,10 +113,6 @@ def detect_force_anomoly(
         sma_window: int = 100,
 ):
 
-    # state_n = force_sensor_adc.get_state_n(n=sma_window, unit='volts')
-    # vouts = state_n.get('a1') - state_n.get('a0')
-    # vrefs = state_n.get('a3') - state_n.get('a2')
-
     while True:
         state_n = force_sensor_adc.get_state_n(n=sma_window, unit='volts')
         try:
@@ -137,7 +133,6 @@ def detect_force_anomoly(
             time.sleep(0.5)
 
     rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
-        # print(f"{rs}")
     if detect_anomoly_rolling_cusum(samples=rs, h=cusum_h, k=cusum_k):
         return True
     else:
@@ -145,8 +140,6 @@ def detect_force_anomoly(
 
 
 def detect_anomoly_rolling_cusum(samples, h, k):
-    # idx = max(-window, -len(samples))
-    # samples = samples[idx:]  # cut to window
 
     avg = np.mean(samples)
     std = np.std(samples)
@@ -164,7 +157,7 @@ def detect_anomoly_rolling_cusum(samples, h, k):
     if sl[-1] < -h:
         return True
 
-    return False
+    return False    
 
 
 if __name__ == '__main__':

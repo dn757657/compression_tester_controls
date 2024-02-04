@@ -3,10 +3,10 @@ import time
 import serial
 
 from simple_pid import PID
-from compression_tester_controls.protocols_dev import load_configs, inst_components
+from compression_tester_controls.sys_functions import load_configs, inst_components
 
 
-def init():
+def sys_init():
     configs = load_configs()
     components = inst_components(component_configs=configs)
     return components
@@ -34,9 +34,9 @@ def test():
             channel.stop_running()
 
 
-from compression_tester_controls.protocols_dev import detect_force_anomoly
+from compression_tester_controls.sys_functions import detect_force_anomoly
 def platon_sensing_test():
-    components = init()
+    components = sys_init()
     adc = components.get('force_sensor_adc')
     a201 = components.get('A201')
 
