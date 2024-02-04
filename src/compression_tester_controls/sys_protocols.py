@@ -25,7 +25,7 @@ def trial_init(
     big_stepper_pid = COMPONENTS.get('big_stepper_PID')
     force_sensor = COMPONENTS.get('A201')
     enc = COMPONENTS.get('e5')
-
+#    big_stepper.rotate(freq=-500, duty_cycle=85)
     while True:
         state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
         states = [x.size for x in state_n.values()]
@@ -53,11 +53,12 @@ def trial_init(
         )
     
     big_stepper.stop()
-    logging.info("Platon Found: Pressing to Align...")
+    logging.info(f"Platon Found @ {enc.read()}: Pressing to Align...")
     
     # move down a few steps to push platons together
     enc_pos = enc.read()
-    new_target = enc_pos + 100
+    additional_steps = 100  # TODO dial this in
+    new_target = enc_pos + additional_steps
     big_stepper_pid.setpoint = new_target
 
     error = 1
@@ -69,7 +70,7 @@ def trial_init(
             big_stepper.stop()
             break 
 
-    logging.info("Platons Aligned...")
+    logging.info(f"Platons Aligned @ {enc.read()}...")
 
 
     big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
