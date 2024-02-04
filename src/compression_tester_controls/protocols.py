@@ -82,9 +82,9 @@ def establish_A201_noise_std(
     return std, running_samples
 
 
-from components.ads1115 import ADS1115
-from components.stepper import StepperMotorDriver
-from components.A201 import A201
+from .components.ads1115 import ADS1115
+from .components.stepper import StepperMotorDriver
+from .components.A201 import A201
 
 def sample_a201_until_force_applied(
         force_sensor_adc: ADS1115,

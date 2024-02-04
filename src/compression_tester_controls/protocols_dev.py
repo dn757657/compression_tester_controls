@@ -1,10 +1,17 @@
 import json
 import logging
 import os
+import time
+
+import numpy as np
 
 from collections import OrderedDict
 
 from .components.factory import HardwareFactory
+from .components.ads1115 import ADS1115
+from .components.stepper import StepperMotorDriver
+from .components.A201 import A201
+
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
@@ -98,34 +105,38 @@ def inst_components(
     return components
 
 
-from .components.ads1115 import ADS1115
-from .components.stepper import StepperMotorDriver
-from .components.A201 import A201
-import numpy as np
-
-
-def sample_a201_until_force_applied(
+def detect_force_anomoly(
         force_sensor_adc: ADS1115,
-        big_stepper: StepperMotorDriver,
         force_sensor: A201,
-        cusum_h: float = 7,
+        cusum_h: float = 4,
         cusum_k: float = 0.1,
         sma_window: int = 100,
 ):
 
-    #big_stepper.rotate(freq=-500, duty_cycle=85)
+    # state_n = force_sensor_adc.get_state_n(n=sma_window, unit='volts')
+    # vouts = state_n.get('a1') - state_n.get('a0')
+    # vrefs = state_n.get('a3') - state_n.get('a2')
 
     while True:
         state_n = force_sensor_adc.get_state_n(n=sma_window, unit='volts')
         vouts = state_n.get('a1') - state_n.get('a0')
         vrefs = state_n.get('a3') - state_n.get('a2')
-        rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
-        print(f"{rs}")
-        if detect_anomoly_rolling_cusum(samples=rs, h=cusum_h, k=cusum_k):
-            #big_stepper.stop()
+        
+        if vrefs.size >= sma_window:
             break
+        if vouts.size >= sma_window:
+            break
+        else:
+            logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
+            time.sleep(0.5)
 
-    pass
+    rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
+        # print(f"{rs}")
+    if detect_anomoly_rolling_cusum(samples=rs, h=cusum_h, k=cusum_k):
+        return True
+    else:
+        return False
+
 
 def detect_anomoly_rolling_cusum(samples, h, k):
     # idx = max(-window, -len(samples))
