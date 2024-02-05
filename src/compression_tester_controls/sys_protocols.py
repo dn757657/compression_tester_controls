@@ -132,7 +132,17 @@ def platon_setup(
     pass
 
 
-def camera_system_setup(
+def home_camera_system(
+        stepper,
+        switches
+):
+    logging.info("Homing Camera System...")
+
+    logging.info("Camera System Home.")
+    return
+
+
+def home_camera_system(
         stepper_freq: int = 500,
         stepper_dc: float = 50
 ):
@@ -142,19 +152,73 @@ def camera_system_setup(
     lsw1 = COMPONENTS.get('cam_limit_swtich1')
     lsw2 = COMPONENTS.get('cam_limit_swtich2')
 
-    while True:
-        adc_state = lsw_adc.get_state(unit='volts')
-        sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
-        sig_lsw2 = adc_state.get('a1') - adc_state.get('a2')
+    adc_state = lsw_adc.get_state(unit='volts')
+    sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
+    sig_lsw2 = adc_state.get('a1') - adc_state.get('a2')
 
-        print(f"sig1: {sig_lsw1}, sig2: {sig_lsw2}")
+    # print(f"sig1: {sig_lsw1}, sig2: {sig_lsw2}")
+    logging.info("Homing Camera System...")
 
-        states = {
-            'lsw1': lsw1.update(sig_lsw1),
-            'lsw2': lsw2.update(sig_lsw2)
-        }
+    states = {
+        'lsw1': lsw1.update(sig_lsw1),
+        'lsw2': lsw2.update(sig_lsw2)
+    }
+    # print(f"state1: {states.get('lsw1')}, state2: {states.get('lsw2')}")
 
-        print(f"state1: {states.get('lsw1')}, state2: {states.get('lsw2')}")
+    if True in states.values():
+        logging.info("Camera System Home.")
+        return
+    else:  # no switch triggered
+        if cam_stepper.frequency:
+            stepper_freq = -cam_stepper.freq
+            logging.info("Previous Stepper Direction Not Known! Untrigger Switch Manually by Moving Camera System Assembly.")
+            input("Press Enter When Collision Resolved...")
+        cam_stepper.rotate(freq=stepper_freq * 2, duty_cycle=stepper_dc)
+        
+        while True:
+            adc_state = lsw_adc.get_state(unit='volts')
+            sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
+            sig_lsw2 = adc_state.get('a1') - adc_state.get('a2')
 
+            states = {
+                'lsw1': lsw1.update(sig_lsw1),
+                'lsw2': lsw2.update(sig_lsw2)
+            }
+
+            if True in states.values():
+                cam_stepper.stop()
+                break   
+
+        bumps = 3
+        for i in range(0, bumps - 1):
+            cam_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)  # move off
+            while True:
+                adc_state = lsw_adc.get_state(unit='volts')
+                sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
+                sig_lsw2 = adc_state.get('a1') - adc_state.get('a2')
+
+                states = {
+                    'lsw1': lsw1.update(sig_lsw1),
+                    'lsw2': lsw2.update(sig_lsw2)
+                }
+
+                if True not in states.values():
+                    cam_stepper.stop()
+                    break
+            
+            cam_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)  # move on
+            while True:
+                adc_state = lsw_adc.get_state(unit='volts')
+                sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
+                sig_lsw2 = adc_state.get('a1') - adc_state.get('a2')
+
+                states = {
+                    'lsw1': lsw1.update(sig_lsw1),
+                    'lsw2': lsw2.update(sig_lsw2)
+                }
+
+                if True in states.values():
+                    cam_stepper.stop()
+                    break
 
     return

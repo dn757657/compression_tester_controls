@@ -27,6 +27,9 @@ class StepperMotorDriver:
         GPIO.setup(dsbl_pin, GPIO.OUT)
         GPIO.setup(step_pin, GPIO.OUT)
 
+        self.direction = None
+        self.frequency = None
+
         self.dir_pin = dir_pin
         self.dsbl_pin = dsbl_pin
         self.step_pin = step_pin
@@ -66,6 +69,7 @@ class StepperMotorDriver:
             elif self.cw_pin_high is False:
                 GPIO.output(self.dir_pin, GPIO.LOW)
 
+        self.direction = direction
         logging.info(f"{self.name}: direction set to {direction}")
         pass
 
@@ -87,6 +91,19 @@ class StepperMotorDriver:
         logging.info(f"{self.name}: disabled")
         pass
 
+    def set_frequency(self, freq: float):
+        if freq < 0:  # swap direction if frequency negative
+            #direction = [x for x in MOTOR_DIRECTIONS != direction][0]
+            self.set_dir(direction='cw')
+            freq = abs(freq)
+        elif freq > 0:
+            self.set_dir(direction='ccw')
+        elif freq == 0:
+            #self.stop()
+            return
+        
+        pass
+
     def rotate(
             self,
             duty_cycle: float,
@@ -100,21 +117,12 @@ class StepperMotorDriver:
         :return:
         """
 
-        if freq < 0:  # swap direction if frequency negative
-            #direction = [x for x in MOTOR_DIRECTIONS != direction][0]
-            direction = 'cw'
-            freq = abs(freq)
-        elif freq > 0:
-            direction = 'ccw'
-        elif freq == 0:
-            #self.stop()
-            return
-        self.set_dir(direction=direction)
-
+        self.set_frequency(freq=freq)  # also sets direction
+        
         logging.info(f"{self.name}: rotating: \n"
                      f"\tduty-cycle: {duty_cycle}\n"
-                     f"\tfrequency : {freq}\n"
-                     f"\tdirection : {direction}")
+                     f"\tfrequency : {self.frequency}\n"
+                     f"\tdirection : {self.direction}")
 
         if not self.pwd_chan:
             self.enable_driver()
