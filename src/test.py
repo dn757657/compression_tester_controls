@@ -5,7 +5,7 @@ import serial
 from simple_pid import PID
 from compression_tester_controls.sys_functions import load_configs, inst_components
 from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup
-
+from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, gpohoto2_get_camera_settings
 
 # def sys_init():
 #     configs = load_configs()
@@ -49,4 +49,7 @@ from compression_tester_controls.sys_protocols import platon_setup, camera_syste
 
 
 if __name__ == '__main__':
-    camera_system_setup()
+    ports = gphoto2_get_active_ports()
+    for port in ports():
+        config = gpohoto2_get_camera_settings(port=port)
+        print(config)
