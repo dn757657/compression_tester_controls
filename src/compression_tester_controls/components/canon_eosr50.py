@@ -43,7 +43,12 @@ def eosr50_init(
     # cannot wake up from pi
     try:
         if config:
-            subprocess.run(['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0'] + config)
+            gcommand = ['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0']
+            for setting in config:
+                gcommand.append('--set-config')
+                gcommand.append(setting)
+
+            subprocess.run(gcommand)
         else:
             subprocess.run(['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0'])
         print(f"EOS R50 configured @ port: {port}.")
