@@ -1,0 +1,7 @@
+{
+    "name": "cam_limit_swtich1",
+    "type": "dipole_switch",
+    "init_priority": 2,
+    "trigger_threshold": 2,
+    "trigger_above_threshold": false
+}

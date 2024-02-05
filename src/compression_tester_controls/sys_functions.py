@@ -160,6 +160,25 @@ def detect_anomoly_rolling_cusum(samples, h, k):
     return False    
 
 
+def move_stepper_PID_target(
+        stepper,
+        pid,
+        enc,
+        stepper_dc: float,
+        setpoint: int,
+        error: int
+):
+    pid.setpoint = setpoint
+
+    while True:
+        fnew = pid(enc.read())
+        stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
+
+        if (setpoint - error) < enc.read() <= (setpoint + error):
+            stepper.stop()
+            break 
+
+
 if __name__ == '__main__':
     configs = load_configs()
     inst_components(component_configs=configs)

@@ -6,6 +6,7 @@ from simple_pid import PID
 from .stepper import StepperMotorDriver
 from .ads1115 import ADS1115
 from .A201 import A201
+from.switch import DiPoleSwitch
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
@@ -49,3 +50,7 @@ class HardwareFactory:
             config.pop('type', None)
             config.pop('init_priority', None)
             return PID(**config)
+        
+        elif 'switch'.lower() in type.lower():
+            if 'dipole'.lower() in type.lower():
+                return DiPoleSwitch(**config)

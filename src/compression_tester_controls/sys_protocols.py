@@ -1,7 +1,7 @@
 import time
 import logging
 
-from compression_tester_controls.sys_functions import load_configs, inst_components, detect_force_anomoly
+from compression_tester_controls.sys_functions import load_configs, inst_components, detect_force_anomoly, move_stepper_PID_target
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
@@ -15,7 +15,7 @@ def sys_init():
 COMPONENTS = sys_init()
 
 
-def trial_init(
+def platon_setup(
         force_sensor_adc_sma_window: int = 100,
         stepper_freq: int = 500,
         stepper_dc: float = 85
@@ -59,31 +59,49 @@ def trial_init(
     enc_pos = enc.read()
     additional_steps = 100  # TODO dial this in
     new_target = enc_pos + additional_steps
-    big_stepper_pid.setpoint = new_target
+    
+    move_stepper_PID_target(
+        stepper=big_stepper, 
+        pid=big_stepper_pid, 
+        enc=enc, 
+        setpoint=new_target,
+        error=2
+        )
+    
+    # big_stepper_pid.setpoint = new_target
 
-    error = 2
-    while True:
-        fnew = big_stepper_pid(enc.read())
-        big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
+    # error = 2
+    # while True:
+        # fnew = big_stepper_pid(enc.read())
+        # big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
 
-        if (new_target - error) < enc.read() <= (new_target + error):
-            big_stepper.stop()
-            break 
+        # if (new_target - error) < enc.read() <= (new_target + error):
+            # big_stepper.stop()
+            # break 
 
     logging.info(f"Platons Aligned @ {enc.read()}...")
     logging.info(f"Platons Returning Home...")
 
-    new_target = 0
-    big_stepper_pid.setpoint = new_target
-    while True:
-        fnew = big_stepper_pid(enc.read())
-        big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
+    new_target = enc.read() - 2000
+    move_stepper_PID_target(
+        stepper=big_stepper, 
+        pid=big_stepper_pid, 
+        enc=enc, 
+        setpoint=new_target,
+        error=2
+        )
+    
+    # new_target = enc.read() - 2000
+    # big_stepper_pid.setpoint = new_target
+    # while True:
+        # fnew = big_stepper_pid(enc.read())
+        # big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
 
-        if (new_target - error) < enc.read() <= (new_target + error):
-            big_stepper.stop()
-            break
+        # if (new_target - error) < enc.read() <= (new_target + error):
+            # big_stepper.stop()
+            # break
 
-    x = input("Insert Sample and Press ENTER:")
+    input("Insert Sample and Press ENTER:")
 
     logging.info("Aligning Platon to Sample...")
     bumps = 3
@@ -109,6 +127,34 @@ def trial_init(
             time.sleep(3)
             big_stepper.stop()
 
-    logging.info("Sample Found - Trial Ready.")
+    logging.info("Platons Aligned to Sample")
 
     pass
+
+
+def camera_system_setup(
+        stepper_freq: int = 500,
+        stepper_dc: float = 50
+):
+    # pull cam settings and setup cams
+    cam_stepper = COMPONENTS.get('cam_stepper')
+    lsw_adc = COMPONENTS.get('cam_limit_switch_adc')
+    lsw1 = COMPONENTS.get('cam_limit_swtich1')
+    lsw2 = COMPONENTS.get('cam_limit_swtich2')
+
+    while True:
+        adc_state = lsw_adc.get_state(unit='volts')
+        sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
+        sig_lsw2 = adc_state.get('a1') - adc_state.get('a2')
+
+        print(f"sig1: {sig_lsw1}, sig2: {sig_lsw2}")
+
+        states = {
+            'lsw1': lsw1.update(sig_lsw1),
+            'lsw2': lsw2.update(sig_lsw2)
+        }
+
+        print(f"state1: {states.get('lsw1')}, state2: {states.get('lsw2')}")
+
+
+    return

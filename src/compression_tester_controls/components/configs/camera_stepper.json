@@ -1,0 +1,10 @@
+{
+  "name": "cam_stepper",
+  "type": "stepper",
+  "dir_pin": 17,
+  "dsbl_pin": 26,
+  "step_pin": 12,
+  "cw_pin_high": false,
+  "disable_high": false,
+  "init_priority": 2
+}

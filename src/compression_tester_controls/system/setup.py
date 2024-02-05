@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from src.compression_tester_controls.system.utils import load_sys_json, write_sys_json
 from compression_tester_controls.components.stepper import StepperMotorDriver
 from src.compression_tester_controls.components.ads1115 import ADS1115
-from src.compression_tester_controls.misc_components.switch import DiPoleSwitch
+from compression_tester_controls.components.switch import DiPoleSwitch
 from src.compression_tester_controls.rpi.setup import init_pi_pins
 
 DEFAULT_INIT_PARAMS = {

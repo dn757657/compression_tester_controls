@@ -4,7 +4,7 @@ import serial
 
 from simple_pid import PID
 from compression_tester_controls.sys_functions import load_configs, inst_components
-from compression_tester_controls.sys_protocols import trial_init
+from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup
 
 
 # def sys_init():
@@ -49,4 +49,4 @@ from compression_tester_controls.sys_protocols import trial_init
 
 
 if __name__ == '__main__':
-    trial_init()
+    camera_system_setup(stepper_freq=500, stepper_dc=50)
