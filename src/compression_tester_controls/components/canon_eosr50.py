@@ -12,7 +12,7 @@ def gpohoto2_get_camera_settings(port):
 
     # Retrieve current settings
     settings = {}
-    for option in config_options:
+    for option in config_options[0:10]:
         get_command = ['sudo', 'gphoto2', '--port', port, '--get-config', option]
         get_result = subprocess.run(get_command, capture_output=True, text=True)
         settings[option] = get_result.stdout

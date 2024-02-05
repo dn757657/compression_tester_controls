@@ -5,8 +5,8 @@ here = pathlib.Path(__file__).parent.resolve()
 
 setup(
     name="compression_tester_controls",  # Required
-    version="2.0.1",  # Required
-    description="poorly made hardware control library",  # Optional
+    version="2.0.2",  # Required
+    description="poorly made hardware control library - camera testing",  # Optional
     long_description_content_type="text/markdown",  # Optional (see note above)
     url="https://github.com/dn757657/compression_tester_controls",  # Optional
     packages=find_packages(where='src'),  # Required
