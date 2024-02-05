@@ -20,6 +20,17 @@ def gpohoto2_get_camera_settings(port):
     return settings
 
 
+def gphoto_settings_test(port):
+    settings = gpohoto2_get_camera_settings(port=port)
+
+    for setting, value in settings.items():
+        config = {setting: value}
+        print(f"Trying to set: {setting}: to {value}")
+        eosr50_init(port=port, config=config)
+
+    return
+
+
 def gphoto2_get_active_ports():
     try:
         active_ports = subprocess.run(['sudo', 'gphoto2', '--auto-detect'], capture_output=True, text=True, check=True)
