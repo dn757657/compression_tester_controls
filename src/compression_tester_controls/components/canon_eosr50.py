@@ -12,7 +12,7 @@ def gpohoto2_get_camera_settings(port):
 
     # Retrieve current settings
     settings = {}
-    for option in config_options[0:10]:
+    for option in config_options:
         get_command = ['sudo', 'gphoto2', '--port', port, '--get-config', option]
         get_result = subprocess.run(get_command, capture_output=True, text=True)
         settings[option] = get_result.stdout
@@ -35,13 +35,17 @@ def gphoto2_get_active_ports():
 
 
 def eosr50_init(
-        port
+        port,
+        config: None
 ):
 
     # configure camera to not turn off/ go to sleep mode
     # cannot wake up from pi
     try:
-        subprocess.run(['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0'])
+        if config:
+            subprocess.run(['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0'] + config)
+        else:
+            subprocess.run(['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0'])
         print(f"EOS R50 configured @ port: {port}.")
 
     except subprocess.CalledProcessError:

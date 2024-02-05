@@ -50,6 +50,6 @@ from compression_tester_controls.components.canon_eosr50 import gphoto2_get_acti
 
 if __name__ == '__main__':
     ports = gphoto2_get_active_ports()
-    for port in ports():
+    for port in ports:
         config = gpohoto2_get_camera_settings(port=port)
         print(config)
