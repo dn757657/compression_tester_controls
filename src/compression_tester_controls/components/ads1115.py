@@ -115,7 +115,10 @@ class ADS1115:
         pass
 
     def get_state(self, unit: str = 'volts'):
-        self._update(unit=unit)
+        try:
+            self._update(unit=unit)
+        except OSError:
+            x = None
         return self.state
     
 
@@ -132,7 +135,10 @@ class ADS1115:
         pass
 
     def get_state_n(self, n: int, unit: str = 'volts'):
-        self._update_n(n=n, unit=unit)
+        try:
+            self._update_n(n=n, unit=unit)
+        except OSError:
+            x = None
         return self.state_n
 
 

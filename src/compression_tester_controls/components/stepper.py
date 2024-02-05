@@ -95,9 +95,10 @@ class StepperMotorDriver:
         if freq < 0:  # swap direction if frequency negative
             #direction = [x for x in MOTOR_DIRECTIONS != direction][0]
             self.set_dir(direction='cw')
-            freq = abs(freq)
+            self.frequency = abs(freq)
         elif freq > 0:
             self.set_dir(direction='ccw')
+            self.frequency = freq
         elif freq == 0:
             #self.stop()
             return

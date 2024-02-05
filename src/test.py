@@ -49,4 +49,4 @@ from compression_tester_controls.sys_protocols import platon_setup, camera_syste
 
 
 if __name__ == '__main__':
-    camera_system_setup(stepper_freq=500, stepper_dc=50)
+    camera_system_setup()
