@@ -20,13 +20,12 @@ def gpohoto2_get_camera_settings(port):
     return settings
 
 
-def gphoto_settings_test(port):
-    settings = gpohoto2_get_camera_settings(port=port)
+def gphoto_settings_test(port, settings):
 
-    for setting, value in settings.items():
-        config = {setting: value}
-        print(f"Trying to set: {setting}: to {value}")
-        eosr50_init(port=port, config=config)
+    for setting in settings:  # settings is list
+        s = setting.split("=")
+        print(f"Trying to set: {s[0]}: to {s[1]}")
+        eosr50_init(port=port, config=setting)
 
     return
 
