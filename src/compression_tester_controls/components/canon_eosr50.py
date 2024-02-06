@@ -77,14 +77,18 @@ def gphoto_settings_test(port, settings):
         'd406',
     ]
     used_settings = []
+    config = []
     for setting in settings:  # settings is list
+        import time
+        time.sleep(0.5)
         s = setting.split("=")
         if s[0] in filtered_settings:
+            config.append(setting)
             print(f"Trying to set: {s[0]}: to {s[1]}")
-            eosr50_init(port=port, config=[setting])
+            eosr50_init(port=port, config=config)
             used_settings.append(s[0])
     print(f"settings used: {used_settings}")
-    print(f"settings not used: {[x for x in filtered_settings not in used_settings]}")
+    print(f"settings not used: {filtered_settings - used_settings}")
     return
 
 
