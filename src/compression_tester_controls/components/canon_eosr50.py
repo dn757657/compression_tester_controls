@@ -21,11 +21,23 @@ def gpohoto2_get_camera_settings(port):
 
 
 def gphoto_settings_test(port, settings):
+    
+    filtered_settings = [
+        'syncdatetimeutc',
+        'syncdatetime',
+        'autofocusdrive',
+        'cancelautofocus',
+        'eoszoom',
+        'eoszoomposition',
+        'viewfinder',
+        'output',
+    ]
 
     for setting in settings:  # settings is list
         s = setting.split("=")
-        print(f"Trying to set: {s[0]}: to {s[1]}")
-        eosr50_init(port=port, config=setting)
+        if s[0] in filtered_settings:
+            print(f"Trying to set: {s[0]}: to {s[1]}")
+            eosr50_init(port=port, config=[setting])
 
     return
 
