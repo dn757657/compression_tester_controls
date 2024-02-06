@@ -21,24 +21,70 @@ def gpohoto2_get_camera_settings(port):
 
 
 def gphoto_settings_test(port, settings):
-    
+    # need to figure which settings can be set
     filtered_settings = [
         'syncdatetimeutc',
         'syncdatetime',
         'autofocusdrive',
         'cancelautofocus',
-        'eoszoom',
+        # 'eoszoom',
         'eoszoomposition',
         'viewfinder',
         'output',
+        'evfmode',
+        'focusarea', 
+        'strobofiring', 
+        'flashcharged', 
+        'oneshotrawon', 
+        'autopoweroff', 
+        'depthoffield', 
+        'capturetarget', 
+        'capture', 
+        'remotemode', 
+        'eventmode', 
+        'lensname', 
+        'availableshots', 
+        'eosmovieswitch', 
+        'imageformat', 
+        'imageformatsd', 
+        'imageformatcf', 
+        'iso',
+        'whitebalance', 
+        'colortemperature', 
+        'whitebalanceadjusta', 
+        'whitebalanceadjustb', 
+        'whitebalancexa',
+        'whitebalancexb', 
+        'colorspace',
+        'zoomspeed', 
+        'exposurecompensation', 
+        'focusmode', 
+        'continuousaf', 
+        'aspectratio', 
+        'storageid',
+        'highisonr', 
+        'autoexposuremode', 
+        'autoexposuremodedial', 
+        'drivemode',
+        'picturestyle', 
+        'aperture',                      
+        'shutterspeed', 
+        'meteringmode', 
+        'liveviewsize', 
+        'bracketmode', 
+        'aeb',
+        'alomode', 
+        'd406',
     ]
-
+    used_settings = []
     for setting in settings:  # settings is list
         s = setting.split("=")
         if s[0] in filtered_settings:
             print(f"Trying to set: {s[0]}: to {s[1]}")
             eosr50_init(port=port, config=[setting])
-
+            used_settings.append(s[0])
+    print(f"settings used: {used_settings}")
+    print(f"settings not used: {[x for x in filtered_settings not in used_settings]}")
     return
 
 
