@@ -20,7 +20,7 @@ REQUIRED_CONFIG_ATTRS = ['name', 'type']
 
 
 def load_configs(
-        package: str, 
+        package: str = "compression_tester_controls.components", 
         directory: str = "configs", 
         config_file_ext: str = 'json'
 ) -> dict():
