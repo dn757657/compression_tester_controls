@@ -92,7 +92,6 @@ def eosr50_capture_and_save(
 def eosr50_continuous_capture_and_save(
         port,
         stop_event,
-        file_name: str = uuid.uuid4(),
         filenames: list = list()
 ):
     """
@@ -104,7 +103,8 @@ def eosr50_continuous_capture_and_save(
     i = 0
     while not stop_event.is_set():
         # sudo gphoto2 --capture-image-and-download -filename "%Y%m%d%H%M%S.jpg"
-        filename = f"{file_name}.%C"  # %C uses extension assigned by cam
+        id = uuid.uuid4()
+        filename = f"{id}.%C"  # %C uses extension assigned by cam
         try:
             subprocess.run([
                 'sudo',
@@ -115,7 +115,7 @@ def eosr50_continuous_capture_and_save(
             ],
                 check=True
             )
-            filenames.append(filename)
+            filenames.append(id)
             logging.info(f"Image {filename} Captured")
             i += 1  # only increment if captured
 
