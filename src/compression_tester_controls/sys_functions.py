@@ -6,6 +6,7 @@ import time
 import numpy as np
 
 from collections import OrderedDict
+from importlib import resources
 
 from .components.factory import HardwareFactory
 from .components.ads1115 import ADS1115
@@ -19,29 +20,60 @@ REQUIRED_CONFIG_ATTRS = ['name', 'type']
 
 
 def load_configs(
-        base_dir: str = f"./components/configs",
+        package: str, 
+        directory: str = "configs", 
         config_file_ext: str = 'json'
-):  
+) -> dict():
     
-    script_path = os.path.dirname(os.path.realpath(__file__))
-    print(f"{script_path}")
-
     component_configs = dict()
-    for file in os.listdir(f"{script_path}/{base_dir}"):
-        if file.endswith(f".{config_file_ext}"):
-            with open(f"{script_path}/{base_dir}/{file}", "r") as f:
-
-                d = json.load(f)
-                all_reqd_attrs = True
-                for attr in REQUIRED_CONFIG_ATTRS:
-                    if attr not in d.keys():
-                        logging.error(f"Config {file} missing attribute: {attr}")
-                        all_reqd_attrs = False
-                        break
-                if all_reqd_attrs:
-                    component_configs[file.split(".")[0]] = d
-
+    
+    # Use importlib.resources to list all entries within the given directory of the package
+    if resources.is_resource(package, directory):
+        with resources.path(package, directory) as pkg_dir:
+            # List all resources in the given directory
+            for entry in resources.contents(package):
+                entry_path = pkg_dir / entry
+                if entry_path.is_file() and entry.endswith(f".{config_file_ext}"):
+                    # Open and load the JSON file
+                    with open(entry_path, "r") as f:
+                        d = json.load(f)
+                        all_reqd_attrs = True
+                        for attr in REQUIRED_CONFIG_ATTRS:
+                            if attr not in d.keys():
+                                logging.error(f"Config {entry} missing attribute: {attr}")
+                                all_reqd_attrs = False
+                                break
+                        if all_reqd_attrs:
+                            component_configs[entry.split(".")[0]] = d
+    
     return component_configs
+
+
+
+# def load_configs(
+#         base_dir: str = f"./components/configs",
+#         config_file_ext: str = 'json'
+# ):  
+    
+#     script_path = os.path.dirname(os.path.realpath(__file__))
+#     print(f"{script_path}")
+
+#     component_configs = dict()
+#     for file in os.listdir(f"{script_path}/{base_dir}"):
+#         if file.endswith(f".{config_file_ext}"):
+#             with open(f"{script_path}/{base_dir}/{file}", "r") as f:
+
+#                 d = json.load(f)
+#                 all_reqd_attrs = True
+#                 for attr in REQUIRED_CONFIG_ATTRS:
+#                     if attr not in d.keys():
+#                         logging.error(f"Config {file} missing attribute: {attr}")
+#                         all_reqd_attrs = False
+#                         break
+#                 if all_reqd_attrs:
+#                     component_configs[file.split(".")[0]] = d
+
+#     return component_configs
 
 
 def inst_components(
