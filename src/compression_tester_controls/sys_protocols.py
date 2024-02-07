@@ -1,8 +1,9 @@
 import time
 import logging
+import threading
 
 from compression_tester_controls.sys_functions import load_configs, inst_components, detect_force_anomoly, move_stepper_PID_target
-from compression_tester_controls.components.canon_eosr50 import eosr50_init, gphoto2_get_active_ports
+from compression_tester_controls.components.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, eosr50_continuous_capture_and_save
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
@@ -234,3 +235,39 @@ def init_cameras(cam_settings):
         eosr50_init(port=port, config=cam_settings)
     
     return cam_ports
+
+
+def move_platon_to_strain():
+    # pass in strain
+    # pass in initial sample height
+    # calc encoder steps for moving motor 1000ppr
+    # move motor steps
+    pass
+
+
+def capture_step_frames(cam_ports):
+    cam_threads = []
+    photos = [list() for x in cam_ports]
+    stop_event = threading.Event()
+
+    for i, port in enumerate(cam_ports, start=0):
+        cam = threading.Thread(
+                target=eosr50_continuous_capture_and_save,
+                args=(port, stop_event, photos[i])
+            )
+        cam_threads.append(cam)
+
+    for thread in cam_threads:
+        thread.start()
+        thread.join()
+
+    # move motor on same stop event thread
+
+    start = time.time()
+    while True:
+        if (time.time() - start) > 5:
+            stop_event.set()
+            break
+    
+    all_photos = [item for sublist in photos for item in sublist]
+    return all_photos

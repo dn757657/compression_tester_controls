@@ -49,33 +49,6 @@ def load_configs(
     return component_configs
 
 
-
-# def load_configs(
-#         base_dir: str = f"./components/configs",
-#         config_file_ext: str = 'json'
-# ):  
-    
-#     script_path = os.path.dirname(os.path.realpath(__file__))
-#     print(f"{script_path}")
-
-#     component_configs = dict()
-#     for file in os.listdir(f"{script_path}/{base_dir}"):
-#         if file.endswith(f".{config_file_ext}"):
-#             with open(f"{script_path}/{base_dir}/{file}", "r") as f:
-
-#                 d = json.load(f)
-#                 all_reqd_attrs = True
-#                 for attr in REQUIRED_CONFIG_ATTRS:
-#                     if attr not in d.keys():
-#                         logging.error(f"Config {file} missing attribute: {attr}")
-#                         all_reqd_attrs = False
-#                         break
-#                 if all_reqd_attrs:
-#                     component_configs[file.split(".")[0]] = d
-
-#     return component_configs
-
-
 def inst_components(
         component_configs: dict
 ):
@@ -213,7 +186,7 @@ def move_stepper_PID_target(
             break 
 
 
-def get_force_zero(n_samples, components):
+def sample_force_sensor(n_samples, components):
     force_sensor = components.get('A201')
     force_sensor_adc = components.get('force_sensor_adc')
 
@@ -239,9 +212,9 @@ def get_force_zero(n_samples, components):
     rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
     # TODO
     # load =
-    force_zero = np.mean(rs)
+    force = np.mean(rs)
 
-    return force_zero 
+    return force 
 
 
 if __name__ == '__main__':
