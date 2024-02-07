@@ -259,7 +259,6 @@ def capture_step_frames(cam_ports):
 
     for thread in cam_threads:
         thread.start()
-        thread.join()
 
     # move motor on same stop event thread
 
@@ -267,6 +266,8 @@ def capture_step_frames(cam_ports):
     while True:
         if (time.time() - start) > 5:
             stop_event.set()
+            for thread in cam_threads:
+                thread.join()
             break
     
     all_photos = [item for sublist in photos for item in sublist]
