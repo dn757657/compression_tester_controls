@@ -20,7 +20,7 @@ REQUIRED_CONFIG_ATTRS = ['name', 'type']
 
 
 def load_configs(
-        package: str = "compression_tester_controls.components", 
+        package: str = "compression_tester_controls.components.configs", 
         directory: str = "configs", 
         config_file_ext: str = 'json'
 ) -> dict():
@@ -28,23 +28,23 @@ def load_configs(
     component_configs = dict()
     
     # Use importlib.resources to list all entries within the given directory of the package
-    if resources.is_resource(package, directory):
-        with resources.path(package, directory) as pkg_dir:
+    # if resources.is_resource(package, directory):
+        # with resources.path(package, directory) as pkg_dir:
             # List all resources in the given directory
-            for entry in resources.contents(package):
-                entry_path = pkg_dir / entry
-                if entry_path.is_file() and entry.endswith(f".{config_file_ext}"):
-                    # Open and load the JSON file
-                    with open(entry_path, "r") as f:
-                        d = json.load(f)
-                        all_reqd_attrs = True
-                        for attr in REQUIRED_CONFIG_ATTRS:
-                            if attr not in d.keys():
-                                logging.error(f"Config {entry} missing attribute: {attr}")
-                                all_reqd_attrs = False
-                                break
-                        if all_reqd_attrs:
-                            component_configs[entry.split(".")[0]] = d
+    for entry in resources.contents(package):
+        entry_path = resources.path(package) / entry
+        if entry_path.is_file() and entry.endswith(f".{config_file_ext}"):
+            # Open and load the JSON file
+            with open(entry_path, "r") as f:
+                d = json.load(f)
+                all_reqd_attrs = True
+                for attr in REQUIRED_CONFIG_ATTRS:
+                    if attr not in d.keys():
+                        logging.error(f"Config {entry} missing attribute: {attr}")
+                        all_reqd_attrs = False
+                        break
+                if all_reqd_attrs:
+                    component_configs[entry.split(".")[0]] = d
     
     return component_configs
 
