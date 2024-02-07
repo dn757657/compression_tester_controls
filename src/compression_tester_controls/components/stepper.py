@@ -127,10 +127,10 @@ class StepperMotorDriver:
 
         if not self.pwd_chan:
             self.enable_driver()
-            self.pwd_chan = GPIO.PWM(self.step_pin, freq)  # pin, freq
+            self.pwd_chan = GPIO.PWM(self.step_pin, self.frequency)  # pin, freq
             self.pwd_chan.start(duty_cycle)
         else:
-            self.pwd_chan.ChangeFrequency(freq)
+            self.pwd_chan.ChangeFrequency(self.frequency)
             self.pwd_chan.ChangeDutyCycle(duty_cycle)
 
         pass

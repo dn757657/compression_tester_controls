@@ -18,7 +18,7 @@ def sys_init():
 
 
 def platon_setup(
-        components = COMPONENTS,
+        components,
         force_sensor_adc_sma_window: int = 100,
         stepper_freq: int = 500,
         stepper_dc: float = 85
@@ -225,6 +225,21 @@ def home_camera_system(
                 cam_stepper.stop()
                 break
 
+    cam_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)  # move off
+    while True:
+        adc_state = lsw_adc.get_state(unit='volts')
+        sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
+        sig_lsw2 = adc_state.get('a1') - adc_state.get('a2')
+
+        states = {
+            'lsw1': lsw1.update(sig_lsw1),
+            'lsw2': lsw2.update(sig_lsw2)
+        }
+
+        if True not in states.values():
+            cam_stepper.stop()
+            break
+
     logging.info("Camera Homed.")
     return
 
@@ -262,7 +277,7 @@ def capture_step_frames(cam_ports, components):
     lsw1 = components.get('cam_limit_swtich1')
     lsw2 = components.get('cam_limit_swtich2')
 
-    cam_stepper.rotate(freq=-cam_stepper.frequency * 2, duty_cycle=50)
+    cam_stepper.rotate(freq=cam_stepper.frequency * 2, duty_cycle=50)
     
     for thread in cam_threads:
         thread.start()
