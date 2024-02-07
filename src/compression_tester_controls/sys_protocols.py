@@ -14,7 +14,7 @@ def sys_init():
     components = inst_components(component_configs=configs)
     return components
 
-COMPONENTS = sys_init()
+# COMPONENTS = sys_init()
 
 
 def platon_setup(
@@ -135,7 +135,7 @@ def platon_setup(
     pass
 
 
-def camera_system_setup(components = COMPONENTS):
+def camera_system_setup(components):
     # pull cam settings and setup cams
     
     cam_stepper = components.get('cam_stepper')
@@ -167,7 +167,7 @@ def camera_system_setup(components = COMPONENTS):
         
         
 def home_camera_system(
-        components = COMPONENTS,
+        components,
         stepper_freq: int = 500,
         stepper_dc: float = 50
 ):
@@ -245,7 +245,7 @@ def move_platon_to_strain():
     pass
 
 
-def capture_step_frames(cam_ports):
+def capture_step_frames(cam_ports, components):
     cam_threads = []
     photos = [list() for x in cam_ports]
     stop_event = threading.Event()
@@ -257,18 +257,40 @@ def capture_step_frames(cam_ports):
             )
         cam_threads.append(cam)
 
+    cam_stepper = components.get('cam_stepper')
+    lsw_adc = components.get('cam_limit_switch_adc')
+    lsw1 = components.get('cam_limit_swtich1')
+    lsw2 = components.get('cam_limit_swtich2')
+
+    cam_stepper.rotate(freq=-cam_stepper.frequency * 2, duty_cycle=50)
+    
     for thread in cam_threads:
         thread.start()
 
-    # move motor on same stop event thread
-
-    start = time.time()
     while True:
-        if (time.time() - start) > 5:
+        adc_state = lsw_adc.get_state(unit='volts')
+        sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
+        sig_lsw2 = adc_state.get('a1') - adc_state.get('a2')
+
+        states = {
+            'lsw1': lsw1.update(sig_lsw1),
+            'lsw2': lsw2.update(sig_lsw2)
+        }
+
+        if True in states.values():
+            cam_stepper.stop()
             stop_event.set()
             for thread in cam_threads:
                 thread.join()
             break
+
+    # start = time.time()
+    # while True:
+        # if (time.time() - start) > 5:
+            # stop_event.set()
+            # for thread in cam_threads:
+                # thread.join()
+            # break
     
     all_photos = [item for sublist in photos for item in sublist]
     return all_photos

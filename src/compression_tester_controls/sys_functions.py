@@ -6,7 +6,8 @@ import time
 import numpy as np
 
 from collections import OrderedDict
-from importlib import resources
+from importlib import resources, util
+from pathlib import Path
 
 from .components.factory import HardwareFactory
 from .components.ads1115 import ADS1115
@@ -32,7 +33,9 @@ def load_configs(
         # with resources.path(package, directory) as pkg_dir:
             # List all resources in the given directory
     for entry in resources.contents(package):
-        entry_path = resources.path(package) / entry
+        config_dir = Path(f"{util.find_spec(package).origin}")
+        config_dir = config_dir.parent
+        entry_path = config_dir / Path(f"{entry}")
         if entry_path.is_file() and entry.endswith(f".{config_file_ext}"):
             # Open and load the JSON file
             with open(entry_path, "r") as f:
