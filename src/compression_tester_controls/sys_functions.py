@@ -133,6 +133,8 @@ def detect_force_anomoly(
             time.sleep(0.5)
 
     rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
+
+    # TODO convert to force instead?
     if detect_anomoly_rolling_cusum(samples=rs, h=cusum_h, k=cusum_k):
         return True
     else:
@@ -177,6 +179,37 @@ def move_stepper_PID_target(
         if (setpoint - error) < enc.read() <= (setpoint + error):
             stepper.stop()
             break 
+
+
+def get_force_zero(n_samples, components):
+    force_sensor = components.get('A201')
+    force_sensor_adc = components.get('force_sensor_adc')
+
+    while True:
+        state_n = force_sensor_adc.get_state_n(n=n_samples, unit='volts')
+        try:
+            vouts = state_n.get('a1') - state_n.get('a0')
+        except ValueError:
+            vouts = np.array([])
+        try:
+            vrefs = state_n.get('a3') - state_n.get('a2')
+        except ValueError:
+            vrefs = np.array([])
+
+        if vrefs.size >= n_samples:
+            break
+        if vouts.size >= n_samples:
+            break
+        else:
+            logging.info(f"Insufficient samples: {force_sensor_adc.name}. {vouts.size}/{n_samples} Retrying...")
+            time.sleep(0.5)
+
+    rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
+    # TODO
+    # load =
+    force_zero = np.mean(rs)
+
+    return force_zero 
 
 
 if __name__ == '__main__':

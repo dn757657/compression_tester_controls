@@ -2,6 +2,7 @@ import time
 import logging
 
 from compression_tester_controls.sys_functions import load_configs, inst_components, detect_force_anomoly, move_stepper_PID_target
+from compression_tester_controls.components.canon_eosr50 import eosr50_init, gphoto2_get_active_ports
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
@@ -16,15 +17,16 @@ COMPONENTS = sys_init()
 
 
 def platon_setup(
+        components = COMPONENTS,
         force_sensor_adc_sma_window: int = 100,
         stepper_freq: int = 500,
         stepper_dc: float = 85
 ):
-    force_sensor_adc = COMPONENTS.get('force_sensor_adc')
-    big_stepper = COMPONENTS.get('big_stepper')
-    big_stepper_pid = COMPONENTS.get('big_stepper_PID')
-    force_sensor = COMPONENTS.get('A201')
-    enc = COMPONENTS.get('e5')
+    force_sensor_adc = components.get('force_sensor_adc')
+    big_stepper = components.get('big_stepper')
+    big_stepper_pid = components.get('big_stepper_PID')
+    force_sensor = components.get('A201')
+    enc = components.get('e5')
 
     while True:
         state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
@@ -132,13 +134,13 @@ def platon_setup(
     pass
 
 
-def camera_system_setup():
+def camera_system_setup(components = COMPONENTS):
     # pull cam settings and setup cams
     
-    cam_stepper = COMPONENTS.get('cam_stepper')
-    lsw_adc = COMPONENTS.get('cam_limit_switch_adc')
-    lsw1 = COMPONENTS.get('cam_limit_swtich1')
-    lsw2 = COMPONENTS.get('cam_limit_swtich2')
+    cam_stepper = components.get('cam_stepper')
+    lsw_adc = components.get('cam_limit_switch_adc')
+    lsw1 = components.get('cam_limit_swtich1')
+    lsw2 = components.get('cam_limit_swtich2')
 
     adc_state = lsw_adc.get_state(unit='volts')
     sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
@@ -164,13 +166,14 @@ def camera_system_setup():
         
         
 def home_camera_system(
+        components = COMPONENTS,
         stepper_freq: int = 500,
         stepper_dc: float = 50
 ):
-    cam_stepper = COMPONENTS.get('cam_stepper')
-    lsw_adc = COMPONENTS.get('cam_limit_switch_adc')
-    lsw1 = COMPONENTS.get('cam_limit_swtich1')
-    lsw2 = COMPONENTS.get('cam_limit_swtich2')
+    cam_stepper = components.get('cam_stepper')
+    lsw_adc = components.get('cam_limit_switch_adc')
+    lsw1 = components.get('cam_limit_swtich1')
+    lsw2 = components.get('cam_limit_swtich2')
 
     logging.info("Homing Camera System...")
     cam_stepper.rotate(freq=stepper_freq * 2, duty_cycle=stepper_dc)
@@ -223,3 +226,11 @@ def home_camera_system(
 
     logging.info("Camera Homed.")
     return
+
+
+def init_cameras(cam_settings):
+    cam_ports = gphoto2_get_active_ports()
+    for port in cam_ports:
+        eosr50_init(port=port, config=cam_settings)
+    
+    return cam_ports
