@@ -110,8 +110,9 @@ def eosr50_continuous_capture_and_save(
                 'sudo',
                 'gphoto2',
                 '--port', port,
-                '--capture-image-and-download',
+                '--capture-image',
                 '--filename', filename,
+                '--keep'
             ],
                 check=True
             )

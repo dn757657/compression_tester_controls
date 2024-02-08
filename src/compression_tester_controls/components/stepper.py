@@ -27,7 +27,7 @@ class StepperMotorDriver:
         GPIO.setup(dsbl_pin, GPIO.OUT)
         GPIO.setup(step_pin, GPIO.OUT)
 
-        self.direction = None
+        self.direction = 'cw'
         self.frequency = None
 
         self.dir_pin = dir_pin
@@ -42,6 +42,7 @@ class StepperMotorDriver:
         # set if disable on disable pin is high or low signal
         self.disable_high = disable_high
 
+        self.set_dir(direction=self.direction)
         logging.info(f"{self.name}: initialized")
         return
 
@@ -108,6 +109,7 @@ class StepperMotorDriver:
     def reverse_direction(self):
         print(F"MOTOR DIR: {self.direction}")
         self.direction = list([set(MOTOR_DIRECTIONS) - {self.direction}][0])[0]
+        self.set_dir(direction=self.reverse_direction)
         print(F"REVSERSE MOTOR DIR: {self.direction}")
         pass
 

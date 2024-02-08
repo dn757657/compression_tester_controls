@@ -6,7 +6,7 @@ from simple_pid import PID
 from compression_tester_controls.sys_functions import load_configs, inst_components
 from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup
 from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, gpohoto2_get_camera_settings
-
+from compression_tester_controls.components.qsbd import send_command
 # def sys_init():
 #     configs = load_configs()
 #     components = inst_components(component_configs=configs)
@@ -46,10 +46,11 @@ from compression_tester_controls.components.canon_eosr50 import gphoto2_get_acti
 #         force_sensor=a201,
 #     )
 
+def test_qsbd():
+    enc_pos = send_command("RP")
+    print(f"encoder pos = {enc_pos}")
+    return
 
 
 if __name__ == '__main__':
-    ports = gphoto2_get_active_ports()
-    for port in ports:
-        config = gpohoto2_get_camera_settings(port=port)
-        print(config)
+    test_qsbd()
