@@ -50,7 +50,10 @@ class ADCChannel(Observer):
 
     def _read(self):
         with self.device_lock:
-            return np.array([self.channel.value])
+            try:
+                return np.array([self.channel.value])
+            except OSError:
+                return np.array([])
 
 
 class ADS1115:

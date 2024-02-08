@@ -203,20 +203,23 @@ def sample_force_sensor(n_samples, components):
     while True:
         state_n = force_sensor_adc.get_state_n(n=n_samples, unit='volts')
         try:
-            vouts = state_n.get('a1') - state_n.get('a0')
+            vout1 = state_n.get('a1')
+            vout2 = state_n.get('a0')
+            vouts = vout1 - vout2
         except ValueError:
             vouts = np.array([])
         try:
-            vrefs = state_n.get('a3') - state_n.get('a2')
+            vref1 = state_n.get('a3')
+            vref2 = state_n.get('a2')
+            vrefs = vref1 - vref2
         except ValueError:
             vrefs = np.array([])
 
-        if vrefs.size >= n_samples:
-            break
-        if vouts.size >= n_samples:
+        # print([vout1.size, vout2.size, vref1.size, vref2.size])
+        if all(v >= n_samples for v in [vout1.size, vout2.size, vref1.size, vref2.size]):
             break
         else:
-            logging.info(f"Insufficient samples: {force_sensor_adc.name}. {vouts.size}/{n_samples} Retrying...")
+            logging.info(f"Insufficient samples: {force_sensor_adc.name}. {vout1.size}/{n_samples} Retrying...")
             time.sleep(0.5)
 
     rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
@@ -224,8 +227,7 @@ def sample_force_sensor(n_samples, components):
     # load =
     force = np.mean(rs)
 
-    return force 
-
+    return force
 
 if __name__ == '__main__':
     configs = load_configs()
