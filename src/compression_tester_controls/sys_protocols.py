@@ -277,7 +277,8 @@ def capture_step_frames(cam_ports, components):
     lsw1 = components.get('cam_limit_swtich1')
     lsw2 = components.get('cam_limit_swtich2')
 
-    cam_stepper.rotate(freq=cam_stepper.frequency * 2, duty_cycle=50)
+    # set this frequency in same dir but as needed for frame rates
+    cam_stepper.rotate(freq=cam_stepper.frequency, duty_cycle=50)
     
     for thread in cam_threads:
         thread.start()
@@ -297,6 +298,21 @@ def capture_step_frames(cam_ports, components):
             stop_event.set()
             for thread in cam_threads:
                 thread.join()
+            break
+    
+    cam_stepper.rotate(freq=cam_stepper.frequency, duty_cycle=50)
+    while True:
+        adc_state = lsw_adc.get_state(unit='volts')
+        sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
+        sig_lsw2 = adc_state.get('a1') - adc_state.get('a2')
+
+        states = {
+            'lsw1': lsw1.update(sig_lsw1),
+            'lsw2': lsw2.update(sig_lsw2)
+        }
+
+        if True not in states.values():
+            cam_stepper.stop()
             break
 
     # start = time.time()
