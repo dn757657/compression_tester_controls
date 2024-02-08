@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+import threading
 
 import numpy as np
 
@@ -109,6 +110,12 @@ def inst_components(
         #         config[ob] = comp.ref_obj_attr
 
         components[name] = HardwareFactory().create_component(config=config)
+    
+    i2c_lock = threading.Lock()
+    for component in components.values():
+        attrs = dir(component)
+        if 'i2c_lock'.lower() in attrs:
+          component.i2c_lock = i2c_lock      
 
     return components
 

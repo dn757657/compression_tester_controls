@@ -73,17 +73,18 @@ class ADS1115:
         self.address = address
 
         i2c = busio.I2C(board.SCL, board.SDA)
-        self.device = ADS.ADS1115(
+        self.i2c_device = ADS.ADS1115(
             i2c,
             address=self.address,
             gain=self.gain
         )
+        self.i2c_lock = threading.Lock()  # replace and share with other i2c devices?
 
         lock = threading.Lock()  # lock all channels together
-        self.a0 = ADCChannel(i2c_device=self.device, name='a0', i2c_device_channel=ADS.P0, device_lock=lock)
-        self.a1 = ADCChannel(i2c_device=self.device, name='a1', i2c_device_channel=ADS.P1, device_lock=lock)
-        self.a2 = ADCChannel(i2c_device=self.device, name='a2', i2c_device_channel=ADS.P2, device_lock=lock)
-        self.a3 = ADCChannel(i2c_device=self.device, name='a3', i2c_device_channel=ADS.P3, device_lock=lock)
+        self.a0 = ADCChannel(i2c_device=self.i2c_device, name='a0', i2c_device_channel=ADS.P0, device_lock=lock)
+        self.a1 = ADCChannel(i2c_device=self.i2c_device, name='a1', i2c_device_channel=ADS.P1, device_lock=lock)
+        self.a2 = ADCChannel(i2c_device=self.i2c_device, name='a2', i2c_device_channel=ADS.P2, device_lock=lock)
+        self.a3 = ADCChannel(i2c_device=self.i2c_device, name='a3', i2c_device_channel=ADS.P3, device_lock=lock)
 
         self.channels = [
             self.a0,
@@ -116,7 +117,8 @@ class ADS1115:
 
     def get_state(self, unit: str = 'volts'):
         try:
-            self._update(unit=unit)
+            with self.i2c_lock:
+                self._update(unit=unit)
         except OSError:
             x = None
         return self.state
@@ -136,7 +138,8 @@ class ADS1115:
 
     def get_state_n(self, n: int, unit: str = 'volts'):
         try:
-            self._update_n(n=n, unit=unit)
+            with self.i2c_lock:
+                self._update_n(n=n, unit=unit)
         except OSError:
             x = None
         return self.state_n
@@ -154,7 +157,8 @@ class ADS1115:
         pass
 
     def get_state_SMA(self, n: int,  unit: str = 'volts'):
-        self._update_SMA(n=n, unit=unit)
+        with self.i2c_lock:
+            self._update_SMA(n=n, unit=unit)
         return self.state_SMA
 
     def bits_to_volts(
