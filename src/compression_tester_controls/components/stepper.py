@@ -107,7 +107,7 @@ class StepperMotorDriver:
 
     def reverse_direction(self):
         print(F"MOTOR DIR: {self.direction}")
-        self.direction = [set(MOTOR_DIRECTIONS) - {self.direction}][0]
+        self.direction = list([set(MOTOR_DIRECTIONS) - {self.direction}][0])[0]
         print(F"REVSERSE MOTOR DIR: {self.direction}")
         pass
 

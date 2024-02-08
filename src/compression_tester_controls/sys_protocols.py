@@ -195,7 +195,8 @@ def home_camera_system(
 
     bumps = 3
     for i in range(0, bumps - 1):
-        cam_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)  # move off
+        cam_stepper.reverse_direction()
+        cam_stepper.rotate(freq=cam_stepper.frequency, duty_cycle=stepper_dc)  # move off
         while True:
             adc_state = lsw_adc.get_state(unit='volts')
             sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
@@ -209,8 +210,8 @@ def home_camera_system(
             if True not in states.values():
                 cam_stepper.stop()
                 break
-        
-        cam_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)  # move on
+        cam_stepper.reverse_direction()
+        cam_stepper.rotate(freq=cam_stepper.frequency, duty_cycle=stepper_dc)  # move on
         while True:
             adc_state = lsw_adc.get_state(unit='volts')
             sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
@@ -225,7 +226,8 @@ def home_camera_system(
                 cam_stepper.stop()
                 break
 
-    cam_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)  # move off
+    cam_stepper.reverse_direction()
+    cam_stepper.rotate(freq=cam_stepper.frequency, duty_cycle=stepper_dc)  # move off
     while True:
         adc_state = lsw_adc.get_state(unit='volts')
         sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
@@ -260,7 +262,7 @@ def move_platon_to_strain():
     pass
 
 
-def capture_step_frames(cam_ports, components):
+def capture_step_frames(cam_ports, components, stepper_freq):
     cam_threads = []
     photos = [list() for x in cam_ports]
     stop_event = threading.Event()
@@ -278,7 +280,7 @@ def capture_step_frames(cam_ports, components):
     lsw2 = components.get('cam_limit_swtich2')
 
     # set this frequency in same dir but as needed for frame rates
-    cam_stepper.rotate(freq=cam_stepper.frequency, duty_cycle=50)
+    cam_stepper.rotate(freq=stepper_freq, duty_cycle=50)
     
     for thread in cam_threads:
         thread.start()
@@ -300,6 +302,7 @@ def capture_step_frames(cam_ports, components):
                 thread.join()
             break
     
+    cam_stepper.reverse_direction()
     cam_stepper.rotate(freq=cam_stepper.frequency, duty_cycle=50)
     while True:
         adc_state = lsw_adc.get_state(unit='volts')
