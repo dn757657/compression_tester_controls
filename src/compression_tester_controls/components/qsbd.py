@@ -1,34 +1,31 @@
 import serial
 import time
 
-# Replace '/dev/ttyUSB0' with the correct serial port for your Raspberry Pi
-serial_port = '/dev/ttyUSB0'
-baud_rate = 9600  # Adjust as necessary
-
-# Open the serial connection
+# Initialize serial connection
+serial_port = '/dev/ttyUSB0'  # Adjust this to your encoder's port
+baud_rate = 9600  # Standard baud rate for communication
 ser = serial.Serial(serial_port, baud_rate, timeout=1)
 
-# Function to send command to QSB-D encoder
 def send_command(command):
-    serial_port = '/dev/ttyUSB0'
-    baud_rate = 9600  # Adjust as necessary
+    ser.write((command + '\r').encode())  # Commands must end with carriage return
+    time.sleep(0.2)  # Wait for the command to be processed
+    response = ser.readline().decode().strip()  # Read the response, if any
+    print(f"Sent: {command}, Received: {response}")  # Optional: print command and response
 
-    # Open the serial connection
-    ser = serial.Serial(serial_port, baud_rate, timeout=1)
-    ser.write(command.encode())
-    time.sleep(0.1)  # Short delay to ensure command is processed
-    response = ser.readline().decode().strip()  # Read the response
-    ser.close()
+try:
+    # Configuration commands based on assumptions
+    send_command('R')    # Reset the device
+    send_command('QM')   # Set mode to Quadrature with Index
+    send_command('SE10000')  # Set encoder resolution, adjust as needed
+    send_command('SB9600')   # Set baud rate, adjust if different
+    send_command('OF1')   # Set output format to ASCII
     
-    return response
+    # Read position command
+    while True:
+        send_command('RP')  # Read position
+        time.sleep(1)  # Adjust the delay based on how frequently you want to read the position
 
-# Example: Initialize encoder (replace 'XX' with actual commands)
-# Example command to read position: "RP"
-# You may need to send initialization commands here based on your preferences
-
-# Reading the encoder position
-position = send_command('RP')
-print(f"Encoder Position: {position}")
-
-# Close the serial connection
-ser.close()
+except KeyboardInterrupt:
+    print("Program terminated by user.")
+finally:
+    ser.close()  # Ensure serial connection is closed on termination
