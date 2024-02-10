@@ -17,10 +17,15 @@ class E5UsDigitalEncoder():
 
         self.name = name
         self.ser = serial.Serial(serial_port, baud_rate, timeout=1)
-
+        
         self._send_command('W0000')  # init in quadrature mode
         self._send_command('W0902')  # reset counter
         self._send_command('W166')  # confirm baud rate
+        self._send_command('W0300')
+
+        self.initial_count = self.read()
+
+        logging.info("Initialized QSB-D.")
 
         pass
     
@@ -32,8 +37,9 @@ class E5UsDigitalEncoder():
     def read(self):
         response = self._send_command('R0E')
         if response[0] == 'r':  # Check if it's a read response
-            register = response[1:3]
-            data = response[3:11]  # Extract the data part
+            s = response.split(" ")
+            register = s[0]
+            data = s[2]  # Extract the data part
             position = int(data, 16)  # Convert data to integer
         else:
             position = None

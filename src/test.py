@@ -7,10 +7,10 @@ from compression_tester_controls.sys_functions import load_configs, inst_compone
 from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup
 from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, gpohoto2_get_camera_settings
 from compression_tester_controls.components.qsbd import send_command
-# def sys_init():
-#     configs = load_configs()
-#     components = inst_components(component_configs=configs)
-#     return components
+def sys_init():
+    configs = load_configs()
+    components = inst_components(component_configs=configs)
+    return components
 
 
 # def test():
@@ -47,8 +47,26 @@ from compression_tester_controls.components.qsbd import send_command
 #     )
 
 def test_qsbd():
-    enc_pos = send_command("RP")
-    print(f"encoder pos = {enc_pos}")
+    components = sys_init()
+    big_stepper = components.get('big_stepper')
+    big_stepper_pid = components.get('big_stepper_PID')
+    big_stepper_enc = components.get('e5')
+
+    error = 5
+
+    while True:
+        print(f"position is: {big_stepper_enc.read()}")
+        setpoint = input("Enter Desired Position: ")
+        big_stepper_pid.setpoint = setpoint
+        
+        while True:
+            freq = big_stepper_pid(big_stepper_enc.read())
+
+            big_stepper.rotate(freq=freq, duty_cycle=80)
+
+            if (setpoint - error) < big_stepper_enc.read() < (setpoint + error):
+                break
+
     return
 
 
