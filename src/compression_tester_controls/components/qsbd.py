@@ -1,31 +1,51 @@
 import serial
 import time
+import logging
 
-# Initialize serial connection
-serial_port = '/dev/ttyUSB0'  # Adjust this to your encoder's port
-baud_rate = 9600  # Standard baud rate for communication
-ser = serial.Serial(serial_port, baud_rate, timeout=1)
 
-def send_command(command):
-    ser.write((command + '\r').encode())  # Commands must end with carriage return
-    time.sleep(0.2)  # Wait for the command to be processed
-    response = ser.readline().decode().strip()  # Read the response, if any
-    print(f"Sent: {command}, Received: {response}")  # Optional: print command and response
+logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
 
-try:
-    # Configuration commands based on assumptions
-    send_command('R')    # Reset the device
-    send_command('QM')   # Set mode to Quadrature with Index
-    send_command('SE10000')  # Set encoder resolution, adjust as needed
-    send_command('SB9600')   # Set baud rate, adjust if different
-    send_command('OF1')   # Set output format to ASCII
+
+class E5UsDigitalEncoder():
+    def __init__(
+            self,
+            name: str,
+            serial_port: str = '/dev/ttyUSB0',
+            baud_rate: int = 230400,
+    ):
+
+        self.name = name
+        self.ser = serial.Serial(serial_port, baud_rate, timeout=1)
+
+        self._send_command('W0000')  # init in quadrature mode
+        self._send_command('W0902')  # reset counter
+        self._send_command('W166')  # confirm baud rate
+
+        pass
     
-    # Read position command
-    while True:
-        send_command('RP')  # Read position
-        time.sleep(1)  # Adjust the delay based on how frequently you want to read the position
+    def _send_command(self, command: str):
+        self.ser.write((command + '\r').encode())  # Commands must end with carriage return
+        response = self.ser.readline().decode().strip()  # Read the response, if any
+        return response
 
-except KeyboardInterrupt:
-    print("Program terminated by user.")
-finally:
-    ser.close()  # Ensure serial connection is closed on termination
+    def read(self):
+        response = self._send_command('R0E')
+        if response[0] == 'r':  # Check if it's a read response
+            register = response[1:3]
+            data = response[3:11]  # Extract the data part
+            position = int(data, 16)  # Convert data to integer
+        else:
+            position = None
+        
+        return position
+    
+
+def main():
+    enc = E5UsDigitalEncoder(name='E5')
+    enc_pos = enc.read()
+    print(f"E5 Pos: {enc_pos}")
+
+
+if __name__ == '__main__':
+    main()
