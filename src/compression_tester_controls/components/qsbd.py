@@ -13,6 +13,7 @@ class E5UsDigitalEncoder():
             name: str,
             serial_port: str = '/dev/ttyUSB0',
             baud_rate: int = 230400,
+            **kwargs
     ):
 
         self.name = name
