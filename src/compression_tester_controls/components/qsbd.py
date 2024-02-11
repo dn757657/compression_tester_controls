@@ -20,9 +20,11 @@ class E5UsDigitalEncoder():
         self.ser = serial.Serial(serial_port, baud_rate, timeout=1)
         
         self._send_command('W0000')  # init in quadrature mode
+        self._send_command('W04000')  # set count direction
         self._send_command('W0902')  # reset counter
-        self._send_command('W166')  # confirm baud rate
+        self._send_command('W1660A')  # confirm baud rate
         self._send_command('W0300')
+        self._send_command('S0E')
 
         self.initial_count = self.read()
 
