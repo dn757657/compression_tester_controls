@@ -121,33 +121,32 @@ def inst_components(
 
 
 def detect_force_anomoly(
-        force_sensor_adc: ADS1115,
-        force_sensor: A201,
+        components,
         cusum_h: float = 4,
         cusum_k: float = 0.1,
         sma_window: int = 100,
 ):
 
-    while True:
-        state_n = force_sensor_adc.get_state_n(n=sma_window, unit='volts')
-        try:
-            vouts = state_n.get('a1') - state_n.get('a0')
-        except ValueError:
-            vouts = np.array([])
-        try:
-            vrefs = state_n.get('a3') - state_n.get('a2')
-        except ValueError:
-            vrefs = np.array([])
+    # while True:
+    #     state_n = force_sensor_adc.get_state_n(n=sma_window, unit='volts')
+    #     try:
+    #         vouts = state_n.get('a1') - state_n.get('a0')
+    #     except ValueError:
+    #         vouts = np.array([])
+    #     try:
+    #         vrefs = state_n.get('a3') - state_n.get('a2')
+    #     except ValueError:
+    #         vrefs = np.array([])
 
-        if vrefs.size >= sma_window:
-            break
-        if vouts.size >= sma_window:
-            break
-        else:
-            logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
-            time.sleep(0.5)
+    #     if vrefs.size >= sma_window:
+    #         break
+    #     if vouts.size >= sma_window:
+    #         break
+    #     else:
+    #         logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
+    #         time.sleep(0.5)
 
-    rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
+    rs = sample_force_sensor(n_samples=sma_window, components=components)
 
     # TODO convert to force instead?
     if detect_anomoly_rolling_cusum(samples=rs, h=cusum_h, k=cusum_k):
@@ -166,12 +165,14 @@ def detect_anomoly_rolling_cusum(samples, h, k):
     sh = np.maximum.accumulate(np.maximum(norm_samples, 0))
     sl = np.minimum.accumulate(np.minimum(norm_samples, 0))
 
-    # print(f"h : {h}\n"
-        #   f"sh: {sh[-1]}\n"
-        #   f"sl: {sl[-1]}\n")
+    print(f"h : {h}\n"
+          f"sh: {sh[-1]}\n"
+          f"sl: {sl[-1]}\n")
     if sh[-1] > h:
+        print(f'{sh[-1]} > {h}')
         return True
     if sl[-1] < -h:
+        print(f'{sl[-1]} < {h}')
         return True
 
     return False    
@@ -223,11 +224,12 @@ def sample_force_sensor(n_samples, components):
             time.sleep(0.5)
 
     rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
+    print(f"Force Sensor RS mean: {np.mean(rs)}")
     # TODO
     # load =
-    force = np.mean(rs)
+    #force = np.mean(rs)
 
-    return force
+    return rs
 
 if __name__ == '__main__':
     configs = load_configs()

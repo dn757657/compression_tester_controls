@@ -51,62 +51,62 @@ import logging
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
-def test_qsbd():
-    components = sys_init()
-    big_stepper_enc = components.get('e5')
-    a201 = components.get('A201')
-    force_sensor_adc = components.get('force_sensor_adc')
-    big_stepper = components.get('big_stepper')
-    big_stepper_pid = components.get('big_stepper_PID')
+# def test_qsbd():
+#     components = sys_init()
+#     big_stepper_enc = components.get('e5')
+#     a201 = components.get('A201')
+#     force_sensor_adc = components.get('force_sensor_adc')
+#     big_stepper = components.get('big_stepper')
+#     big_stepper_pid = components.get('big_stepper_PID')
 
-    force_sensor_adc_sma_window: int = 100
+#     force_sensor_adc_sma_window: int = 100
 
-    while True:
+#     while True:
 
-        while True:
-            state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
-            states = [x.size for x in state_n.values()]
-            x = list()
-            for state in states:
-                if state >= force_sensor_adc_sma_window:
-                    x.append(True)
-                else:
-                    x.append(False)
+#         while True:
+#             state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
+#             states = [x.size for x in state_n.values()]
+#             x = list()
+#             for state in states:
+#                 if state >= force_sensor_adc_sma_window:
+#                     x.append(True)
+#                 else:
+#                     x.append(False)
 
-            if False in x:
-                logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
-                time.sleep(0.5)
-            else:
-                break
+#             if False in x:
+#                 logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
+#                 time.sleep(0.5)
+#             else:
+#                 break
 
-        print(f"position is: {big_stepper_enc.read()}")
-        big_stepper.rotate(freq=300, duty_cycle=80)
+#         print(f"position is: {big_stepper_enc.read()}")
+#         big_stepper.rotate(freq=300, duty_cycle=80)
 
-        while True:
-            if detect_force_anomoly(
-                force_sensor_adc=force_sensor_adc,
-                force_sensor=a201,
-            ):
-                big_stepper.stop()
-                break
+#         while True:
+#             if detect_force_anomoly(
+#                 force_sensor_adc=force_sensor_adc,
+#                 force_sensor=a201,
+#             ):
+#                 big_stepper.stop()
+#                 break
 
-        error = 5
+#         error = 5
 
-        print(f"found sample, position is: {big_stepper_enc.read()}")
-        # setpoint = input("Enter Desired Position: ")
-        setpoint = 100
-        big_stepper_pid.setpoint = setpoint
+#         print(f"found sample, position is: {big_stepper_enc.read()}")
+#         # setpoint = input("Enter Desired Position: ")
+#         setpoint = 100
+#         big_stepper_pid.setpoint = setpoint
             
-        while True:
-            freq = big_stepper_pid(big_stepper_enc.read())
+#         while True:
+#             freq = big_stepper_pid(big_stepper_enc.read())
 
-            big_stepper.rotate(freq=freq, duty_cycle=80)
+#             big_stepper.rotate(freq=freq, duty_cycle=80)
 
-            if (setpoint - error) < big_stepper_enc.read() < (setpoint + error):
-                break
+#             if (setpoint - error) < big_stepper_enc.read() < (setpoint + error):
+#                 break
 
-    return
+#     return
 
 
 if __name__ == '__main__':
-    test_qsbd()
+    platon_setup(components=sys_init())

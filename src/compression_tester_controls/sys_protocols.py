@@ -29,31 +29,34 @@ def platon_setup(
     force_sensor = components.get('A201')
     enc = components.get('e5')
 
-    while True:
-        state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
-        states = [x.size for x in state_n.values()]
-        x = list()
-        for state in states:
-            if state >= force_sensor_adc_sma_window:
-                x.append(True)
-            else:
-                x.append(False)
+    # while True:
+    #     state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
+    #     states = [x.size for x in state_n.values()]
+    #     x = list()
+    #     for state in states:
+    #         if state >= force_sensor_adc_sma_window:
+    #             x.append(True)
+    #         else:
+    #             x.append(False)
 
-        if False in x:
-            logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
-            time.sleep(0.5)
-        else:
-            break
+    #     if False in x:
+    #         logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
+    #         time.sleep(0.5)
+    #     else:
+    #         break
     
     logging.info("Aligning Platons...")
-    big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
+    # big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
 
+    x = False
     anomoly = False
     while not anomoly:
         anomoly = detect_force_anomoly(
-            force_sensor_adc=force_sensor_adc,
-            force_sensor=force_sensor
+            components=components
         )
+        if not x:
+            big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
+            x = True
     
     big_stepper.stop()
     logging.info(f"Platon Found @ {enc.read()}: Pressing to Align...")
@@ -66,7 +69,8 @@ def platon_setup(
     move_stepper_PID_target(
         stepper=big_stepper, 
         pid=big_stepper_pid, 
-        enc=enc, 
+        enc=enc,
+        stepper_dc=80, 
         setpoint=new_target,
         error=2
         )
