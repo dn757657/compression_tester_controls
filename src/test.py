@@ -1,3 +1,4 @@
+
 # import Encoder
 import time
 import serial
@@ -67,23 +68,30 @@ def test_qsbd():
     # freq = 500
     while True:
 
-        error = 1
+        error = 5
 
         setpoint = int(input("Enter Desired Position: "))
-        cur_pos = big_stepper_enc.read()
-        total_pulses = setpoint - cur_pos
+        start_pos = big_stepper_enc.read()
+        total_pulses = setpoint - start_pos
         if total_pulses < 0:
             total_pulses = abs(total_pulses)
             freq_multi = -1
         else:
             freq_multi = 1 
 
-        pos, vel = generate_s_curve_velocity_profile(total_pulses=total_pulses, steps=100)
+        pos, vel = generate_s_curve_velocity_profile(total_pulses=total_pulses, steps=total_pulses)
 
-        print(f"current pos: {ini_pos}, target: {setpoint}")
+        print(f"current pos: {big_stepper_enc.read()}, target: {setpoint}")
         while True:
             # freq = big_stepper_pid(sample_force_sensor(n_sample=100, components=components))
             enc_pos = big_stepper_enc.read()
+            
+            if (setpoint - error) < enc_pos < (setpoint + error):
+                big_stepper.stop()
+                print(f"position reached: {big_stepper_enc.read()} = {setpoint}")
+                break
+            
+            enc_pos = big_stepper_enc.read() - start_pos
             new_freq = adjust_pwm_based_on_position(
                 current_position=enc_pos,
                 positions=pos,
@@ -91,13 +99,7 @@ def test_qsbd():
                 max_pwm_frequency=400,
                 min_pwm_frequency=50
             )
-
             big_stepper.rotate(freq=new_freq * freq_multi, duty_cycle=85)
-
-            if (setpoint - error) < enc_pos < (setpoint + error):
-                big_stepper.stop()
-                print(f"position reached: {big_stepper_enc.read()} = {setpoint}")
-                break
 
     return
 
