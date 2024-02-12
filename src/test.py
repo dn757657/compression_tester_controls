@@ -7,6 +7,8 @@ from compression_tester_controls.sys_functions import load_configs, inst_compone
 from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup
 from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, gpohoto2_get_camera_settings
 from compression_tester_controls.sys_functions import detect_force_anomoly, sample_force_sensor
+from compression_tester_controls.utils import generate_s_curve_velocity_profile, adjust_pwm_based_on_position
+
 
 def sys_init():
     configs = load_configs()
@@ -60,56 +62,38 @@ def test_qsbd():
     big_stepper_pid = components.get('big_stepper_PID')
 
     force_sensor_adc_sma_window: int = 100
-    freq = 500
+    # freq = 500
     while True:
 
-        # while True:
-        #     state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
-        #     states = [x.size for x in state_n.values()]
-        #     x = list()
-        #     for state in states:
-        #         if state >= force_sensor_adc_sma_window:
-        #             x.append(True)
-        #         else:
-        #             x.append(False)
+        error = 1
 
-        #     if False in x:
-        #         logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
-        #         time.sleep(0.5)
-        #     else:
-        #         break
-
-        # print(f"position is: {big_stepper_enc.read()}")
-        # big_stepper.rotate(freq=300, duty_cycle=80)
-
-        # while True:
-        #     if detect_force_anomoly(
-        #         force_sensor_adc=force_sensor_adc,
-        #         force_sensor=a201,
-        #     ):
-        #         big_stepper.stop()
-        #         break
-
-        error = 5
-
-        # print(f"found sample, position is: {big_stepper_enc.read()}")
         setpoint = int(input("Enter Desired Position: "))
-        # setpoint = 100
-        enc_pos = big_stepper_enc.read()
-        big_stepper_pid.setpoint = setpoint
-        if setpoint < enc_pos:
-            freq = -freq
+        ini_pos = big_stepper_enc.read()
+        total_pulses = setpoint - ini_pos
+        if total_pulses < 0:
+            total_pulses = abs(total_pulses)
+            freq_multi = -1
+        else:
+            freq_multi = 1 
+
+        pos, vel = generate_s_curve_velocity_profile(total_pulses=total_pulses, steps=100)
 
         print(f"current pos: {enc_pos}, target: {setpoint}")
         while True:
             # freq = big_stepper_pid(sample_force_sensor(n_sample=100, components=components))
             enc_pos = big_stepper_enc.read()
-            big_stepper.rotate(freq=freq, duty_cycle=80)
+            new_freq = adjust_pwm_based_on_position(
+                current_position=enc_pos,
+                positions=pos,
+                velocities=vel,
+                max_pwm_frequency=400
+            )
 
-            if (setpoint - error) < big_stepper_enc.read() < (setpoint + error):
+            big_stepper.rotate(freq=new_freq * freq_multi, duty_cycle=85)
+
+            if (setpoint - error) < enc_pos < (setpoint + error):
                 big_stepper.stop()
                 print(f"position reached: {big_stepper_enc.read()} = {setpoint}")
-                freq = 500
                 break
 
     return

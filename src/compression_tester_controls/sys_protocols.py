@@ -19,7 +19,6 @@ def sys_init():
 
 def platon_setup(
         components,
-        force_sensor_adc_sma_window: int = 100,
         stepper_freq: int = 500,
         stepper_dc: float = 85
 ):
