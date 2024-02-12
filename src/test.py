@@ -8,7 +8,7 @@ from compression_tester_controls.sys_functions import load_configs, inst_compone
 from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup
 from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, gpohoto2_get_camera_settings
 from compression_tester_controls.sys_functions import detect_force_anomoly, sample_force_sensor
-from compression_tester_controls.utils import generate_s_curve_velocity_profile, adjust_pwm_based_on_position
+from compression_tester_controls.utils import generate_s_curve_velocity_profile, adjust_pwm_based_on_position, scale_velocity_profile
 
 
 def sys_init():
@@ -80,6 +80,7 @@ def test_qsbd():
             freq_multi = 1 
 
         pos, vel = generate_s_curve_velocity_profile(total_pulses=total_pulses, steps=total_pulses)
+        vel = scale_velocity_profile(velocities=vel, min_pwm_frequency=50, max_pwm_frequency=500)
 
         print(f"current pos: {big_stepper_enc.read()}, target: {setpoint}")
         while True:
@@ -96,8 +97,7 @@ def test_qsbd():
                 current_position=enc_pos,
                 positions=pos,
                 velocities=vel,
-                max_pwm_frequency=400,
-                min_pwm_frequency=50
+                max_pwm_frequency=500,
             )
             big_stepper.rotate(freq=new_freq * freq_multi, duty_cycle=85)
 
