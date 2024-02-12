@@ -1,3 +1,4 @@
+
 # import Encoder
 import time
 import serial
@@ -65,7 +66,7 @@ def test_qsbd():
     # freq = 500
     while True:
 
-        error = 1
+        error = 5
 
         setpoint = int(input("Enter Desired Position: "))
         ini_pos = big_stepper_enc.read()
@@ -76,19 +77,20 @@ def test_qsbd():
         else:
             freq_multi = 1 
 
-        pos, vel = generate_s_curve_velocity_profile(total_pulses=total_pulses, steps=100)
+        pos, vel = generate_s_curve_velocity_profile(total_pulses=total_pulses, steps=total_pulses)
 
-        print(f"current pos: {enc_pos}, target: {setpoint}")
+        print(f"current pos: {big_stepper_enc.read()}, target: {setpoint}")
         while True:
             # freq = big_stepper_pid(sample_force_sensor(n_sample=100, components=components))
-            enc_pos = big_stepper_enc.read()
+            enc_pos = big_stepper_enc.read() - ini_pos
             new_freq = adjust_pwm_based_on_position(
                 current_position=enc_pos,
                 positions=pos,
                 velocities=vel,
                 max_pwm_frequency=400
             )
-
+            if new_freq < 100:
+                new_freq = 100
             big_stepper.rotate(freq=new_freq * freq_multi, duty_cycle=85)
 
             if (setpoint - error) < enc_pos < (setpoint + error):
