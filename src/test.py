@@ -62,14 +62,16 @@ def test_qsbd():
     big_stepper_pid = components.get('big_stepper_PID')
 
     force_sensor_adc_sma_window: int = 100
+    enc_init = big_stepper_enc.read()
+    
     # freq = 500
     while True:
 
         error = 1
 
         setpoint = int(input("Enter Desired Position: "))
-        ini_pos = big_stepper_enc.read()
-        total_pulses = setpoint - ini_pos
+        cur_pos = big_stepper_enc.read()
+        total_pulses = setpoint - cur_pos
         if total_pulses < 0:
             total_pulses = abs(total_pulses)
             freq_multi = -1
@@ -78,7 +80,7 @@ def test_qsbd():
 
         pos, vel = generate_s_curve_velocity_profile(total_pulses=total_pulses, steps=100)
 
-        print(f"current pos: {enc_pos}, target: {setpoint}")
+        print(f"current pos: {ini_pos}, target: {setpoint}")
         while True:
             # freq = big_stepper_pid(sample_force_sensor(n_sample=100, components=components))
             enc_pos = big_stepper_enc.read()
@@ -86,7 +88,8 @@ def test_qsbd():
                 current_position=enc_pos,
                 positions=pos,
                 velocities=vel,
-                max_pwm_frequency=400
+                max_pwm_frequency=400,
+                min_pwm_frequency=50
             )
 
             big_stepper.rotate(freq=new_freq * freq_multi, duty_cycle=85)
