@@ -86,15 +86,20 @@ def test_qsbd():
         while True:
             # freq = big_stepper_pid(sample_force_sensor(n_sample=100, components=components))
             enc_pos = big_stepper_enc.read()
-            
+
             if (setpoint - error) < enc_pos < (setpoint + error):
                 big_stepper.stop()
                 print(f"position reached: {big_stepper_enc.read()} = {setpoint}")
                 break
+
+            if enc_pos < (setpoint + error):
+                freq_multi = 1
+            if (setpoint - error) < enc_pos:
+                freq_multi = -1
             
             enc_pos = big_stepper_enc.read() - start_pos
             new_freq = adjust_pwm_based_on_position(
-                current_position=enc_pos,
+                current_position=abs(enc_pos),
                 positions=pos,
                 velocities=vel,
                 max_pwm_frequency=500,

@@ -27,38 +27,9 @@ def platon_setup(
     big_stepper_pid = components.get('big_stepper_PID')
     force_sensor = components.get('A201')
     enc = components.get('e5')
-
-    # while True:
-    #     state_n = force_sensor_adc.get_state_n(n=force_sensor_adc_sma_window, unit='volts')
-    #     states = [x.size for x in state_n.values()]
-    #     x = list()
-    #     for state in states:
-    #         if state >= force_sensor_adc_sma_window:
-    #             x.append(True)
-    #         else:
-    #             x.append(False)
-
-    #     if False in x:
-    #         logging.info(f"Insufficient samples: {force_sensor_adc.name}. Retrying...")
-    #         time.sleep(0.5)
-    #     else:
-    #         break
     
-    logging.info("Aligning Platons...")
-    # big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
-
-    x = False
-    anomoly = False
-    while not anomoly:
-        anomoly = detect_force_anomoly(
-            components=components
-        )
-        if not x:
-            big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
-            x = True
-    
-    big_stepper.stop()
-    logging.info(f"Platon Found @ {enc.read()}: Pressing to Align...")
+    logging.info("Manually Mate Platons and Press ENTER...")
+    logging.info(f"Pressing to Align...")
     
     # move down a few steps to push platons together
     enc_pos = enc.read()
