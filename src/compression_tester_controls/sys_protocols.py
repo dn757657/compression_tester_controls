@@ -2,7 +2,7 @@ import time
 import logging
 import threading
 
-from compression_tester_controls.sys_functions import load_configs, inst_components, detect_force_anomoly, move_stepper_PID_target
+from compression_tester_controls.sys_functions import load_configs, move_big_stepper_to_setpoint, inst_components, detect_force_anomoly, move_stepper_PID_target
 from compression_tester_controls.components.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, eosr50_continuous_capture_and_save
 
 logging.basicConfig()
@@ -28,10 +28,28 @@ def platon_setup(
     # force_sensor = components.get('A201')
     enc = components.get('e5')
     
-    logging.info("Manually Mate Platons and Press ENTER...")
+    logging.info("Manually Mate Platons by jogging...")
+    logging.info("Enter q when complete...")
+
+    while True:
+        setpoint = input(f"Encoder Position: {enc.read()}, Move to:")
+        if setpoint == 'q':
+            break
+        else:
+            move_big_stepper_to_setpoint(setpoint=int(setpoint))
+
     platon_zero_count = enc.read()
 
-    logging.info("Manually Align Platon with Top of Sample and Press ENTER...")
+    logging.info("Manually Align Platon with Top of Sample by jogging...")
+    logging.info("Enter q when complete...")
+
+    while True:
+        setpoint = input(f"Encoder Position: {enc.read()}, Move to:")
+        if setpoint == 'q':
+            break
+        else:
+            move_big_stepper_to_setpoint(setpoint=int(setpoint))
+    
     sample_height_count = enc.read()
 
     # move down a few steps to push platons together
@@ -137,9 +155,9 @@ def camera_system_setup(components):
         if not cam_stepper.frequency:
             logging.info("Previous Stepper Direction Not Known! Untrigger Switch Manually by Moving Camera System Assembly.")
             input("Press Enter When Collision Resolved...")
-            home_camera_system()
-        else:
-            logging.info("Camera System Initialized.")
+    home_camera_system()
+
+    logging.info("Camera System Initialized.")
     return
         
         

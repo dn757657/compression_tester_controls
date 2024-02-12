@@ -2,11 +2,12 @@
 # import Encoder
 import time
 import serial
+import threading
 
 from simple_pid import PID
 from compression_tester_controls.sys_functions import load_configs, inst_components
 from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup
-from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, gpohoto2_get_camera_settings
+from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, eosr50_init, eosr50_continuous_capture_and_save
 from compression_tester_controls.sys_functions import detect_force_anomoly, sample_force_sensor
 from compression_tester_controls.utils import generate_s_curve_velocity_profile, adjust_pwm_based_on_position, scale_velocity_profile
 
@@ -54,55 +55,23 @@ import logging
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
-def test_qsbd():
-    components = sys_init()
-    big_stepper_enc = components.get('e5')
-    a201 = components.get('A201')
-    force_sensor_adc = components.get('force_sensor_adc')
-    big_stepper = components.get('big_stepper')
-    big_stepper_pid = components.get('big_stepper_PID')
+def test_canon_speed():
+    cam_ports = gphoto2_get_active_ports()
+    port = cam_ports[0]
+    eosr50_init(port=port)
+    filenames = list()
 
-    force_sensor_adc_sma_window: int = 100
-    enc_init = big_stepper_enc.read()
-    
-    # freq = 500
+    start = time.time()
     while True:
-
-        error = 5
-
-        setpoint = int(input("Enter Desired Position: "))
-        start_pos = big_stepper_enc.read()
-        total_pulses = setpoint - start_pos
-
-        if total_pulses > error:
-            pos, vel = generate_s_curve_velocity_profile(total_pulses=total_pulses, steps=total_pulses)
-            vel = scale_velocity_profile(velocities=vel, min_pwm_frequency=50, max_pwm_frequency=500)
-
-            print(f"current pos: {big_stepper_enc.read()}, target: {setpoint}")
-            while True:
-                # freq = big_stepper_pid(sample_force_sensor(n_sample=100, components=components))
-                enc_pos = big_stepper_enc.read()
-
-                if (setpoint - error) < enc_pos < (setpoint + error):
-                    big_stepper.stop()
-                    print(f"position reached: {big_stepper_enc.read()} = {setpoint}")
-                    break
-
-                if enc_pos < (setpoint + error):
-                    freq_multi = 1
-                if (setpoint - error) < enc_pos:
-                    freq_multi = -1
-                
-                enc_pos = big_stepper_enc.read() - start_pos
-                new_freq = adjust_pwm_based_on_position(
-                    current_position=abs(enc_pos),
-                    positions=pos,
-                    velocities=vel,
-                    max_pwm_frequency=500,
-                )
-                big_stepper.rotate(freq=new_freq * freq_multi, duty_cycle=85)
-
-    return
+        stop_event = threading.Event()
+        eosr50_continuous_capture_and_save(
+            port=port, 
+            stop_event=stop_event,
+            filenames=filenames
+        )
+        if time.time() - start > 60:
+            print(f"{len(filenames)} photos taken in {time.time() - start} seconds: {len(filenames) / time.time() - start} [photos/sec]")
+            break
 
 
 if __name__ == '__main__':
