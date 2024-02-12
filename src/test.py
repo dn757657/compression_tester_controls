@@ -51,6 +51,8 @@ def sys_init():
 #         force_sensor=a201,
 #     )
 import logging
+import uuid
+import subprocess
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
@@ -63,16 +65,30 @@ def test_canon_speed():
 
     start = time.time()
     while True:
-        stop_event = threading.Event()
-        eosr50_continuous_capture_and_save(
-            port=port, 
-            stop_event=stop_event,
-            filenames=filenames
-        )
-        if time.time() - start > 60:
+        id = uuid.uuid4()
+        filename = f"{id}.%C"  # %C uses extension assigned by cam
+        try:
+            subprocess.run([
+                'sudo',
+                'gphoto2',
+                '--port', port,
+                '--capture-image-and-download',
+                '--filename', filename,
+                '--keep'
+            ],
+                check=True
+            )
+            filenames.append(id)
+            logging.info(f"Image {filename} Captured")
+            i += 1  # only increment if captured
+
+        except subprocess.CalledProcessError:
+            logging.info(f"Failed to capture @ {port}.")
+
+        if time.time() - start > 10:
             print(f"{len(filenames)} photos taken in {time.time() - start} seconds: {len(filenames) / time.time() - start} [photos/sec]")
             break
 
 
 if __name__ == '__main__':
-    test_qsbd()
+    test_canon_speed()

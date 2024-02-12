@@ -35,7 +35,7 @@ def gphoto2_get_active_ports():
 
 def eosr50_init(
         port,
-        config: None
+        config = None
 ):
 
     try:
