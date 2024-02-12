@@ -19,94 +19,97 @@ def sys_init():
 
 def platon_setup(
         components,
-        stepper_freq: int = 500,
-        stepper_dc: float = 85
+        # stepper_freq: int = 500,
+        # stepper_dc: float = 85
 ):
-    force_sensor_adc = components.get('force_sensor_adc')
-    big_stepper = components.get('big_stepper')
-    big_stepper_pid = components.get('big_stepper_PID')
-    force_sensor = components.get('A201')
+    # force_sensor_adc = components.get('force_sensor_adc')
+    # big_stepper = components.get('big_stepper')
+    # big_stepper_pid = components.get('big_stepper_PID')
+    # force_sensor = components.get('A201')
     enc = components.get('e5')
     
     logging.info("Manually Mate Platons and Press ENTER...")
-    logging.info(f"Pressing to Align...")
-    
+    platon_zero_count = enc.read()
+
+    logging.info("Manually Align Platon with Top of Sample and Press ENTER...")
+    sample_height_count = enc.read()
+
     # move down a few steps to push platons together
-    enc_pos = enc.read()
-    additional_steps = 100  # TODO dial this in
-    new_target = enc_pos + additional_steps
+    # enc_pos = enc.read()
+    # additional_steps = 100  # TODO dial this in
+    # new_target = enc_pos + additional_steps
     
-    move_stepper_PID_target(
-        stepper=big_stepper, 
-        pid=big_stepper_pid, 
-        enc=enc,
-        stepper_dc=80, 
-        setpoint=new_target,
-        error=2
-        )
+    # move_stepper_PID_target(
+    #     stepper=big_stepper, 
+    #     pid=big_stepper_pid, 
+    #     enc=enc,
+    #     stepper_dc=80, 
+    #     setpoint=new_target,
+    #     error=2
+    #     )
     
-    # big_stepper_pid.setpoint = new_target
+    # # big_stepper_pid.setpoint = new_target
 
-    # error = 2
-    # while True:
-        # fnew = big_stepper_pid(enc.read())
-        # big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
+    # # error = 2
+    # # while True:
+    #     # fnew = big_stepper_pid(enc.read())
+    #     # big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
 
-        # if (new_target - error) < enc.read() <= (new_target + error):
-            # big_stepper.stop()
-            # break 
+    #     # if (new_target - error) < enc.read() <= (new_target + error):
+    #         # big_stepper.stop()
+    #         # break 
 
-    logging.info(f"Platons Aligned @ {enc.read()}...")
-    logging.info(f"Platons Returning Home...")
+    # logging.info(f"Platons Aligned @ {enc.read()}...")
+    # logging.info(f"Platons Returning Home...")
 
-    new_target = enc.read() - 2000
-    move_stepper_PID_target(
-        stepper=big_stepper, 
-        pid=big_stepper_pid, 
-        enc=enc, 
-        setpoint=new_target,
-        error=2
-        )
-    
     # new_target = enc.read() - 2000
-    # big_stepper_pid.setpoint = new_target
-    # while True:
-        # fnew = big_stepper_pid(enc.read())
-        # big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
+    # move_stepper_PID_target(
+    #     stepper=big_stepper, 
+    #     pid=big_stepper_pid, 
+    #     enc=enc, 
+    #     setpoint=new_target,
+    #     error=2
+    #     )
+    
+    # # new_target = enc.read() - 2000
+    # # big_stepper_pid.setpoint = new_target
+    # # while True:
+    #     # fnew = big_stepper_pid(enc.read())
+    #     # big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
 
-        # if (new_target - error) < enc.read() <= (new_target + error):
-            # big_stepper.stop()
-            # break
+    #     # if (new_target - error) < enc.read() <= (new_target + error):
+    #         # big_stepper.stop()
+    #         # break
 
-    input("Insert Sample and Press ENTER:")
+    # input("Insert Sample and Press ENTER:")
 
-    logging.info("Aligning Platon to Sample...")
-    bumps = 3
-    for i in range(0, bumps):
-        # big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
-        # time.sleep(3)
-        # big_stepper.stop()
+    # logging.info("Aligning Platon to Sample...")
+    # bumps = 3
+    # for i in range(0, bumps):
+    #     # big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
+    #     # time.sleep(3)
+    #     # big_stepper.stop()
 
-        big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
+    #     big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
 
-        anomoly = False
-        while not anomoly:
-            anomoly = detect_force_anomoly(
-                force_sensor_adc=force_sensor_adc,
-                force_sensor=force_sensor
-            )
+    #     anomoly = False
+    #     while not anomoly:
+    #         anomoly = detect_force_anomoly(
+    #             force_sensor_adc=force_sensor_adc,
+    #             force_sensor=force_sensor
+    #         )
         
-        big_stepper.stop()
-        # TODO could check enc position and see if theyre the same, failsafe against cusum errors
-        print(f"bumps: {i}, bumps: {bumps - 1}")
-        if i != bumps - 1:
-            big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
-            time.sleep(3)
-            big_stepper.stop()
+    #     big_stepper.stop()
+    #     # TODO could check enc position and see if theyre the same, failsafe against cusum errors
+    #     print(f"bumps: {i}, bumps: {bumps - 1}")
+    #     if i != bumps - 1:
+    #         big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
+    #         time.sleep(3)
+    #         big_stepper.stop()
 
-    logging.info("Platons Aligned to Sample")
+    # logging.info("Platons Aligned to Sample")
 
-    pass
+    return platon_zero_count, sample_height_count
 
 
 def camera_system_setup(components):
