@@ -86,7 +86,7 @@ def test_canon_speed():
             logging.info(f"Failed to capture @ {port}.")
 
         if time.time() - start > 10:
-            print(f"{len(filenames)} photos taken in {time.time() - start} seconds: {len(filenames) / time.time() - start} [photos/sec]")
+            print(f"{len(filenames)} photos taken in {time.time() - start} seconds: {len(filenames) / (time.time() - start)} [photos/sec]")
             break
 
 

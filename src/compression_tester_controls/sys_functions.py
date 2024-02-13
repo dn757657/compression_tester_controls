@@ -233,6 +233,41 @@ def sample_force_sensor(n_samples, components):
     return rs
 
 
+def get_a201_Rf(n_samples: int, components, rs: int):
+    force_sensor = components.get('A201')
+    force_sensor_adc = components.get('force_sensor_adc')
+
+    while True:
+        state_n = force_sensor_adc.get_state_n(n=n_samples, unit='volts')
+        try:
+            vout1 = state_n.get('a1')
+            vout2 = state_n.get('a0')
+            vouts = vout1 - vout2
+        except ValueError:
+            vouts = np.array([])
+        try:
+            vref1 = state_n.get('a3')
+            vref2 = state_n.get('a2')
+            vrefs = vref1 - vref2
+        except ValueError:
+            vrefs = np.array([])
+
+        # print([vout1.size, vout2.size, vref1.size, vref2.size])
+        if all(v >= n_samples for v in [vout1.size, vout2.size, vref1.size, vref2.size]):
+            break
+        else:
+            logging.info(f"Insufficient samples: {force_sensor_adc.name}. {vout1.size}/{n_samples} Retrying...")
+            time.sleep(0.5)
+
+    rf = force_sensor.get_rf(rs=rs, vout=vouts, vref=vrefs)
+    print(f"Force Sensor Rf mean: {np.mean(rf)}")
+    # TODO
+    # load =
+    #force = np.mean(rs)
+
+    return rf
+
+
 def move_big_stepper_to_setpoint(
         components,
         setpoint: int,

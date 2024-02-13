@@ -79,12 +79,12 @@ class A201:
 
     #     return self.load, self.rs
     
-    def get_rf(self, rs: float):
+    def get_rf(self, rs: float, vout: float, vref: float):
         """
         pass in known rs to determine adjustable rf pot resistance
         """
         try:
-            rf = rs * ((self.vout/self.vref) - 1)
+            rf = rs * ((vout/vref) - 1)
         except ZeroDivisionError:
             rf = None
         return rf        
