@@ -204,13 +204,13 @@ def generate_s_curve_profile(
     :param total_distance: Total distance for the motion.
     :return: Velocity profile as a numpy array.
     """
-
+    total_steps = np.linspace(1, total_steps, total_steps)
     accel_steps = int(round(total_steps * accel_frac))
+
     s_curve_accel_steps, s_curve_accel_vels = generate_s_curve(steps=accel_steps, jm=jm, v0=v0)
     s_curve_decel_vels = s_curve_accel_vels[::-1]
 
     constant_steps = total_steps - (2 * accel_steps) 
-    total_steps = np.linspace(1, total_steps, total_steps)
     constant_steps = np.linspace(1, constant_steps, constant_steps)
     constant_vels = np.full((constant_steps.size), s_curve_accel_vels.max())
 
@@ -227,18 +227,21 @@ def generate_scaled_s_curve(
         accel_fraction: float = 0.2, 
         jm: float = 0.1,
         v0: float = 0):
-    
-    steps, vels = generate_s_curve_profile(
-        total_steps=total_steps,
-        accel_frac=accel_fraction,
-        jm=jm,
-        v0=v0)
-    
-    scaled_vels = scale_velocity_profile(
-        velocities=vels, 
-        min_pwm_frequency=min_pwm_frequency, 
-        max_pwm_frequency=max_pwm_frequency)
-    
+    try:
+        steps, vels = generate_s_curve_profile(
+            total_steps=total_steps,
+            accel_frac=accel_fraction,
+            jm=jm,
+            v0=v0)
+        
+        scaled_vels = scale_velocity_profile(
+            velocities=vels, 
+            min_pwm_frequency=min_pwm_frequency, 
+            max_pwm_frequency=max_pwm_frequency)
+    except:
+        steps = np.linspace(1, steps, steps)
+        scaled_vels = np.full((steps.size), min_pwm_frequency)
+
     return steps, scaled_vels
 
 def test():

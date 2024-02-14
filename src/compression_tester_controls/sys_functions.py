@@ -282,16 +282,16 @@ def move_big_stepper_to_setpoint(
     total_pulses = abs(setpoint - start_pos)    
 
     if total_pulses > error:
+        min_pwm_frequency=50
         pos, vel = generate_scaled_s_curve(
             total_steps=total_pulses,
-            min_pwm_frequency=50,
+            min_pwm_frequency=min_pwm_frequency,
             max_pwm_frequency=400) 
         
         logging.info(f"Moving Crushing stepper: {start_pos} -> {setpoint}")
-
-        if enc_pos < (setpoint + error):
+        if start_pos < (setpoint + error):
             big_stepper.set_dir(direction='ccw')
-        elif (setpoint - error) < enc_pos:
+        elif (setpoint - error) < start_pos:
             big_stepper.set_dir(direction='cw')
 
         while True:
@@ -299,7 +299,7 @@ def move_big_stepper_to_setpoint(
 
             if (setpoint - error) < enc_pos < (setpoint + error):
                 big_stepper.stop()
-                print(f"position reached: {big_stepper_enc.read()} = {setpoint}")
+                # print(f"position reached: {big_stepper_enc.read()} = {setpoint}")
                 break
 
             enc_pos = enc_pos - start_pos
