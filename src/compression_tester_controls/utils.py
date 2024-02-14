@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 # def generate_s_curve_velocity_profile(total_pulses, steps):
@@ -193,8 +193,8 @@ def generate_s_curve(steps, jm: float = 0.1, v0: float = 0):
 def generate_s_curve_profile(
         total_steps: int, 
         accel_frac: float = 0.2, 
-        jm: float = None,
-        v0: float = None):
+        jm: float = 0.1,
+        v0: float = 0):
     """
     Generate an S-curve profile based on steps, jerk, and acceleration.
     
@@ -224,9 +224,9 @@ def generate_scaled_s_curve(
         total_steps: int,
         min_pwm_frequency: int = 0,
         max_pwm_frequency: int = 100, 
-        accel_fraction: float = None, 
-        jm: float = None,
-        v0: float = None):
+        accel_fraction: float = 0.2, 
+        jm: float = 0.1,
+        v0: float = 0):
     
     steps, vels = generate_s_curve_profile(
         total_steps=total_steps,
