@@ -307,7 +307,6 @@ def move_big_stepper_to_setpoint(
                 current_position=abs(enc_pos),
                 positions=pos,
                 velocities=vel,
-                max_pwm_frequency=500,
             )
             big_stepper.rotate(freq=new_freq, duty_cycle=85)
 

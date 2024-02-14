@@ -115,7 +115,7 @@ import numpy as np
 #     return steps, velocities
 
 
-def adjust_pwm_based_on_position(current_position, positions, velocities, max_pwm_frequency):
+def adjust_pwm_based_on_position(current_position, positions, velocities):
     """
     Adjust PWM frequency based on the current encoder position using the velocity profile,
     ensuring the PWM frequency never drops below a minimum value.
@@ -129,16 +129,16 @@ def adjust_pwm_based_on_position(current_position, positions, velocities, max_pw
     """
     # Find the closest position in the profile and get the corresponding velocity
     closest_idx = np.abs(positions - current_position).argmin()
-    desired_velocity = velocities[closest_idx]
+    desired_pwm = velocities[closest_idx]
     
     # Convert the desired velocity to a PWM frequency
     # This is a placeholder for the conversion logic, which depends on specific hardware characteristics
-    pwm_frequency = max_pwm_frequency * desired_velocity / np.max(velocities)
+    # pwm_frequency = max_pwm_frequency * desired_velocity / np.max(velocities)
     
     # Ensure the PWM frequency does not fall below the minimum value
     # pwm_frequency = max(pwm_frequency, min_pwm_frequency)
     
-    return pwm_frequency
+    return desired_pwm
 
 
 def scale_velocity_profile(velocities, min_pwm_frequency, max_pwm_frequency):
@@ -239,7 +239,7 @@ def generate_scaled_s_curve(
             min_pwm_frequency=min_pwm_frequency, 
             max_pwm_frequency=max_pwm_frequency)
     except:
-        steps = np.linspace(1, steps, steps)
+        steps = np.linspace(1, total_steps, total_steps)
         scaled_vels = np.full((steps.size), min_pwm_frequency)
 
     return steps, scaled_vels
