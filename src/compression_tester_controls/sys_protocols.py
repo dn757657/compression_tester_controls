@@ -155,7 +155,7 @@ def camera_system_setup(components):
         if not cam_stepper.frequency:
             logging.info("Previous Stepper Direction Not Known! Untrigger Switch Manually by Moving Camera System Assembly.")
             input("Press Enter When Collision Resolved...")
-    home_camera_system()
+    home_camera_system(components=components)
 
     logging.info("Camera System Initialized.")
     return

@@ -248,8 +248,8 @@ def generate_scaled_s_curve(
     return steps, scaled_vels
 
 def test():
-    steps, vels = generate_s_curve_profile(total_steps=100)
-    vels = scale_velocity_profile(velocities=vels, min_pwm_frequency=50, max_pwm_frequency=400)
+    steps, vels = generate_scaled_s_curve(total_steps=5, min_pwm_frequency=50)
+    # vels = scale_velocity_profile(velocities=vels, min_pwm_frequency=50, max_pwm_frequency=400)
 
     plt.plot(steps, vels)
     plt.xlabel('Steps')
