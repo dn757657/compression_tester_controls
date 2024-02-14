@@ -1,5 +1,5 @@
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 # def generate_s_curve_velocity_profile(total_pulses, steps):
@@ -204,13 +204,16 @@ def generate_s_curve_profile(
     :param total_distance: Total distance for the motion.
     :return: Velocity profile as a numpy array.
     """
-    total_steps = np.linspace(1, total_steps, total_steps)
+    # total_steps = np.linspace(1, total_steps, total_steps)
     accel_steps = int(round(total_steps * accel_frac))
+    constant_steps = total_steps - (2 * accel_steps) 
+    total_steps = np.linspace(1, total_steps, total_steps)
+    # constant_steps = total_steps - (2 * accel_steps) 
 
     s_curve_accel_steps, s_curve_accel_vels = generate_s_curve(steps=accel_steps, jm=jm, v0=v0)
     s_curve_decel_vels = s_curve_accel_vels[::-1]
 
-    constant_steps = total_steps - (2 * accel_steps) 
+    # constant_steps = total_steps - (2 * accel_steps) 
     constant_steps = np.linspace(1, constant_steps, constant_steps)
     constant_vels = np.full((constant_steps.size), s_curve_accel_vels.max())
 
@@ -245,7 +248,7 @@ def generate_scaled_s_curve(
     return steps, scaled_vels
 
 def test():
-    steps, vels = generate_s_curve_profile(total_steps=1000)
+    steps, vels = generate_s_curve_profile(total_steps=100)
     vels = scale_velocity_profile(velocities=vels, min_pwm_frequency=50, max_pwm_frequency=400)
 
     plt.plot(steps, vels)

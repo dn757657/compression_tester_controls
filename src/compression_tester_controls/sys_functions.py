@@ -273,7 +273,7 @@ def get_a201_Rf(n_samples: int, components, rs: int):
 def move_big_stepper_to_setpoint(
         components,
         setpoint: int,
-        error: int = 5,
+        error: int = 1,
 ):
     big_stepper_enc = components.get('e5')
     big_stepper = components.get('big_stepper')
