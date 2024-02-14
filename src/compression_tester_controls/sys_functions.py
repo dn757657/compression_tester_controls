@@ -14,7 +14,7 @@ from .components.factory import HardwareFactory
 from .components.ads1115 import ADS1115
 from .components.stepper import StepperMotorDriver
 from .components.A201 import A201
-from .utils import generate_s_curve_velocity_profile, scale_velocity_profile, adjust_pwm_based_on_position
+from .utils import generate_scaled_s_curve, scale_velocity_profile, adjust_pwm_based_on_position
 
 
 logging.basicConfig()
@@ -23,13 +23,13 @@ REQUIRED_CONFIG_ATTRS = ['name', 'type']
 
 
 def load_configs(
-        package: str = "compression_tester_controls.components.configs", 
-        directory: str = "configs", 
+        package: str = "compression_tester_controls.components.configs",
+        directory: str = "configs",
         config_file_ext: str = 'json'
 ) -> dict():
-    
+
     component_configs = dict()
-    
+
     # Use importlib.resources to list all entries within the given directory of the package
     # if resources.is_resource(package, directory):
         # with resources.path(package, directory) as pkg_dir:
@@ -50,7 +50,7 @@ def load_configs(
                         break
                 if all_reqd_attrs:
                     component_configs[entry.split(".")[0]] = d
-    
+
     return component_configs
 
 
@@ -111,12 +111,12 @@ def inst_components(
         #         config[ob] = comp.ref_obj_attr
 
         components[name] = HardwareFactory().create_component(config=config)
-    
+
     i2c_lock = threading.Lock()
     for component in components.values():
         attrs = dir(component)
         if 'i2c_lock'.lower() in attrs:
-          component.i2c_lock = i2c_lock      
+          component.i2c_lock = i2c_lock
 
     return components
 
@@ -176,7 +176,7 @@ def detect_anomoly_rolling_cusum(samples, h, k):
         print(f'{sl[-1]} < {h}')
         return True
 
-    return False    
+    return False
 
 
 def move_stepper_PID_target(
@@ -195,7 +195,7 @@ def move_stepper_PID_target(
 
         if (setpoint - error) < enc.read() <= (setpoint + error):
             stepper.stop()
-            break 
+            break
 
 
 def sample_force_sensor(n_samples, components):
@@ -225,6 +225,8 @@ def sample_force_sensor(n_samples, components):
             time.sleep(0.5)
 
     rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
+    print(f"Force Sensor Vout mean: {np.mean(vouts)}")
+    print(f"Force Sensor Vref mean: {np.mean(vrefs)}")
     print(f"Force Sensor RS mean: {np.mean(rs)}")
     # TODO
     # load =
@@ -277,12 +279,20 @@ def move_big_stepper_to_setpoint(
     big_stepper = components.get('big_stepper')
 
     start_pos = big_stepper_enc.read()
-    total_pulses = setpoint - start_pos
+    total_pulses = abs(setpoint - start_pos)    
 
     if total_pulses > error:
-        pos, vel = generate_s_curve_velocity_profile(total_pulses=total_pulses, steps=total_pulses)
-        vel = scale_velocity_profile(velocities=vel, min_pwm_frequency=50, max_pwm_frequency=500)
+        pos, vel = generate_scaled_s_curve(
+            total_steps=total_pulses,
+            min_pwm_frequency=50,
+            max_pwm_frequency=400) 
+        
         logging.info(f"Moving Crushing stepper: {start_pos} -> {setpoint}")
+
+        if enc_pos < (setpoint + error):
+            big_stepper.set_dir(direction='ccw')
+        elif (setpoint - error) < enc_pos:
+            big_stepper.set_dir(direction='cw')
 
         while True:
             enc_pos = big_stepper_enc.read()
@@ -292,20 +302,15 @@ def move_big_stepper_to_setpoint(
                 print(f"position reached: {big_stepper_enc.read()} = {setpoint}")
                 break
 
-            if enc_pos < (setpoint + error):
-                freq_multi = 1
-            if (setpoint - error) < enc_pos:
-                freq_multi = -1
-            
-            enc_pos = big_stepper_enc.read() - start_pos
+            enc_pos = enc_pos - start_pos
             new_freq = adjust_pwm_based_on_position(
                 current_position=abs(enc_pos),
                 positions=pos,
                 velocities=vel,
                 max_pwm_frequency=500,
             )
-            big_stepper.rotate(freq=new_freq * freq_multi, duty_cycle=85)
-    
+            big_stepper.rotate(freq=new_freq, duty_cycle=85)
+
     logging.info(f"Crushing Stepper moved: {start_pos} -> {big_stepper_enc.read()}")
     return
 

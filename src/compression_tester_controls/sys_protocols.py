@@ -36,7 +36,7 @@ def platon_setup(
         if setpoint == 'q':
             break
         else:
-            move_big_stepper_to_setpoint(setpoint=int(setpoint))
+            move_big_stepper_to_setpoint(setpoint=int(setpoint), components=components)
 
     platon_zero_count = enc.read()
 
@@ -48,7 +48,7 @@ def platon_setup(
         if setpoint == 'q':
             break
         else:
-            move_big_stepper_to_setpoint(setpoint=int(setpoint))
+            move_big_stepper_to_setpoint(setpoint=int(setpoint), components=components)
     
     sample_height_count = enc.read()
 
