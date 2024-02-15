@@ -225,9 +225,9 @@ def sample_force_sensor(n_samples, components):
             time.sleep(0.5)
 
     rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
-    print(f"Force Sensor Vout mean: {np.mean(vouts)}")
-    print(f"Force Sensor Vref mean: {np.mean(vrefs)}")
-    print(f"Force Sensor RS mean: {np.mean(rs)}")
+    # print(f"Force Sensor Vout mean: {np.mean(vouts)}")
+    # print(f"Force Sensor Vref mean: {np.mean(vrefs)}")
+    # print(f"Force Sensor RS mean: {np.mean(rs)}")
     # TODO
     # load =
     #force = np.mean(rs)
