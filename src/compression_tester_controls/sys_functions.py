@@ -294,8 +294,21 @@ def move_big_stepper_to_setpoint(
         elif (setpoint - error) < start_pos:
             big_stepper.set_dir(direction='cw')
 
+        stall_count = 0
+        stall_count_limit = 10
         while True:
             enc_pos = big_stepper_enc.read()
+
+            # stall
+            if (enc_pos_prev - error) < enc_pos < (enc_pos_prev + error):
+                stall_count += 1
+                if stall_count > stall_count_limit:
+                    big_stepper.stop()
+                    logging.info(f"Motor Stalled @ {enc_pos}")
+                    break
+            else:
+                if stall_count > 0:
+                    stall_count = stall_count - 1
 
             if (setpoint - error) < enc_pos < (setpoint + error):
                 big_stepper.stop()
@@ -310,6 +323,7 @@ def move_big_stepper_to_setpoint(
             )
             big_stepper.rotate(freq=new_freq, duty_cycle=85)
 
+            enc_pos_prev = enc_pos
     logging.info(f"Crushing Stepper moved: {start_pos} -> {big_stepper_enc.read()}")
     return
 
