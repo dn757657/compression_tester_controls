@@ -294,26 +294,37 @@ def move_big_stepper_to_setpoint(
         elif (setpoint - error) < start_pos:
             big_stepper.set_dir(direction='cw')
 
+        enc_pos_prev = None
         stall_count = 0
         stall_count_limit = 10
         while True:
             enc_pos = big_stepper_enc.read()
 
-            # stall
-            if (enc_pos_prev - error) < enc_pos < (enc_pos_prev + error):
-                stall_count += 1
-                if stall_count > stall_count_limit:
-                    big_stepper.stop()
-                    logging.info(f"Motor Stalled @ {enc_pos}")
-                    break
-            else:
-                if stall_count > 0:
-                    stall_count = stall_count - 1
+            if enc_pos_prev:
+                if (enc_pos_prev - 10) < enc_pos < (enc_pos_prev + 10):
+                    stall_count += 1
+                    print(f"added one to stall count: {stall_count}")
+                    if stall_count > stall_count_limit:
+                        big_stepper.stop()
+                        logging.info(f"Motor Stalled @ {enc_pos}")
+                        break
+                else:
+                    if stall_count > 0:
+                        stall_count = stall_count - 1
+                        print(f"subtracted one from stall count: {stall_count}")
 
             if (setpoint - error) < enc_pos < (setpoint + error):
                 big_stepper.stop()
-                # print(f"position reached: {big_stepper_enc.read()} = {setpoint}")
                 break
+            elif enc_pos_prev:
+                if enc_pos_prev > enc_pos:  # moving up
+                    if (setpoint - error) < enc_pos:  # moved too far up
+                        big_stepper.stop()
+                        break
+                elif enc_pos_prev < enc_pos:  # moving down
+                    if enc_pos < (setpoint + error):  # moved too far down
+                        big_stepper.stop()
+                        break
 
             enc_pos = enc_pos - start_pos
             new_freq = adjust_pwm_based_on_position(
