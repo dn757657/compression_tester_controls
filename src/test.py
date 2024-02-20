@@ -90,5 +90,12 @@ def test_canon_speed():
             break
 
 
+def test_force_sensor():
+    components = sys_init()
+    adc = components.get('force_sensor_adc')
+    force_sensor = components.get('A201')
+
+
+
 if __name__ == '__main__':
     test_canon_speed()

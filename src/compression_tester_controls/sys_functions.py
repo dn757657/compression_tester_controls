@@ -225,9 +225,9 @@ def sample_force_sensor(n_samples, components):
             time.sleep(0.5)
 
     rs = force_sensor.get_rs(vout=vouts, vref=vrefs)
-    # print(f"Force Sensor Vout mean: {np.mean(vouts)}")
-    # print(f"Force Sensor Vref mean: {np.mean(vrefs)}")
-    # print(f"Force Sensor RS mean: {np.mean(rs)}")
+    print(f"Force Sensor Vout mean: {np.mean(vouts)}")
+    print(f"Force Sensor Vref mean: {np.mean(vrefs)}")
+    print(f"Force Sensor RS mean: {np.mean(rs)}")
     # TODO
     # load =
     #force = np.mean(rs)
@@ -322,13 +322,13 @@ def move_big_stepper_to_setpoint(
                         big_stepper.stop()
                         break
                 elif enc_pos_prev < enc_pos:  # moving down
-                    if enc_pos < (setpoint + error):  # moved too far down
+                    if enc_pos > (setpoint + error):  # moved too far down
                         big_stepper.stop()
                         break
 
-            enc_pos = enc_pos - start_pos
+            enc_pos_abs = enc_pos - start_pos
             new_freq = adjust_pwm_based_on_position(
-                current_position=abs(enc_pos),
+                current_position=abs(enc_pos_abs),
                 positions=pos,
                 velocities=vel,
             )

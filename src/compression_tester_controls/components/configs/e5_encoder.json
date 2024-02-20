@@ -2,6 +2,6 @@
     "name": "e5",
     "type": "encoder",
     "init_priority": 2,
-    "serial_port": "/dev/ttyUSB1",
+    "serial_port": "/dev/ttyUSB0",
     "baud_rate": 230400
 }
