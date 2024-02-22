@@ -9,7 +9,7 @@ from compression_tester_controls.sys_functions import load_configs, inst_compone
 from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup, test_frame_speed
 from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, eosr50_init, eosr50_continuous_capture_and_save
 from compression_tester_controls.sys_functions import detect_force_anomoly, sample_force_sensor
-from compression_tester_controls.utils import generate_s_curve_velocity_profile, adjust_pwm_based_on_position, scale_velocity_profile
+# from compression_tester_controls.utils import generate_s_curve_velocity_profile, adjust_pwm_based_on_position, scale_velocity_profile
 
 
 def sys_init():
