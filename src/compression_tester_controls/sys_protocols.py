@@ -323,3 +323,36 @@ def capture_step_frames(cam_ports, components, stepper_freq):
     
     all_photos = [item for sublist in photos for item in sublist]
     return all_photos
+
+
+def test_frame_speed(runtime):
+    cam_ports = gphoto2_get_active_ports()
+    eosr50_init(port=port)
+    
+    cam_threads = []
+    photos = [list() for x in cam_ports]
+    stop_event = threading.Event()
+
+    start = time.time()
+    for i, port in enumerate(cam_ports, start=0):
+        cam = threading.Thread(
+                target=eosr50_continuous_capture_and_save,
+                args=(port, stop_event, photos[i])
+            )
+        cam_threads.append(cam)
+
+    for thread in cam_threads:
+        thread.start()
+
+    while True:
+
+        if time.time() - start > runtime:
+            stop_event.set()
+            for thread in cam_threads:
+                thread.join()
+            break
+    
+    all_photos = [item for sublist in photos for item in sublist]
+    print(f"{len(all_photos)} photos taken in {time.time() - start} seconds: {len(filenames) / (time.time() - start)} [photos/sec]")
+
+    return all_photos

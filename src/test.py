@@ -6,7 +6,7 @@ import threading
 
 from simple_pid import PID
 from compression_tester_controls.sys_functions import load_configs, inst_components
-from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup
+from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup, test_frame_speed
 from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, eosr50_init, eosr50_continuous_capture_and_save
 from compression_tester_controls.sys_functions import detect_force_anomoly, sample_force_sensor
 from compression_tester_controls.utils import generate_s_curve_velocity_profile, adjust_pwm_based_on_position, scale_velocity_profile
@@ -92,10 +92,10 @@ def test_canon_speed():
 
 def test_force_sensor():
     components = sys_init()
-    adc = components.get('force_sensor_adc')
-    force_sensor = components.get('A201')
-
+    while True:
+        time.sleep(1)
+        sample_force_sensor(n_samples=10, components=components)
 
 
 if __name__ == '__main__':
-    test_canon_speed()
+    test_frame_speed(runtime=10)
