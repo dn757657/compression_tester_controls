@@ -1,4 +1,5 @@
 import logging
+import math
 import numpy as np
 
 logging.basicConfig()
@@ -10,14 +11,24 @@ class A201:
     def __init__(
             self,
             name: str,
+            exp_A: float,
+            exp_B: float,
             rf: float = 0,
             **kwargs
             ) -> None:
-        
+        """
+        exp A and B are constants in the exponential function fit to the force measurement
+        for translating resistance to force
+        """
+
+
         self.name = name
         self.rf = rf
         self.rs = None
         self.load = None
+
+        self.exp_a_const = exp_A
+        self.exp_b_const = exp_B
 
         logging.info(f"A201 Flexiforce initialized with Rf Value: {self.rf}")
         if self.rf == 0:
@@ -52,7 +63,7 @@ class A201:
     def _update_load(self, vout: float, vref: float):
         self._update_rs(vout=vout, vref=vref)
         try:
-            self.load = 1 / self.rs
+            self.load = (self.exp_a_const *  math.e) ** (self.rs * self.exp_b_const)
         except ZeroDivisionError:
             self.load = 0
         pass
