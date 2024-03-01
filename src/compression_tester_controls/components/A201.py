@@ -55,7 +55,7 @@ class A201:
         except ZeroDivisionError:
             self.rs = 0
         pass
-
+    
     def get_rs(self, vout: float, vref: float):
         self._update_rs(vout=vout, vref=vref)
         return self.rs
@@ -63,7 +63,7 @@ class A201:
     def _update_load(self, vout: float, vref: float):
         self._update_rs(vout=vout, vref=vref)
         try:
-            self.load = (self.exp_a_const *  math.e) ** (self.rs * self.exp_b_const)
+            self.load = (self.exp_a_const * np.exp((1/self.rs) * self.exp_b_const))
         except ZeroDivisionError:
             self.load = 0
         pass
