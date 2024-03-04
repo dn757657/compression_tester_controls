@@ -271,6 +271,77 @@ def get_a201_Rf(n_samples: int, components, rs: int):
     return rf
 
 
+# def move_big_stepper_to_setpoint(
+#         components,
+#         setpoint: int,
+#         error: int = 1,
+# ):
+#     big_stepper_enc = components.get('e5')
+#     big_stepper = components.get('big_stepper')
+
+#     start_pos = big_stepper_enc.read()
+#     total_pulses = abs(setpoint - start_pos)
+
+#     if total_pulses > error:
+#         min_pwm_frequency=50
+#         pos, vel = generate_scaled_s_curve(
+#             total_steps=total_pulses,
+#             min_pwm_frequency=min_pwm_frequency,
+#             max_pwm_frequency=400)
+
+#         logging.info(f"Moving Crushing stepper: {start_pos} -> {setpoint}")
+#         if start_pos < (setpoint + error):
+#             big_stepper.set_dir(direction='ccw')
+#         elif (setpoint - error) < start_pos:
+#             big_stepper.set_dir(direction='cw')
+
+#         enc_pos_prev = None
+#         stall_count = 0
+#         stall_count_limit = 10
+#         while True:
+#             enc_pos = big_stepper_enc.read()
+
+#             if enc_pos_prev:
+#                 if (enc_pos_prev - 10) < enc_pos < (enc_pos_prev + 10):
+#                     stall_count += 1
+#                     print(f"added one to stall count: {stall_count}")
+#                     if stall_count > stall_count_limit:
+#                         big_stepper.stop()
+#                         logging.info(f"Motor Stalled @ {enc_pos}")
+#                         break
+#                 else:
+#                     if stall_count > 0:
+#                         stall_count = stall_count - 1
+#                         print(f"subtracted one from stall count: {stall_count}")
+
+#             if (setpoint - error) < enc_pos < (setpoint + error):
+#                 big_stepper.stop()
+#                 break
+#             elif enc_pos_prev:
+#                 if enc_pos_prev > enc_pos:  # moving up
+#                     if (setpoint - error) < enc_pos:  # moved too far up
+#                         big_stepper.stop()
+#                         break
+#                 elif enc_pos_prev < enc_pos:  # moving down
+#                     if enc_pos > (setpoint + error):  # moved too far down
+#                         big_stepper.stop()
+#                         break
+
+            
+            
+
+#             enc_pos_abs = enc_pos - start_pos
+#             new_freq = adjust_pwm_based_on_position(
+#                 current_position=abs(enc_pos_abs),
+#                 positions=pos,
+#                 velocities=vel,
+#             )
+#             big_stepper.rotate(freq=new_freq, duty_cycle=85)
+
+#             enc_pos_prev = enc_pos
+#     logging.info(f"Crushing Stepper moved: {start_pos} -> {big_stepper_enc.read()}")
+#     return
+
 def move_big_stepper_to_setpoint(
         components,
         setpoint: int,
@@ -290,40 +361,47 @@ def move_big_stepper_to_setpoint(
             max_pwm_frequency=400)
 
         logging.info(f"Moving Crushing stepper: {start_pos} -> {setpoint}")
+        freq_multi = 1
         if start_pos < (setpoint + error):
             big_stepper.set_dir(direction='ccw')
         elif (setpoint - error) < start_pos:
             big_stepper.set_dir(direction='cw')
 
         enc_pos_prev = None
-        stall_count = 0
-        stall_count_limit = 10
+        # stall_count = 0
+        # stall_count_limit = 25
         while True:
             enc_pos = big_stepper_enc.read()
 
-            if enc_pos_prev:
-                if (enc_pos_prev - 10) < enc_pos < (enc_pos_prev + 10):
-                    stall_count += 1
-                    print(f"added one to stall count: {stall_count}")
-                    if stall_count > stall_count_limit:
-                        big_stepper.stop()
-                        logging.info(f"Motor Stalled @ {enc_pos}")
-                        break
-                else:
-                    if stall_count > 0:
-                        stall_count = stall_count - 1
-                        print(f"subtracted one from stall count: {stall_count}")
+            #if enc_pos_prev:
+            #    if (enc_pos_prev - 10) < enc_pos < (enc_pos_prev + 10):
+            #        stall_count += 1
+            #        print(f"added one to stall count: {stall_count}")
+            #        if stall_count > stall_count_limit:
+            #            big_stepper.stop()
+            #            logging.info(f"Motor Stalled @ {enc_pos}")
+            #            break
+            #    else:
+            #        if stall_count > 0:
+            #            stall_count = stall_count - 1
+            #            print(f"subtracted one from stall count: {stall_count}")
 
             if (setpoint - error) < enc_pos < (setpoint + error):
                 big_stepper.stop()
                 break
-            elif enc_pos_prev:
+            direction = 0
+            dir_lim = 10
+            if enc_pos_prev:
                 if enc_pos_prev > enc_pos:  # moving up
-                    if (setpoint - error) < enc_pos:  # moved too far up
+                    direction += 1
+                    # logging.info("Moving UP")
+                    if ((setpoint - error) < enc_pos) and direction > dir_lim:  # moved too far up
                         big_stepper.stop()
                         break
                 elif enc_pos_prev < enc_pos:  # moving down
-                    if enc_pos > (setpoint + error):  # moved too far down
+                    direction -= 1
+                    # logging.info("Moving DOWN")
+                    if (enc_pos > (setpoint + error)) and direction < -dir_lim:  # moved too far down
                         big_stepper.stop()
                         break
 
@@ -333,14 +411,11 @@ def move_big_stepper_to_setpoint(
                 positions=pos,
                 velocities=vel,
             )
-            big_stepper.rotate(freq=new_freq, duty_cycle=85)
+            big_stepper.rotate(freq=new_freq * freq_multi, duty_cycle=85)
 
             enc_pos_prev = enc_pos
     logging.info(f"Crushing Stepper moved: {start_pos} -> {big_stepper_enc.read()}")
     return
-
-
-
 
 
     # big_stepper_enc = components.get('e5')
