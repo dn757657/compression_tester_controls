@@ -55,7 +55,7 @@ class A201:
         except ZeroDivisionError:
             self.rs = 0
         pass
-    
+
     def get_rs(self, vout: float, vref: float):
         self._update_rs(vout=vout, vref=vref)
         return self.rs

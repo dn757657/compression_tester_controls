@@ -280,6 +280,10 @@ def capture_step_frames(cam_ports, components, stepper_freq):
     for thread in cam_threads:
         thread.start()
 
+    state_count = 0  
+    state_count_limit = 10
+    # an occasional false positive on a endstop switch in this instance can ruin a trial
+    # so we confirm it a few times 
     while True:
         adc_state = lsw_adc.get_state(unit='volts')
         sig_lsw1 = adc_state.get('a0') - adc_state.get('a2')
@@ -291,11 +295,13 @@ def capture_step_frames(cam_ports, components, stepper_freq):
         }
 
         if True in states.values():
-            cam_stepper.stop()
-            stop_event.set()
-            for thread in cam_threads:
-                thread.join()
-            break
+            state_count += 1
+            if state_count >= state_count_limit:  # only stop if state is confirmed!
+                cam_stepper.stop()
+                stop_event.set()
+                for thread in cam_threads:
+                    thread.join()
+                break
     
     cam_stepper.reverse_direction()
     cam_stepper.rotate(freq=cam_stepper.frequency, duty_cycle=50)
