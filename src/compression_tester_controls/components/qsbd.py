@@ -122,15 +122,24 @@ class DeviceController:
         # Send configuration commands to the device, similar to the C# Connect method logic
         # For example:
         self.write_command('03', self.quadrature_mode.value)  # Setting quadrature mode
-        self.write_command('04', self.encoder_direction.value)  # Setting encoder direction
-        # Add more configuration commands as needed
+        self.write_command('04', self.encoder_direction.value) 
+        self.write_command('0B', 0x00000000)
+
+        # Set the output interval to 1/512 x 1 Hz (1.953125 ms)
+        self.write_command('0C', 0x00000001)
+
+        # Reset the 32-bit timestamp register to minimize the chance of rollover
+        self.write_command('0D', 0x00000001)
+
+        # Start streaming the encoder count at the specified interval
+        self.stream_command('0E')
         pass
 
-    def start_reading_thread(self):
-        # Starting the background thread for continuous reading
-        self.reading_thread = threading.Thread(target=self._reading_loop, daemon=True)
-        self.reading_thread.start()
-        pass
+    # def start_reading_thread(self):
+    #     # Starting the background thread for continuous reading
+    #     self.reading_thread = threading.Thread(target=self._reading_loop, daemon=True)
+    #     self.reading_thread.start()
+    #     pass
 
     def write_command(self, register, data):
         if self.serial_port and self.serial_port.isOpen():
@@ -138,10 +147,45 @@ class DeviceController:
             self.serial_port.write(command.encode('utf-8'))
             logging.info(f"Sent command: {command}")
 
+    def stream_command(self, register, data):
+        """
+        Send a command to the device to start streaming data, such as encoder counts.
+        
+        Args:
+            register (str): The register or command code to write to.
+            data (int): The data value to send with the command.
+        """
+        try:
+            # Construct the command string. Adjust formatting as necessary for your device.
+            command = f'S{register}{data:08X}\n'
+            self.serial_port.write(command.encode('utf-8'))
+            logging.info(f"Sent stream command: {command}")
+
+            # Wait for and process the response to confirm successful command execution.
+            # This is a simplified example. Adjust parsing as necessary based on your device's protocol.
+            response = self.serial_port.readline().decode('utf-8').strip()
+            logging.info(f"Received response to stream command: {response}")
+
+            # Validate the response. This example checks for a simple acknowledgment pattern.
+            # You'll need to replace this with validation logic appropriate for your device's responses.
+            if not response or response[0] != 's':
+                raise ValueError("Invalid response to stream command.")
+
+        except serial.SerialException as e:
+            logging.error(f"Serial communication error during stream command: {e}")
+            # Handle serial communication errors appropriately.
+            # This might involve retrying the command, resetting the connection, etc.
+        except ValueError as e:
+            logging.error(f"Response validation error: {e}")
+            # Handle unexpected or invalid responses.
+            # This might involve logging the error, retrying, or taking corrective action.
+
+
     def start_reading_thread(self):
         self._stop_reading_thread.clear()
         self._reading_thread = threading.Thread(target=self._reading_loop, daemon=True)
         self._reading_thread.start()
+        pass
 
     def _reading_loop(self):
         while not self._stop_reading_thread.is_set():
