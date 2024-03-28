@@ -88,26 +88,48 @@ class DeviceController:
         self._encoder_count_lock = threading.Lock()
 
     def connect(self):
-        with self._connection_lock:
+        try:
+            if self.serial_port is not None:
+                raise Exception("Cannot reconnect using the same DeviceController instance.")
+            self.serial_port = serial.Serial(self.port_name, self.baud_rate, timeout=1)
+            logging.info(f"Connected to {self.port_name}.")
+
+            # Resetting the device (assuming DTR line usage is applicable in your context)
+            self.serial_port.dtr = False
+            self.serial_port.dtr = True
+
+            # Example configuration commands
+            self.write_command('15', 0x0000000F)  # Adjust the command as necessary
+
+            # Read the first line if needed (handling the specific device behavior on reset)
             try:
-                self.serial_port = serial.Serial(port=self.port_name, baudrate=self.baud_rate,
-                                                 parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
-                                                 bytesize=serial.EIGHTBITS, timeout=1)
-                logging.info(f"Connected to {self.port_name}.")
+                first_line = self.serial_port.readline().decode('utf-8').strip()
+                logging.info(f"Received initial response: {first_line}")
+            except serial.SerialTimeoutException:
+                logging.info("No initial response received.")
 
-                # Configure the device as needed
-                self.configure_device()
+            # Device-specific configuration
+            # Set quadrature mode, encoder direction, etc., by sending appropriate commands
+            self.configure_device()
 
-                self.connected = True
-                self.start_reading_thread()
-
-            except Exception as e:
-                logging.error(f"Failed to connect: {e}")
-                self.disconnect()
+            # Starting the reading thread
+            self.start_reading_thread()
+        except Exception as e:
+            logging.error(f"Failed to connect and configure the device: {e}")
+            self.disconnect()
 
     def configure_device(self):
-        # Send configuration commands to the device
-        # Example: self.write_command('03', self.quadrature_mode.value)
+        # Send configuration commands to the device, similar to the C# Connect method logic
+        # For example:
+        self.write_command('03', self.quadrature_mode.value)  # Setting quadrature mode
+        self.write_command('04', self.encoder_direction.value)  # Setting encoder direction
+        # Add more configuration commands as needed
+        pass
+
+    def start_reading_thread(self):
+        # Starting the background thread for continuous reading
+        self.reading_thread = threading.Thread(target=self._reading_loop, daemon=True)
+        self.reading_thread.start()
         pass
 
     def write_command(self, register, data):
@@ -173,7 +195,7 @@ class DeviceController:
 
 def test():
     device_controller = DeviceController(
-        port_name='COM5',  # Change to your port
+        port_name='/dev/ttyUSB1',  # Change to your port
         baud_rate=230400,
         quadrature_mode=QuadratureMode.X4,
         encoder_direction=EncoderDirection.CountUp,
@@ -195,4 +217,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    test()
