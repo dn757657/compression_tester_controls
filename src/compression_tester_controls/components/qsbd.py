@@ -176,7 +176,7 @@ class DeviceController:
                     raise ValueError("The first field in the response was expected to be 'w'.")
                 elif fields[1].upper() != register.upper():
                     raise ValueError(f"The second field in the response was expected to be '{register}'.")
-                elif fields[2] != data:
+                elif int(fields[2], 16) != data:
                     raise ValueError(f"The third field in the response was expected to be '{data}'.")
                 elif len(fields[3]) != 8:
                     raise ValueError("The fourth field in the response was expected to be 8 bytes.")
