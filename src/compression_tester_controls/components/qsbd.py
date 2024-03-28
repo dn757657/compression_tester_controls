@@ -107,23 +107,11 @@ class DeviceController:
             except serial.SerialTimeoutException:
                 logging.info("No initial response received.")
 
-
             # Example configuration commands
             self.write_command('15', 0x0000000F)  # Adjust the command as necessary
-
-            # # Read the first line if needed (handling the specific device behavior on reset)
-            # try:
-            #     first_line = self.serial_port.readline().decode('utf-8').strip()
-            #     logging.info(f"Received initial response: {first_line}")
-            # except serial.SerialTimeoutException:
-            #     logging.info("No initial response received.")
-
-            # Device-specific configuration
-            # Set quadrature mode, encoder direction, etc., by sending appropriate commands
             self.configure_device()
 
-            # Starting the reading thread
-            # self.start_reading_thread()
+            self.start_reading_thread()
         except Exception as e:
             logging.error(f"Failed to connect and configure the device: {e}")
             self.disconnect()
@@ -133,21 +121,10 @@ class DeviceController:
         self.write_command('04', self.encoder_direction.value) # direcrtion
         self.write_command('0B', 0x00000000)  # threshold
 
-        # Set the output interval to 1/512 x 1 Hz (1.953125 ms)
-        self.write_command('0C', 0x00000001)
-
-        # Reset the 32-bit timestamp register to minimize the chance of rollover
-        self.write_command('0D', 0x00000001)
-
-        # Start streaming the encoder count at the specified interval
-        self.stream_command('0E')
+        self.write_command('0C', 0x00000001) # set output freq to max
+        self.write_command('0D', 0x00000001)  # reset timestampt
+        self.stream_command('0E')  # start streaming
         pass
-
-    # def start_reading_thread(self):
-    #     # Starting the background thread for continuous reading
-    #     self.reading_thread = threading.Thread(target=self._reading_loop, daemon=True)
-    #     self.reading_thread.start()
-    #     pass
 
     def write_command(self, register, data):
         """
@@ -172,7 +149,7 @@ class DeviceController:
                 fields = response.split(' ')
                 if len(fields) != 5:
                     raise ValueError("The response was expected to have 5 fields.")
-                elif fields[0] != 'w':
+                elif fields[0] != 's':
                     raise ValueError("The first field in the response was expected to be 'w'.")
                 elif fields[1].upper() != register.upper():
                     raise ValueError(f"The second field in the response was expected to be '{register}'.")
@@ -189,7 +166,6 @@ class DeviceController:
             except ValueError as e:
                 logging.error(f"Response validation error: {e}")
                 raise
-
 
     def stream_command(self, register):
         """
@@ -230,32 +206,58 @@ class DeviceController:
                 logging.error(f"Validation error for the response: {e}")
                 # Handle validation errors, possibly re-throwing or taking corrective action
 
-
     def start_reading_thread(self):
         self._stop_reading_thread.clear()
         self._reading_thread = threading.Thread(target=self._reading_loop, daemon=True)
         self._reading_thread.start()
         pass
-
+    
     def _reading_loop(self):
-        while not self._stop_reading_thread.is_set():
-            if not self.connected:
-                break
+        logging.info("Started EncoderCountReaderLoop.")
 
-            try:
-                raw_response = self.serial_port.readline().decode('utf-8').strip()
-                logging.info(f"Raw response: {raw_response}")
+        try:
+            while True:
+                if not self.connected:
+                    logging.info("Terminating EncoderCountReaderLoop.")
+                    break
+                with self._serial_port_lock:
+                    if self.serial_port is None or not self.serial_port.isOpen():
+                        logging.info("Terminating EncoderCountReaderLoop.")
+                        break
 
-                # Parse the response
-                encoder_count, timestamp = self.parse_encoder_count_stream_response(raw_response)
-                
-                # Update the internal state with the parsed values
+                    response = self.serial_port.readline().decode('utf-8').strip()
+
+                encoder_count, timestamp = self.parse_encoder_count_stream_response(response)
+
                 with self._encoder_count_lock:
                     self.encoder_count = encoder_count
 
-            except Exception as e:
-                logging.error(f"Reading loop error: {e}")
-            time.sleep(0.1)  # Sleep to simulate reading interval; adjust as necessary
+        except Exception as e:
+            logging.error(f"Terminating EncoderCountReaderLoop because of an exception: {e}")
+            self.disconnect()
+        pass
+
+
+
+    # def _reading_loop(self):
+    #     while not self._stop_reading_thread.is_set():
+    #         if not self.connected:
+    #             break
+
+    #         try:
+    #             raw_response = self.serial_port.readline().decode('utf-8').strip()
+    #             logging.info(f"Raw response: {raw_response}")
+
+    #             # Parse the response
+    #             encoder_count, timestamp = self.parse_encoder_count_stream_response(raw_response)
+                
+    #             # Update the internal state with the parsed values
+    #             with self._encoder_count_lock:
+    #                 self.encoder_count = encoder_count
+
+    #         except Exception as e:
+    #             logging.error(f"Reading loop error: {e}")
+    #         time.sleep(0.1)  # Sleep to simulate reading interval; adjust as necessary
 
     def disconnect(self):
         with self._connection_lock:
