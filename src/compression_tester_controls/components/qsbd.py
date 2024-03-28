@@ -151,10 +151,10 @@ class DeviceController:
         """
         with self._serial_port_lock:  # Ensure this uses the correct lock initialized for serial port access
             try:
-                register_str = format(register, '02X')
-                data_str = format(data, '08X')
+                # register_str = format(register, '02X')
+                # data_str = format(data, '08X')
 
-                command = f'W{register_str}{data_str}'
+                command = f'W{register}{data:08X}'
                 logging.info(f"Sending command: {command}")
                 self.serial_port.write(f"{command}\r\n".encode('utf-8'))
 
@@ -166,10 +166,10 @@ class DeviceController:
                     raise ValueError("The response was expected to have 5 fields.")
                 if fields[0] != 'w':
                     raise ValueError("The first field in the response was expected to be 'w'.")
-                if fields[1].upper() != register_str.upper():
-                    raise ValueError(f"The second field in the response was expected to be '{register_str}'.")
-                if fields[2].upper() != data_str.upper():
-                    raise ValueError(f"The third field in the response was expected to be '{data_str}'.")
+                if fields[1].upper() != register.upper():
+                    raise ValueError(f"The second field in the response was expected to be '{register}'.")
+                if fields[2].upper() != data.upper():
+                    raise ValueError(f"The third field in the response was expected to be '{data}'.")
                 if len(fields[3]) != 8:
                     raise ValueError("The fourth field in the response was expected to be 8 bytes.")
                 if fields[4] != '!':
