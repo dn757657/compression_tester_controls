@@ -86,44 +86,45 @@ class DeviceController:
 
         self._connection_lock = threading.Lock()
         self._encoder_count_lock = threading.Lock()
+        self._serial_port_lock = threading.Lock()
 
     def connect(self):
-        try:
-            if self.serial_port is not None:
-                raise Exception("Cannot reconnect using the same DeviceController instance.")
-            self.serial_port = serial.Serial(self.port_name, self.baud_rate, timeout=1)
-            logging.info(f"Connected to {self.port_name}.")
-
-            # Resetting the device (assuming DTR line usage is applicable in your context)
-            self.serial_port.dtr = False
-            self.serial_port.dtr = True
-
-            # Example configuration commands
-            self.write_command('15', 0x0000000F)  # Adjust the command as necessary
-
-            # Read the first line if needed (handling the specific device behavior on reset)
+        with self._serial_port_lock:
             try:
-                first_line = self.serial_port.readline().decode('utf-8').strip()
-                logging.info(f"Received initial response: {first_line}")
-            except serial.SerialTimeoutException:
-                logging.info("No initial response received.")
+                if self.serial_port is not None:
+                    raise Exception("Cannot reconnect using the same DeviceController instance.")
+                
+                self.serial_port = serial.Serial(self.port_name, self.baud_rate, timeout=1)
+                logging.info(f"Connected to {self.port_name}.")
 
-            # Device-specific configuration
-            # Set quadrature mode, encoder direction, etc., by sending appropriate commands
-            self.configure_device()
+                # Resetting the device (assuming DTR line usage is applicable in your context)
+                self.serial_port.dtr = False
+                self.serial_port.dtr = True
 
-            # Starting the reading thread
-            self.start_reading_thread()
-        except Exception as e:
-            logging.error(f"Failed to connect and configure the device: {e}")
-            self.disconnect()
+                # Example configuration commands
+                self.write_command('15', 0x0000000F)  # Adjust the command as necessary
+
+                # Read the first line if needed (handling the specific device behavior on reset)
+                try:
+                    first_line = self.serial_port.readline().decode('utf-8').strip()
+                    logging.info(f"Received initial response: {first_line}")
+                except serial.SerialTimeoutException:
+                    logging.info("No initial response received.")
+
+                # Device-specific configuration
+                # Set quadrature mode, encoder direction, etc., by sending appropriate commands
+                self.configure_device()
+
+                # Starting the reading thread
+                # self.start_reading_thread()
+            except Exception as e:
+                logging.error(f"Failed to connect and configure the device: {e}")
+                self.disconnect()
 
     def configure_device(self):
-        # Send configuration commands to the device, similar to the C# Connect method logic
-        # For example:
-        self.write_command('03', self.quadrature_mode.value)  # Setting quadrature mode
-        self.write_command('04', self.encoder_direction.value) 
-        self.write_command('0B', 0x00000000)
+        self.write_command('03', self.quadrature_mode.value)  # Squadrature mode
+        self.write_command('04', self.encoder_direction.value) # direcrtion
+        self.write_command('0B', 0x00000000)  # threshold
 
         # Set the output interval to 1/512 x 1 Hz (1.953125 ms)
         self.write_command('0C', 0x00000001)
@@ -132,7 +133,7 @@ class DeviceController:
         self.write_command('0D', 0x00000001)
 
         # Start streaming the encoder count at the specified interval
-        self.stream_command('0E')
+        # self.stream_command('0E')
         pass
 
     # def start_reading_thread(self):
@@ -142,10 +143,46 @@ class DeviceController:
     #     pass
 
     def write_command(self, register, data):
-        if self.serial_port and self.serial_port.isOpen():
-            command = f'W{register}{data:08X}\n'  # Adapt command format as needed
-            self.serial_port.write(command.encode('utf-8'))
-            logging.info(f"Sent command: {command}")
+        """
+        Sends a command to the device, including a register and data, then reads and validates the response.
+
+        Args:
+            register (str): The register code, to be formatted as a two-digit hexadecimal string.
+            data (int): The data to send, to be formatted as an eight-digit hexadecimal string.
+        """
+        with self._serial_port_lock:  # Ensure this uses the correct lock initialized for serial port access
+            try:
+                register_str = format(register, '02X')
+                data_str = format(data, '08X')
+
+                command = f'W{register_str}{data_str}'
+                logging.info(f"Sending command: {command}")
+                self.serial_port.write(f"{command}\r\n".encode('utf-8'))
+
+                response = self.serial_port.readline().decode('utf-8').strip()
+                logging.info(f"Received response: {response}")
+
+                fields = response.split(' ')
+                if len(fields) != 5:
+                    raise ValueError("The response was expected to have 5 fields.")
+                if fields[0] != 'w':
+                    raise ValueError("The first field in the response was expected to be 'w'.")
+                if fields[1].upper() != register_str.upper():
+                    raise ValueError(f"The second field in the response was expected to be '{register_str}'.")
+                if fields[2].upper() != data_str.upper():
+                    raise ValueError(f"The third field in the response was expected to be '{data_str}'.")
+                if len(fields[3]) != 8:
+                    raise ValueError("The fourth field in the response was expected to be 8 bytes.")
+                if fields[4] != '!':
+                    raise ValueError("The fifth field in the response was expected to be '!'.")
+
+            except serial.SerialTimeoutException as e:
+                logging.error(f"The device didn't respond to command '{command}': {e}")
+                raise TimeoutError("The device didn't respond to the command.") from e
+            except ValueError as e:
+                logging.error(f"Response validation error: {e}")
+                raise
+
 
     def stream_command(self, register):
         """
