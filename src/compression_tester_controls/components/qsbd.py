@@ -147,38 +147,35 @@ class DeviceController:
             self.serial_port.write(command.encode('utf-8'))
             logging.info(f"Sent command: {command}")
 
-    def stream_command(self, register, data):
+    def stream_command(self, register):
         """
-        Send a command to the device to start streaming data, such as encoder counts.
+        Send a stream command to the device using the specified register.
         
         Args:
-            register (str): The register or command code to write to.
-            data (int): The data value to send with the command.
+            register (str): The register or command code to write to, formatted as a hexadecimal string.
         """
-        try:
-            # Construct the command string. Adjust formatting as necessary for your device.
-            command = f'S{register}{data:08X}\n'
-            self.serial_port.write(command.encode('utf-8'))
-            logging.info(f"Sent stream command: {command}")
+        with threading.Lock():  # Assuming you've initialized this lock elsewhere as self._serial_port_lock
+            try:
+                command = f'S{register}\n'
+                self.serial_port.write(command.encode('utf-8'))
+                logging.info(f"Sent stream command: {command}")
 
-            # Wait for and process the response to confirm successful command execution.
-            # This is a simplified example. Adjust parsing as necessary based on your device's protocol.
-            response = self.serial_port.readline().decode('utf-8').strip()
-            logging.info(f"Received response to stream command: {response}")
+                # Reading the response
+                response = self.serial_port.readline().decode('utf-8').strip()
+                logging.info(f"Received response: {response}")
 
-            # Validate the response. This example checks for a simple acknowledgment pattern.
-            # You'll need to replace this with validation logic appropriate for your device's responses.
-            if not response or response[0] != 's':
-                raise ValueError("Invalid response to stream command.")
+                # Validate the response format
+                fields = response.split(' ')
+                if len(fields) != 5 or fields[0] != 's' or fields[1].upper() != register.upper() or \
+                len(fields[2]) != 8 or len(fields[3]) != 8 or fields[4] != '!':
+                    raise ValueError(f"Invalid or unexpected response to stream command: {response}")
 
-        except serial.SerialException as e:
-            logging.error(f"Serial communication error during stream command: {e}")
-            # Handle serial communication errors appropriately.
-            # This might involve retrying the command, resetting the connection, etc.
-        except ValueError as e:
-            logging.error(f"Response validation error: {e}")
-            # Handle unexpected or invalid responses.
-            # This might involve logging the error, retrying, or taking corrective action.
+            except serial.SerialException as e:
+                logging.error(f"Serial communication error during stream command: {e}")
+                # Consider re-throwing or handling the exception as needed
+            except ValueError as e:
+                logging.error(f"Validation error for the response: {e}")
+                # Handle validation errors, possibly re-throwing or taking corrective action
 
 
     def start_reading_thread(self):
