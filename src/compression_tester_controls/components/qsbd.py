@@ -125,12 +125,18 @@ class DeviceController:
         while not self._stop_reading_thread.is_set():
             if not self.connected:
                 break
-            # Implement reading logic here, similar to EncoderCountReaderLoop in C#
-            # Example reading and parsing logic
+
             try:
-                response = self.serial_port.readline().decode('utf-8').strip()
+                raw_response = self.serial_port.readline().decode('utf-8').strip()
+                logging.info(f"Raw response: {raw_response}")
+
+                # Parse the response
+                encoder_count, timestamp = self.parse_encoder_count_stream_response(raw_response)
+                
+                # Update the internal state with the parsed values
                 with self._encoder_count_lock:
-                    self.encoder_count += 1  # Example operation; adapt as needed
+                    self.encoder_count = encoder_count
+
             except Exception as e:
                 logging.error(f"Reading loop error: {e}")
             time.sleep(0.1)  # Sleep to simulate reading interval; adjust as necessary
@@ -148,21 +154,21 @@ class DeviceController:
     def get_encoder_count(self):
         with self._encoder_count_lock:
             return self.encoder_count
-
-# Example usage
-if __name__ == '__main__':
-    device_controller = DeviceController(
-        port_name='COM3',  # Change to your port
-        baud_rate=115200,
-        quadrature_mode=QuadratureMode.X4,
-        encoder_direction=EncoderDirection.CountUp,
-        encoder_resolution_nm=0.01
-    )
-    device_controller.connect()
-    time.sleep(2)  # Simulate operation time
-    if device_controller.connected:
-        print(f"Encoder count: {device_controller.get_encoder_count()}")
-    device_controller.disconnect()
+        
+    def parse_encoder_count_stream_response(self, response):
+        fields = response.split(' ')
+        if len(fields) != 5:
+            raise ValueError("The stream response was expected to have 5 fields.")
+        if fields[0] != 's' or fields[1] != '0E' or len(fields[2]) != 8 or len(fields[3]) != 8 or fields[4] != '!':
+            raise ValueError("Response format validation failed.")
+        
+        try:
+            count = int(fields[2], 16)  # Parsing hexadecimal to integer
+            timestamp = int(fields[3], 16)  # Parsing hexadecimal to integer
+            return count, timestamp
+        except ValueError as e:
+            logging.error(f"Failed to parse count or timestamp: {e}")
+            raise ValueError("Failed to parse count or timestamp.") from e
 
 
 def test():
