@@ -89,37 +89,36 @@ class DeviceController:
         self._serial_port_lock = threading.Lock()
 
     def connect(self):
-        with self._serial_port_lock:
+        try:
+            if self.serial_port is not None:
+                raise Exception("Cannot reconnect using the same DeviceController instance.")
+            
+            self.serial_port = serial.Serial(self.port_name, self.baud_rate, timeout=1)
+            logging.info(f"Connected to {self.port_name}.")
+
+            # Resetting the device (assuming DTR line usage is applicable in your context)
+            self.serial_port.dtr = False
+            self.serial_port.dtr = True
+
+            # Example configuration commands
+            self.write_command('15', 0x0000000F)  # Adjust the command as necessary
+
+            # Read the first line if needed (handling the specific device behavior on reset)
             try:
-                if self.serial_port is not None:
-                    raise Exception("Cannot reconnect using the same DeviceController instance.")
-                
-                self.serial_port = serial.Serial(self.port_name, self.baud_rate, timeout=1)
-                logging.info(f"Connected to {self.port_name}.")
+                first_line = self.serial_port.readline().decode('utf-8').strip()
+                logging.info(f"Received initial response: {first_line}")
+            except serial.SerialTimeoutException:
+                logging.info("No initial response received.")
 
-                # Resetting the device (assuming DTR line usage is applicable in your context)
-                self.serial_port.dtr = False
-                self.serial_port.dtr = True
+            # Device-specific configuration
+            # Set quadrature mode, encoder direction, etc., by sending appropriate commands
+            self.configure_device()
 
-                # Example configuration commands
-                self.write_command('15', 0x0000000F)  # Adjust the command as necessary
-
-                # Read the first line if needed (handling the specific device behavior on reset)
-                try:
-                    first_line = self.serial_port.readline().decode('utf-8').strip()
-                    logging.info(f"Received initial response: {first_line}")
-                except serial.SerialTimeoutException:
-                    logging.info("No initial response received.")
-
-                # Device-specific configuration
-                # Set quadrature mode, encoder direction, etc., by sending appropriate commands
-                self.configure_device()
-
-                # Starting the reading thread
-                # self.start_reading_thread()
-            except Exception as e:
-                logging.error(f"Failed to connect and configure the device: {e}")
-                self.disconnect()
+            # Starting the reading thread
+            # self.start_reading_thread()
+        except Exception as e:
+            logging.error(f"Failed to connect and configure the device: {e}")
+            self.disconnect()
 
     def configure_device(self):
         self.write_command('03', self.quadrature_mode.value)  # Squadrature mode
