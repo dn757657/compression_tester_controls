@@ -30,7 +30,9 @@ class HardwareFactory:
         
         # TODO need to implement with decoder
         elif 'encoder'.lower() in type.lower():
-            return E5UsDigitalEncoder(**config)
+            encoder = E5UsDigitalEncoder(**config)
+            encoder.connect()
+            return encoder
         
         elif 'ads1115'.lower() in type.lower():
             return ADS1115(**config)

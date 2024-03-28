@@ -190,7 +190,7 @@ def move_stepper_PID_target(
     pid.setpoint = setpoint
 
     while True:
-        fnew = pid(enc.read())
+        fnew = pid(enc.get_encoder_count())
         stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
 
         if (setpoint - error) < enc.read() <= (setpoint + error):
@@ -365,9 +365,11 @@ def move_big_stepper_to_setpoint(
         logging.info(f"Moving Crushing stepper: {start_pos} -> {setpoint}")
         freq_multi = 1
         if start_pos < (setpoint + error):
+            direction = 'ccw'
             big_stepper.set_dir(direction='ccw')
         elif (setpoint - error) < start_pos:
             big_stepper.set_dir(direction='cw')
+            direction = 'cw'
 
         enc_pos_prev = None
         # stall_count = 0
@@ -391,19 +393,23 @@ def move_big_stepper_to_setpoint(
             if (setpoint - error) < enc_pos < (setpoint + error):
                 big_stepper.stop()
                 break
-            direction = 0
-            dir_lim = 10
+            # direction = 0
+            # dir_lim = 5
+
+            # USE MOTOR DIR INSTEAD OF MOMENTUM CALC SINCE ENCODER IS UNRELIABLE?
             if enc_pos_prev:
-                if enc_pos_prev > enc_pos:  # moving up
-                    direction += 1
+                if direction == 'cw':  # moving up
+                    # direction += 1
                     # logging.info("Moving UP")
-                    if ((setpoint - error) < enc_pos) and direction > dir_lim:  # moved too far up
+                    # if ((setpoint - error) < enc_pos) and direction > dir_lim:  # moved too far up
+                    if ((setpoint - error) > enc_pos):  # moved too far up
                         big_stepper.stop()
                         break
-                elif enc_pos_prev < enc_pos:  # moving down
-                    direction -= 1
+                elif direction == 'ccw':  # moving down
+                    # direction -= 1
                     # logging.info("Moving DOWN")
-                    if (enc_pos > (setpoint + error)) and direction < -dir_lim:  # moved too far down
+                    # if (enc_pos > (setpoint + error)) and direction < -dir_lim:  # moved too far down
+                    if (enc_pos > (setpoint + error)):  # moved too far down
                         big_stepper.stop()
                         break
 

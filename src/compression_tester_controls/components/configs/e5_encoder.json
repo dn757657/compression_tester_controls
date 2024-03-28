@@ -2,6 +2,8 @@
     "name": "e5",
     "type": "encoder",
     "init_priority": 2,
-    "serial_port": "/dev/ttyUSB0",
-    "baud_rate": 230400
+    "port_name": "/dev/ttyUSB1",
+    "baud_rate": 230400,
+    "quadrature_mode": "QuadratureMode.X4",
+    "encoder_direction": "EncoderDirection.CountUp",
 }

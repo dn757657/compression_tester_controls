@@ -5,7 +5,7 @@ import serial
 import threading
 
 from simple_pid import PID
-from compression_tester_controls.sys_functions import load_configs, inst_components
+from compression_tester_controls.sys_functions import load_configs, inst_components, move_big_stepper_to_setpoint, move_stepper_PID_target
 from compression_tester_controls.sys_protocols import platon_setup, camera_system_setup, test_frame_speed
 from compression_tester_controls.components.canon_eosr50 import gphoto2_get_active_ports, eosr50_init, eosr50_continuous_capture_and_save
 from compression_tester_controls.sys_functions import detect_force_anomoly, sample_force_sensor
@@ -97,5 +97,23 @@ def test_force_sensor():
         sample_force_sensor(n_samples=10, components=components)
 
 
+def big_motor():
+    components = sys_init()
+    stepper = components.get('big_stepper')
+    enc = components.get('encoder')
+    pid = components.get('big_stepper_PID')
+
+    while True:
+        setpoint = int(input("input the pid target weener"))
+        move_stepper_PID_target(
+            stepper=stepper,
+            enc=enc,
+            pid=pid,
+            stepper_dc=85,
+            setpoint=setpoint,
+            error=1
+        )
+
+
 if __name__ == '__main__':
-    test_frame_speed(runtime=10)
+    big_motor()

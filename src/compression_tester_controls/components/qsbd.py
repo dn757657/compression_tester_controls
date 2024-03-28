@@ -1,61 +1,58 @@
 import serial
-import time
 import logging
+import threading
+import serial
+import logging
+import time
+from enum import Enum, unique
 
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
 
-class E5UsDigitalEncoder():
-    def __init__(
-            self,
-            name: str,
-            serial_port: str = '/dev/ttyUSB0',
-            baud_rate: int = 230400,
-            **kwargs
-    ):
+# class E5UsDigitalEncoder():
+#     def __init__(
+#             self,
+#             name: str,
+#             serial_port: str = '/dev/ttyUSB0',
+#             baud_rate: int = 230400,
+#             **kwargs
+#     ):
 
-        self.name = name
-        self.ser = serial.Serial(serial_port, baud_rate, timeout=1)
+#         self.name = name
+#         self.ser = serial.Serial(serial_port, baud_rate, timeout=1)
         
-        self._send_command('W0000')  # init in quadrature mode
-        self._send_command('W04000')  # set count direction
-        self._send_command('W0902')  # reset counter
-        self._send_command('W1660A')  # confirm baud rate
-        self._send_command('W0300')
-        self._send_command('S0E')
+#         self._send_command('W0000')  # init in quadrature mode
+#         self._send_command('W04000')  # set count direction
+#         self._send_command('W0902')  # reset counter
+#         self._send_command('W1660A')  # confirm baud rate
+#         self._send_command('W0300')
+#         self._send_command('S0E')
 
-        self.initial_count = self.read()
+#         self.initial_count = self.read()
 
-        logging.info("Initialized QSB-D.")
+#         logging.info("Initialized QSB-D.")
 
-        pass
+#         pass
     
-    def _send_command(self, command: str):
-        self.ser.write((command + '\r').encode())  # Commands must end with carriage return
-        response = self.ser.readline().decode().strip()  # Read the response, if any
-        return response
+#     def _send_command(self, command: str):
+#         self.ser.write((command + '\r').encode())  # Commands must end with carriage return
+#         response = self.ser.readline().decode().strip()  # Read the response, if any
+#         return response
 
-    def read(self):
-        response = self._send_command('R0E')
-        if response[0] == 'r':  # Check if it's a read response
-            s = response.split(" ")
-            register = s[0]
-            data = s[2]  # Extract the data part
-            position = int(data, 16)  # Convert data to integer
-        else:
-            position = None
+#     def read(self):
+#         response = self._send_command('R0E')
+#         if response[0] == 'r':  # Check if it's a read response
+#             s = response.split(" ")
+#             register = s[0]
+#             data = s[2]  # Extract the data part
+#             position = int(data, 16)  # Convert data to integer
+#         else:
+#             position = None
         
-        return position
+#         return position
 
-
-# testing
-import threading
-import serial
-import logging
-import time
-from enum import Enum, unique
 
 logging.basicConfig(level=logging.INFO)
 
@@ -67,16 +64,15 @@ class QuadratureMode(Enum):
 
 @unique
 class EncoderDirection(Enum):
-    CountUp = 0
-    CountDown = 1
+    CountUp = 0x00
+    CountDown = 0x80
 
-class DeviceController:
-    def __init__(self, port_name, baud_rate, quadrature_mode, encoder_direction, encoder_resolution_nm):
+class E5UsDigitalEncoder:
+    def __init__(self, port_name, baud_rate, quadrature_mode, encoder_direction, **kwargs):
         self.port_name = port_name
         self.baud_rate = baud_rate
         self.quadrature_mode = quadrature_mode
         self.encoder_direction = encoder_direction
-        self.encoder_resolution_nm = encoder_resolution_nm
 
         self.serial_port = None
         self.connected = False
@@ -97,8 +93,10 @@ class DeviceController:
             logging.info(f"Connected to {self.port_name}.")
 
             # Resetting the device (assuming DTR line usage is applicable in your context)
+            self.serial_port.dtr = True
             self.serial_port.dtr = False
             self.serial_port.dtr = True
+            self.connected = True
 
             # Read the first line if needed (handling the specific device behavior on reset)
             try:
@@ -117,8 +115,11 @@ class DeviceController:
             self.disconnect()
 
     def configure_device(self):
-        self.write_command('03', self.quadrature_mode.value)  # Squadrature mode
-        self.write_command('04', self.encoder_direction.value) # direcrtion
+        # self.write_command('03', self.quadrature_mode.value)  # Squadrature mode
+        self.write_command('03', 0x43)  # Squadrature mode
+        self.write_command('04', 0x100) # direcrtion
+
+        # self.write_command('04', self.encoder_direction.value) # direcrtion
         self.write_command('0B', 0x00000000)  # threshold
 
         self.write_command('0C', 0x00000001) # set output freq to max
@@ -149,7 +150,7 @@ class DeviceController:
                 fields = response.split(' ')
                 if len(fields) != 5:
                     raise ValueError("The response was expected to have 5 fields.")
-                elif fields[0] != 's':
+                elif fields[0] != 'w':
                     raise ValueError("The first field in the response was expected to be 'w'.")
                 elif fields[1].upper() != register.upper():
                     raise ValueError(f"The second field in the response was expected to be '{register}'.")
@@ -188,7 +189,7 @@ class DeviceController:
                 fields = response.split(' ')
                 if len(fields) != 5:
                     raise ValueError("The response was expected to have 5 fields.")
-                elif fields[0] != 'w':
+                elif fields[0] != 's':
                     raise ValueError("The first field in the response was expected to be 's'.")
                 elif fields[1].upper() != register.upper():
                     raise ValueError(f"The second field in the response was expected to be '{register}'.")
@@ -226,6 +227,7 @@ class DeviceController:
                         break
 
                     response = self.serial_port.readline().decode('utf-8').strip()
+                    logging.info(response)
 
                 encoder_count, timestamp = self.parse_encoder_count_stream_response(response)
 
@@ -236,28 +238,6 @@ class DeviceController:
             logging.error(f"Terminating EncoderCountReaderLoop because of an exception: {e}")
             self.disconnect()
         pass
-
-
-
-    # def _reading_loop(self):
-    #     while not self._stop_reading_thread.is_set():
-    #         if not self.connected:
-    #             break
-
-    #         try:
-    #             raw_response = self.serial_port.readline().decode('utf-8').strip()
-    #             logging.info(f"Raw response: {raw_response}")
-
-    #             # Parse the response
-    #             encoder_count, timestamp = self.parse_encoder_count_stream_response(raw_response)
-                
-    #             # Update the internal state with the parsed values
-    #             with self._encoder_count_lock:
-    #                 self.encoder_count = encoder_count
-
-    #         except Exception as e:
-    #             logging.error(f"Reading loop error: {e}")
-    #         time.sleep(0.1)  # Sleep to simulate reading interval; adjust as necessary
 
     def disconnect(self):
         with self._connection_lock:
@@ -290,15 +270,13 @@ class DeviceController:
 
 
 def test():
-    device_controller = DeviceController(
+    device_controller = E5UsDigitalEncoder(
         port_name='/dev/ttyUSB1',  # Change to your port
         baud_rate=230400,
         quadrature_mode=QuadratureMode.X4,
         encoder_direction=EncoderDirection.CountUp,
-        encoder_resolution_nm=0.01
     )
     device_controller.connect()
-    time.sleep(2)  # Simulate operation time
 
     if device_controller.connected:
         print(f"Encoder count: {device_controller.get_encoder_count()}")
