@@ -100,15 +100,23 @@ class DeviceController:
             self.serial_port.dtr = False
             self.serial_port.dtr = True
 
-            # Example configuration commands
-            self.write_command('15', 0x0000000F)  # Adjust the command as necessary
-
             # Read the first line if needed (handling the specific device behavior on reset)
             try:
                 first_line = self.serial_port.readline().decode('utf-8').strip()
                 logging.info(f"Received initial response: {first_line}")
             except serial.SerialTimeoutException:
                 logging.info("No initial response received.")
+
+
+            # Example configuration commands
+            self.write_command('15', 0x0000000F)  # Adjust the command as necessary
+
+            # # Read the first line if needed (handling the specific device behavior on reset)
+            # try:
+            #     first_line = self.serial_port.readline().decode('utf-8').strip()
+            #     logging.info(f"Received initial response: {first_line}")
+            # except serial.SerialTimeoutException:
+            #     logging.info("No initial response received.")
 
             # Device-specific configuration
             # Set quadrature mode, encoder direction, etc., by sending appropriate commands
@@ -132,7 +140,7 @@ class DeviceController:
         self.write_command('0D', 0x00000001)
 
         # Start streaming the encoder count at the specified interval
-        # self.stream_command('0E')
+        self.stream_command('0E')
         pass
 
     # def start_reading_thread(self):
@@ -164,15 +172,15 @@ class DeviceController:
                 fields = response.split(' ')
                 if len(fields) != 5:
                     raise ValueError("The response was expected to have 5 fields.")
-                if fields[0] != 'w':
+                elif fields[0] != 'w':
                     raise ValueError("The first field in the response was expected to be 'w'.")
-                if fields[1].upper() != register.upper():
+                elif fields[1].upper() != register.upper():
                     raise ValueError(f"The second field in the response was expected to be '{register}'.")
-                if fields[2].upper() != data.upper():
+                elif fields[2] != data:
                     raise ValueError(f"The third field in the response was expected to be '{data}'.")
-                if len(fields[3]) != 8:
+                elif len(fields[3]) != 8:
                     raise ValueError("The fourth field in the response was expected to be 8 bytes.")
-                if fields[4] != '!':
+                elif fields[4] != '!':
                     raise ValueError("The fifth field in the response was expected to be '!'.")
 
             except serial.SerialTimeoutException as e:
@@ -202,9 +210,18 @@ class DeviceController:
 
                 # Validate the response format
                 fields = response.split(' ')
-                if len(fields) != 5 or fields[0] != 's' or fields[1].upper() != register.upper() or \
-                len(fields[2]) != 8 or len(fields[3]) != 8 or fields[4] != '!':
-                    raise ValueError(f"Invalid or unexpected response to stream command: {response}")
+                if len(fields) != 5:
+                    raise ValueError("The response was expected to have 5 fields.")
+                elif fields[0] != 'w':
+                    raise ValueError("The first field in the response was expected to be 's'.")
+                elif fields[1].upper() != register.upper():
+                    raise ValueError(f"The second field in the response was expected to be '{register}'.")
+                elif len(fields[2]) != 8:
+                    raise ValueError(f"The third field in the response was expected to be 8 bytes.")
+                elif len(fields[3]) != 8:
+                    raise ValueError("The fourth field in the response was expected to be 8 bytes.")
+                elif fields[4] != '!':
+                    raise ValueError("The fifth field in the response was expected to be '!'.")
 
             except serial.SerialException as e:
                 logging.error(f"Serial communication error during stream command: {e}")
