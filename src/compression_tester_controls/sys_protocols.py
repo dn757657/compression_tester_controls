@@ -38,10 +38,10 @@ def platon_setup(
         else:
             move_stepper_PID_target(
                 stepper=components.get('big_stepper'),
-                pi=components.get('big_stepper_PID'),
+                pid=components.get('big_stepper_PID'),
                 enc=components.get('e5'),
                 stepper_dc=85, 
-                setpoint=setpoint, 
+                setpoint=int(setpoint), 
                 error=1
             )
 
@@ -57,10 +57,10 @@ def platon_setup(
         else:
             move_stepper_PID_target(
                 stepper=components.get('big_stepper'),
-                pi=components.get('big_stepper_PID'),
+                pid=components.get('big_stepper_PID'),
                 enc=components.get('e5'),
                 stepper_dc=85, 
-                setpoint=setpoint, 
+                setpoint=int(setpoint), 
                 error=1
             )
 

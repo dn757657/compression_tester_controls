@@ -179,20 +179,52 @@ def detect_anomoly_rolling_cusum(samples, h, k):
     return False
 
 
+# def move_stepper_PID_target(
+#         stepper,
+#         pid,
+#         enc,
+#         stepper_dc: float,
+#         setpoint: int,
+#         error: int 
+# ):
+#     pid.setpoint = setpoint
+
+#     while True:
+#         fnew = pid(enc.get_encoder_count())
+#         if fnew > 0:
+#             stepper.
+        
+#         stepper.rotate(freq=abs(fnew), duty_cycle=stepper_dc)
+
+#         if (setpoint - error) < enc.get_encoder_count() <= (setpoint + error):
+#             stepper.stop()
+#             break
+
 def move_stepper_PID_target(
         stepper,
         pid,
         enc,
         stepper_dc: float,
         setpoint: int,
-        error: int 
+        error: int
 ):
     pid.setpoint = setpoint
-
+    fnew = None
+    fnew_prev = None
     while True:
+        logging.info(enc.get_encoder_count())
         fnew = pid(enc.get_encoder_count())
-        stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
+        if fnew < 0:
+            stepper.set_dir(direction='cw')
+        else:
+            stepper.set_dir(direction='ccw')
 
+        if fnew_prev:
+            if fnew_prev / fnew < 0:
+                stepper.reverse_direction()
+        stepper.rotate(freq=abs(fnew), duty_cycle=stepper_dc)
+        fnew_prev = fnew
+        time.sleep(0.1)
         if (setpoint - error) < enc.get_encoder_count() <= (setpoint + error):
             stepper.stop()
             break
