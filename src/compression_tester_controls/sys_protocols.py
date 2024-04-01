@@ -2,7 +2,7 @@ import time
 import logging
 import threading
 
-from compression_tester_controls.sys_functions import load_configs, move_big_stepper_to_setpoint, inst_components, detect_force_anomoly, move_stepper_PID_target
+from compression_tester_controls.sys_functions import load_configs, inst_components, detect_force_anomoly, move_stepper_PID_target
 from compression_tester_controls.components.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, eosr50_continuous_capture_and_save
 
 logging.basicConfig()
@@ -32,101 +32,39 @@ def platon_setup(
     logging.info("Enter q when complete...")
 
     while True:
-        setpoint = input(f"Encoder Position: {enc.read()}, Move to:")
+        setpoint = input(f"Encoder Position: {enc.get_encoder_count()}, Move to:")
         if setpoint == 'q':
             break
         else:
-            move_big_stepper_to_setpoint(setpoint=int(setpoint), components=components)
+            move_stepper_PID_target(
+                stepper=components.get('big_stepper'),
+                pi=components.get('big_stepper_PID'),
+                enc=components.get('e5'),
+                stepper_dc=85, 
+                setpoint=setpoint, 
+                error=1
+            )
 
-    platon_zero_count = enc.read()
+    platon_zero_count = enc.get_encoder_count()
 
     logging.info("Manually Align Platon with Top of Sample by jogging...")
     logging.info("Enter q when complete...")
 
     while True:
-        setpoint = input(f"Encoder Position: {enc.read()}, Move to:")
+        setpoint = input(f"Encoder Position: {enc.get_encoder_count()}, Move to:")
         if setpoint == 'q':
             break
         else:
-            move_big_stepper_to_setpoint(setpoint=int(setpoint), components=components)
-    
-    sample_height_count = enc.read()
+            move_stepper_PID_target(
+                stepper=components.get('big_stepper'),
+                pi=components.get('big_stepper_PID'),
+                enc=components.get('e5'),
+                stepper_dc=85, 
+                setpoint=setpoint, 
+                error=1
+            )
 
-    # move down a few steps to push platons together
-    # enc_pos = enc.read()
-    # additional_steps = 100  # TODO dial this in
-    # new_target = enc_pos + additional_steps
-    
-    # move_stepper_PID_target(
-    #     stepper=big_stepper, 
-    #     pid=big_stepper_pid, 
-    #     enc=enc,
-    #     stepper_dc=80, 
-    #     setpoint=new_target,
-    #     error=2
-    #     )
-    
-    # # big_stepper_pid.setpoint = new_target
-
-    # # error = 2
-    # # while True:
-    #     # fnew = big_stepper_pid(enc.read())
-    #     # big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
-
-    #     # if (new_target - error) < enc.read() <= (new_target + error):
-    #         # big_stepper.stop()
-    #         # break 
-
-    # logging.info(f"Platons Aligned @ {enc.read()}...")
-    # logging.info(f"Platons Returning Home...")
-
-    # new_target = enc.read() - 2000
-    # move_stepper_PID_target(
-    #     stepper=big_stepper, 
-    #     pid=big_stepper_pid, 
-    #     enc=enc, 
-    #     setpoint=new_target,
-    #     error=2
-    #     )
-    
-    # # new_target = enc.read() - 2000
-    # # big_stepper_pid.setpoint = new_target
-    # # while True:
-    #     # fnew = big_stepper_pid(enc.read())
-    #     # big_stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
-
-    #     # if (new_target - error) < enc.read() <= (new_target + error):
-    #         # big_stepper.stop()
-    #         # break
-
-    # input("Insert Sample and Press ENTER:")
-
-    # logging.info("Aligning Platon to Sample...")
-    # bumps = 3
-    # for i in range(0, bumps):
-    #     # big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
-    #     # time.sleep(3)
-    #     # big_stepper.stop()
-
-    #     big_stepper.rotate(freq=stepper_freq, duty_cycle=stepper_dc)
-
-    #     anomoly = False
-    #     while not anomoly:
-    #         anomoly = detect_force_anomoly(
-    #             force_sensor_adc=force_sensor_adc,
-    #             force_sensor=force_sensor
-    #         )
-        
-    #     big_stepper.stop()
-    #     # TODO could check enc position and see if theyre the same, failsafe against cusum errors
-    #     print(f"bumps: {i}, bumps: {bumps - 1}")
-    #     if i != bumps - 1:
-    #         big_stepper.rotate(freq=-stepper_freq, duty_cycle=stepper_dc)
-    #         time.sleep(3)
-    #         big_stepper.stop()
-
-    # logging.info("Platons Aligned to Sample")
-
+    sample_height_count = enc.get_encoder_count()
     return platon_zero_count, sample_height_count
 
 
