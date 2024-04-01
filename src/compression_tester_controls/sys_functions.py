@@ -185,7 +185,7 @@ def move_stepper_PID_target(
         enc,
         stepper_dc: float,
         setpoint: int,
-        error: int
+        error: int 
 ):
     pid.setpoint = setpoint
 
@@ -193,7 +193,7 @@ def move_stepper_PID_target(
         fnew = pid(enc.get_encoder_count())
         stepper.rotate(freq=fnew, duty_cycle=stepper_dc)
 
-        if (setpoint - error) < enc.read() <= (setpoint + error):
+        if (setpoint - error) < enc.get_encoder_count() <= (setpoint + error):
             stepper.stop()
             break
 

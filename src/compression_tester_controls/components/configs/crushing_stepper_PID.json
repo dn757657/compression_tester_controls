@@ -2,7 +2,7 @@
     "name": "big_stepper_PID",
     "type": "PID",
     "init_priority": 1,
-    "Kp": 5,
+    "Kp": 1.5,
     "Ki": 0, 
     "Kd": 0,
     "setpoint": 0,

@@ -124,6 +124,8 @@ class E5UsDigitalEncoder:
 
         self.write_command('0C', 0x00000001) # set output freq to max
         self.write_command('0D', 0x00000001)  # reset timestampt
+        self.write_command('09', 0x00000002)  # reset counter
+
         self.stream_command('0E')  # start streaming
         pass
 
@@ -227,7 +229,7 @@ class E5UsDigitalEncoder:
                         break
 
                     response = self.serial_port.readline().decode('utf-8').strip()
-                    logging.info(response)
+                    # logging.info(response)
 
                 encoder_count, timestamp = self.parse_encoder_count_stream_response(response)
 

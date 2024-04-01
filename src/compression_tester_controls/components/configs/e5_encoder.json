@@ -5,5 +5,5 @@
     "port_name": "/dev/ttyUSB1",
     "baud_rate": 230400,
     "quadrature_mode": "QuadratureMode.X4",
-    "encoder_direction": "EncoderDirection.CountUp",
+    "encoder_direction": "EncoderDirection.CountUp"
 }
