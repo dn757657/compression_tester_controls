@@ -98,13 +98,17 @@ class E5UsDigitalEncoder:
             self.serial_port.dtr = True
             self.connected = True
 
-            # Read the first line if needed (handling the specific device behavior on reset)
-            try:
-                first_line = self.serial_port.readline().decode('utf-8').strip()
-                logging.info(f"Received initial response: {first_line}")
-            except serial.SerialTimeoutException:
-                logging.info("No initial response received.")
-
+            x = True  # clear out the serial - otherwise may fail to configure
+            while x:
+                try:
+                    first_line = self.serial_port.readline().decode('utf-8').strip()
+                    if len(first_line) == 0:
+                        x = False
+                    else:
+                        logging.info(f"Received initial response: {first_line}")
+                except serial.SerialTimeoutException:
+                    logging.info("No initial response received.")
+                    x = False
             # Example configuration commands
             self.write_command('15', 0x0000000F)  # Adjust the command as necessary
             self.configure_device()
