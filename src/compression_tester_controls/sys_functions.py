@@ -212,7 +212,7 @@ def move_stepper_PID_target(
     fnew = None
     fnew_prev = None
     while True:
-        logging.info(enc.get_encoder_count())
+        # logging.info(enc.get_encoder_count())
         fnew = pid(enc.get_encoder_count())
         if fnew < 0:
             stepper.set_dir(direction='cw')
@@ -224,7 +224,7 @@ def move_stepper_PID_target(
                 stepper.reverse_direction()
         stepper.rotate(freq=abs(fnew), duty_cycle=stepper_dc)
         fnew_prev = fnew
-        time.sleep(0.1)
+        # time.sleep(0.1)
         if (setpoint - error) < enc.get_encoder_count() <= (setpoint + error):
             stepper.stop()
             break

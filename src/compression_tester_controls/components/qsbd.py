@@ -9,51 +9,6 @@ from enum import Enum, unique
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
-
-
-# class E5UsDigitalEncoder():
-#     def __init__(
-#             self,
-#             name: str,
-#             serial_port: str = '/dev/ttyUSB0',
-#             baud_rate: int = 230400,
-#             **kwargs
-#     ):
-
-#         self.name = name
-#         self.ser = serial.Serial(serial_port, baud_rate, timeout=1)
-        
-#         self._send_command('W0000')  # init in quadrature mode
-#         self._send_command('W04000')  # set count direction
-#         self._send_command('W0902')  # reset counter
-#         self._send_command('W1660A')  # confirm baud rate
-#         self._send_command('W0300')
-#         self._send_command('S0E')
-
-#         self.initial_count = self.read()
-
-#         logging.info("Initialized QSB-D.")
-
-#         pass
-    
-#     def _send_command(self, command: str):
-#         self.ser.write((command + '\r').encode())  # Commands must end with carriage return
-#         response = self.ser.readline().decode().strip()  # Read the response, if any
-#         return response
-
-#     def read(self):
-#         response = self._send_command('R0E')
-#         if response[0] == 'r':  # Check if it's a read response
-#             s = response.split(" ")
-#             register = s[0]
-#             data = s[2]  # Extract the data part
-#             position = int(data, 16)  # Convert data to integer
-#         else:
-#             position = None
-        
-#         return position
-
-
 logging.basicConfig(level=logging.INFO)
 
 @unique
@@ -260,19 +215,31 @@ class E5UsDigitalEncoder:
             return self.encoder_count
         
     def parse_encoder_count_stream_response(self, response):
-        fields = response.split(' ')
-        if len(fields) != 5:
-            raise ValueError("The stream response was expected to have 5 fields.")
-        if fields[0] != 's' or fields[1] != '0E' or len(fields[2]) != 8 or len(fields[3]) != 8 or fields[4] != '!':
-            raise ValueError("Response format validation failed.")
+        # fields = response.split(' ')
+        # if len(fields) != 5:
+        #     raise ValueError(f"The response was expected to have 5 fields. \n{response}")
+        # elif fields[0] != 's':
+        #     raise ValueError(f"The first field in the response was expected to be 's'. \n{response}")
+        # elif fields[1].upper() != '0E':
+        #     raise ValueError(f"The second field in the response was expected to be '0E'. \n{response}")
+        # elif len(fields[2]) != 8:
+        #     raise ValueError(f"The third field in the response was expected to be 8 bytes. \n{response}")
+        # elif len(fields[3]) != 8:
+        #     raise ValueError(f"The fourth field in the response was expected to be 8 bytes. \n{response}")
+        # elif fields[4] != '!':
+        #     raise ValueError(f"The fifth field in the response was expected to be '!'. \n{response}")
         
-        try:
-            count = int(fields[2], 16)  # Parsing hexadecimal to integer
-            timestamp = int(fields[3], 16)  # Parsing hexadecimal to integer
-            return count, timestamp
-        except ValueError as e:
-            logging.error(f"Failed to parse count or timestamp: {e}")
-            raise ValueError("Failed to parse count or timestamp.") from e
+        # try:
+        #     count = int(fields[2], 16)  # Parsing hexadecimal to integer
+        #     timestamp = int(fields[3], 16)  # Parsing hexadecimal to integer
+        #     return count, timestamp
+        # except ValueError as e:
+        #     logging.error(f"Failed to parse count or timestamp: {e}")
+        #     raise ValueError("Failed to parse count or timestamp.") from e
+
+        fields = response.split(' ')
+        count = int(fields[2], 16)
+        return count
 
 
 def test():

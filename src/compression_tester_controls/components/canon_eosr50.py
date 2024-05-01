@@ -40,14 +40,14 @@ def eosr50_init(
 
     try:
         if config:
-            gcommand = ['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0']
+            gcommand = ['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0', 'capturetarget=1']
             for setting in config:
                 gcommand.append('--set-config')
                 gcommand.append(setting)
 
             subprocess.run(gcommand)
         else:
-            subprocess.run(['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0'])
+            subprocess.run(['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0', 'capturetarget=1'])
         logging.info(f"EOS R50 configured @ port: {port}.")
     
     except subprocess.CalledProcessError:
@@ -89,10 +89,45 @@ def eosr50_capture_and_save(
     pass
 
 
-def eosr50_continuous_capture_and_save(
+def eosr50_get_all_files(port):
+    """
+    coudl provide a download path to --get-all-files in the future but . dir works for now babyyyy
+    """
+    subprocess.run([
+        # 'sudo',
+        'gphoto2',
+        '--port', port,
+        '--get-all-files',
+        # '--filename', filename,
+        # '--keep'
+    ],
+        check=True
+    )
+    logging.info(f"Transfered all files from {port}")
+    pass
+
+
+def eosr50_clear_all_files(port, filepath: str = '/store_00020001/DCIM/100CANON'):
+    
+    subprocess.run([
+        # 'sudo',
+        'gphoto2',
+        '--port', port,
+        '-f', filepath,
+        '-D'
+        # '--filename', filename,
+        # '--keep'
+    ],
+        check=True
+    )
+    logging.info(f"Deleted all files from {port}")
+    return
+
+
+def eosr50_continuous_capture(
         port,
         stop_event,
-        filenames: list = list()
+        # filenames: list = list()
 ):
     """
     can use date characters like %Y in filename see naming standard?
@@ -100,25 +135,25 @@ def eosr50_continuous_capture_and_save(
     :param filename: must end in .jpg
     :return:
     """
-    i = 0
+    # i = 0
     while not stop_event.is_set():
         # sudo gphoto2 --capture-image-and-download -filename "%Y%m%d%H%M%S.jpg"
-        id = uuid.uuid4()
-        filename = f"{id}.%C"  # %C uses extension assigned by cam
+        # id = uuid.uuid4()
+        # filename = f"{id}.%C"  # %C uses extension assigned by cam
         try:
             subprocess.run([
                 'sudo',
                 'gphoto2',
                 '--port', port,
-                '--capture-image-and-download',
-                '--filename', filename,
-                '--keep'
+                '--capture-image',
+                # '--filename', filename,
+                # '--keep'
             ],
                 check=True
             )
-            filenames.append(id)
-            logging.info(f"Image {filename} Captured")
-            i += 1  # only increment if captured
+            # filenames.append(id)
+            # logging.info(f"Image {filename} Captured")
+            # i += 1  # only increment if captured
 
         except subprocess.CalledProcessError:
             logging.info(f"Failed to capture @ {port}.")

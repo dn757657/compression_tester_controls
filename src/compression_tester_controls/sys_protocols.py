@@ -3,7 +3,7 @@ import logging
 import threading
 
 from compression_tester_controls.sys_functions import load_configs, inst_components, detect_force_anomoly, move_stepper_PID_target
-from compression_tester_controls.components.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, eosr50_continuous_capture_and_save
+from compression_tester_controls.components.canon_eosr50 import eosr50_init, gphoto2_get_active_ports, eosr50_continuous_capture, eosr50_get_all_files, eosr50_clear_all_files
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
@@ -195,15 +195,27 @@ def move_platon_to_strain():
     pass
 
 
+def transfer_step_frames(cam_ports):
+    for port in cam_ports:
+        eosr50_get_all_files(port=port)
+    pass
+
+
+def clear_cam_frames(cam_ports):
+    for port in cam_ports:
+        eosr50_clear_all_files(port=port)
+    pass
+
+
 def capture_step_frames(cam_ports, components, stepper_freq):
     cam_threads = []
-    photos = [list() for x in cam_ports]
+    # photos = [list() for x in cam_ports]
     stop_event = threading.Event()
 
     for i, port in enumerate(cam_ports, start=0):
         cam = threading.Thread(
-                target=eosr50_continuous_capture_and_save,
-                args=(port, stop_event, photos[i])
+                target=eosr50_continuous_capture,
+                args=(port, stop_event)
             )
         cam_threads.append(cam)
 
@@ -219,7 +231,7 @@ def capture_step_frames(cam_ports, components, stepper_freq):
         thread.start()
 
     state_count = 0  
-    state_count_limit = 10
+    state_count_limit = 200
     # an occasional false positive on a endstop switch in this instance can ruin a trial
     # so we confirm it a few times 
     while True:
@@ -265,8 +277,8 @@ def capture_step_frames(cam_ports, components, stepper_freq):
                 # thread.join()
             # break
     
-    all_photos = [item for sublist in photos for item in sublist]
-    return all_photos
+    # all_photos = [item for sublist in photos for item in sublist]
+    pass
 
 
 def test_frame_speed(runtime):
@@ -281,7 +293,7 @@ def test_frame_speed(runtime):
     for i, port in enumerate(cam_ports, start=0):
         eosr50_init(port=port)
         cam = threading.Thread(
-                target=eosr50_continuous_capture_and_save,
+                target=eosr50_continuous_capture,
                 args=(port, stop_event, photos[i])
             )
         cam_threads.append(cam)
