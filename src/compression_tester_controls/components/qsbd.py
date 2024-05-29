@@ -190,7 +190,7 @@ class E5UsDigitalEncoder:
                     response = self.serial_port.readline().decode('utf-8').strip()
                     # logging.info(response)
 
-                encoder_count, timestamp = self.parse_encoder_count_stream_response(response)
+                encoder_count = self.parse_encoder_count_stream_response(response)
 
                 with self._encoder_count_lock:
                     self.encoder_count = encoder_count

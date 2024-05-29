@@ -40,14 +40,14 @@ def eosr50_init(
 
     try:
         if config:
-            gcommand = ['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0', 'capturetarget=1']
+            gcommand = ['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0', '--set-config', 'capturetarget=1']
             for setting in config:
                 gcommand.append('--set-config')
                 gcommand.append(setting)
 
             subprocess.run(gcommand)
         else:
-            subprocess.run(['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0', 'capturetarget=1'])
+            subprocess.run(['sudo', 'gphoto2', '--port', port, '--set-config', 'autopoweroff=0', '--set-config', 'capturetarget=1'])
         logging.info(f"EOS R50 configured @ port: {port}.")
     
     except subprocess.CalledProcessError:
