@@ -1,5 +1,5 @@
 import logging
-import Encoder
+# import Encoder
 
 from simple_pid import PID
 

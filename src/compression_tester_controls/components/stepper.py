@@ -27,7 +27,7 @@ class StepperMotorDriver:
         GPIO.setup(dsbl_pin, GPIO.OUT)
         GPIO.setup(step_pin, GPIO.OUT)
 
-        self.direction = 'cw'
+        self.direction = 'ccw'
         self.frequency = None
 
         self.dir_pin = dir_pin
