@@ -63,7 +63,8 @@ class A201:
     def _update_load(self, vout: float, vref: float):
         self._update_rs(vout=vout, vref=vref)
         try:
-            self.load = (self.exp_a_const * np.exp((1/self.rs) * self.exp_b_const))
+            # self.load = (self.exp_a_const * np.exp((1/self.rs) * self.exp_b_const))
+            self.load = (self.exp_a_const * (1/self.rs))
         except ZeroDivisionError:
             self.load = 0
         pass
